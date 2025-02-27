@@ -7,6 +7,15 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
     <style>
+        .navbar {
+    background-color: #2196F3;
+    padding: 1rem;
+    color: white;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
         body {
             font-family: Arial, sans-serif;
             max-width: 1200px;
@@ -71,6 +80,28 @@
     </style>
 </head>
 <body>
+    <body>
+    <!-- Barra de navegación -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">Sistema Clínico</div>
+            <div class="nav-links">
+                <button onclick="toggleSearch()">Buscar Paciente</button>
+                <button onclick="showNewPatientForm()">Nuevo Paciente</button>
+                <button onclick="toggleDarkMode()">Modo Oscuro</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Panel de búsqueda -->
+    <div class="search-panel" id="searchPanel">
+        <div class="search-form">
+            <input type="text" id="searchInput" placeholder="Buscar por RUT o nombre...">
+            <button onclick="searchPatients()">Buscar</button>
+        </div>
+        <div class="search-results" id="searchResults"></div>
+    </div>
+
     <h1>Sistema de Registro Clínico</h1>
 
     <form id="clinicalForm">
@@ -461,6 +492,14 @@
                     alert('Error al guardar el registro');
                 });
         });
+        function toggleSearch() {
+    const searchPanel = document.getElementById('searchPanel');
+    searchPanel.classList.toggle('active');
+}
+
+function searchPatients() {
+    // ... código de búsqueda ...
+}
     </script>
 </body>
 </html>
