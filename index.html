@@ -56,21 +56,17 @@
         button:hover {
             background: #45a049;
         }
-        h1, h2 {
-            color: #2c3e50;
-        }
-        .radio-group {
+        .range-labels {
             display: flex;
-            gap: 20px;
-            margin: 10px 0;
+            justify-content: space-between;
+            margin-top: 5px;
+            font-size: 12px;
         }
-        .radio-option {
-            display: flex;
-            align-items: center;
+        .range-container {
+            margin: 15px 0;
         }
-        .radio-option input[type="radio"] {
-            width: auto;
-            margin-right: 5px;
+        input[type="range"] {
+            width: 100%;
         }
     </style>
 </head>
@@ -78,109 +74,146 @@
     <h1>Sistema de Registro Clínico</h1>
 
     <form id="clinicalForm">
-        <!-- Información Personal -->
+        <!-- Hábitos y Hobbies -->
         <div class="form-section">
-            <h2>Información Personal y de Contacto</h2>
+            <h2>Hábitos y Hobbies</h2>
             <div class="form-group">
-                <label>Kinesiólogo/Evaluador:</label>
-                <input type="text" id="evaluador" required>
+                <label>Tabaco:</label>
+                <textarea id="tabaco" placeholder="Cantidad, años de fumador, etc"></textarea>
             </div>
             <div class="form-group">
-                <label>Nombre del Paciente:</label>
-                <input type="text" id="nombre" required>
+                <label>Alcohol:</label>
+                <textarea id="alcohol" placeholder="Bebedor frecuente o social"></textarea>
             </div>
             <div class="form-group">
-                <label>RUT:</label>
-                <input type="text" id="rut" required placeholder="Sin puntos, con guión">
+                <label>Drogas:</label>
+                <textarea id="drogas"></textarea>
             </div>
             <div class="form-group">
-                <label>Email:</label>
-                <input type="email" id="email">
+                <label>Hobbies o Deportes:</label>
+                <textarea id="hobbies" placeholder="Que realiza, ha realizado o quiere realizar"></textarea>
             </div>
             <div class="form-group">
-                <label>Número de Contacto:</label>
-                <input type="tel" id="telefono">
+                <label>Hábitos Nutricionales:</label>
+                <textarea id="habitosNutricionales" placeholder="Alimentación, N° de comidas, alimentos ultra procesados, suplementos, hidratación, café, etc"></textarea>
             </div>
             <div class="form-group">
-                <label>Nacionalidad:</label>
-                <input type="text" id="nacionalidad">
+                <label>Sueño y Calidad del Sueño:</label>
+                <textarea id="sueno" placeholder="Calidad, número de horas, tiempo para conciliar, despertares nocturnos"></textarea>
             </div>
             <div class="form-group">
-                <label>Fecha de Nacimiento:</label>
-                <input type="date" id="fechaNacimiento">
+                <label>Estado Mental:</label>
+                <textarea id="estadoMental" placeholder="Salud mental, estrés percibido, preguntas asociadas a depresión"></textarea>
             </div>
             <div class="form-group">
-                <label>Estado Civil:</label>
-                <select id="estadoCivil">
-                    <option value="">Seleccione...</option>
-                    <option value="soltero">Soltero/a</option>
-                    <option value="casado">Casado/a</option>
-                    <option value="divorciado">Divorciado/a</option>
-                    <option value="viudo">Viudo/a</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label>Nivel Educacional:</label>
-                <input type="text" id="nivelEducacional">
-            </div>
-            <div class="form-group">
-                <label>Dirección:</label>
-                <input type="text" id="direccion">
-            </div>
-            <div class="form-group">
-                <label>Contacto de Emergencia:</label>
-                <input type="text" id="contactoEmergencia" placeholder="Nombre y parentesco">
+                <label>Dificultades en Actividades Diarias:</label>
+                <textarea id="dificultadesAVD" placeholder="Dificultades en tareas diarias o aspectos a mejorar"></textarea>
             </div>
         </div>
 
-        <!-- Información Clínica -->
+        <!-- Hogar y Red de Apoyo -->
         <div class="form-section">
-            <h2>Información Clínica</h2>
+            <h2>Hogar y Red de Apoyo</h2>
             <div class="form-group">
-                <label>Ocupación y Actividad:</label>
-                <textarea id="ocupacion" placeholder="Describa movimientos involucrados, tiempo activo y sedentario"></textarea>
+                <label>Descripción del Hogar:</label>
+                <textarea id="descripcionHogar"></textarea>
             </div>
             <div class="form-group">
-                <label>Lateralidad/Dominancia:</label>
-                <select id="lateralidad">
-                    <option value="">Seleccione...</option>
-                    <option value="diestro">Diestro</option>
-                    <option value="zurdo">Zurdo</option>
-                    <option value="ambidiestro">Ambidiestro</option>
-                </select>
+                <label>Red de Apoyo:</label>
+                <textarea id="redApoyo"></textarea>
             </div>
             <div class="form-group">
-                <label>Motivo de Consulta:</label>
-                <textarea id="motivoConsulta"></textarea>
+                <label>Factores Sociales Relevantes:</label>
+                <textarea id="factoresSociales"></textarea>
             </div>
             <div class="form-group">
-                <label>Diagnóstico Principal:</label>
-                <input type="text" id="diagnostico">
-            </div>
-            <div class="form-group">
-                <label>Expectativas y Metas:</label>
-                <textarea id="expectativas" placeholder="Corto, mediano y largo plazo"></textarea>
+                <label>Participación Social / Restricción de Participación:</label>
+                <textarea id="participacionSocial"></textarea>
             </div>
         </div>
 
-        <!-- Anamnesis -->
+        <!-- Antropometría -->
         <div class="form-section">
-            <h2>Anamnesis</h2>
+            <h2>Antropometría</h2>
             <div class="form-group">
-                <label>Historia del Caso:</label>
-                <textarea id="historiaDelCaso" placeholder="¿Qué? ¿Cuándo? ¿Dónde? ¿Cómo?"></textarea>
+                <label>Peso (kg):</label>
+                <input type="number" id="peso" step="0.1">
             </div>
             <div class="form-group">
-                <label>ALICIA:</label>
-                <textarea id="alicia" placeholder="Antigüedad, Localización, Intensidad, Carácter, Irradiación, Atenuantes/Agravantes"></textarea>
+                <label>Talla (cm):</label>
+                <input type="number" id="talla">
             </div>
             <div class="form-group">
-                <label>Cambios en Sintomatología:</label>
-                <textarea id="cambiosSintomatologia" placeholder="Cambios diurnos y vespertinos"></textarea>
+                <label>Circunferencia de Cuello (cm):</label>
+                <input type="number" id="circunferenciaCuello" step="0.1">
+            </div>
+            <div class="form-group">
+                <label>Circunferencia de Brazos (cm):</label>
+                <input type="number" id="circunferenciaBrazos" step="0.1">
+            </div>
+            <div class="form-group">
+                <label>Circunferencia de Cintura (cm):</label>
+                <input type="number" id="circunferenciaCintura" step="0.1">
+            </div>
+            <div class="form-group">
+                <label>Circunferencia de Cadera (cm):</label>
+                <input type="number" id="circunferenciaCadera" step="0.1">
+            </div>
+            <div class="form-group">
+                <label>Circunferencia de Muslo (cm):</label>
+                <input type="number" id="circunferenciaMuslo" step="0.1">
+            </div>
+            <div class="form-group">
+                <label>Circunferencia de Pantorrilla (cm):</label>
+                <input type="number" id="circunferenciaPantorrilla" step="0.1">
             </div>
         </div>
 
-        <!-- Botón de envío -->
+        <!-- Examen Físico -->
+        <div class="form-section">
+            <h2>Examen Físico</h2>
+            <div class="form-group">
+                <label>Observación:</label>
+                <textarea id="observacion" placeholder="Marcha / posición del usuario / Postura en todos los planos"></textarea>
+            </div>
+            <div class="form-group">
+                <label>Inspección:</label>
+                <textarea id="inspeccion"></textarea>
+            </div>
+            <div class="form-group">
+                <label>Palpación:</label>
+                <textarea id="palpacion"></textarea>
+            </div>
+            <div class="form-group">
+                <label>Evaluación de Rangos de Movimientos:</label>
+                <textarea id="rangosMovimiento" placeholder="FUNCIONAL / AROM / PROM / ACCESORIOS - Resalte signo comparable"></textarea>
+            </div>
+            <div class="form-group">
+                <label>Fuerza:</label>
+                <textarea id="fuerza" placeholder="Global como ejercicios o analítica MRC/KENDALLS"></textarea>
+            </div>
+            <div class="form-group">
+                <label>Evaluación Neurológica:</label>
+                <textarea id="evaluacionNeurologica" placeholder="Dermatomas/Miotomas/Reflejo - ASIA VS NERVIO PERIFERICO"></textarea>
+            </div>
+            <div class="form-group">
+                <label>Flexibilidad:</label>
+                <textarea id="flexibilidad"></textarea>
+            </div>
+            <div class="form-group">
+                <label>Test Ortopédicos:</label>
+                <textarea id="testOrtopedicos"></textarea>
+            </div>
+            <div class="form-group">
+                <label>Equilibrio y Riesgo de Caída:</label>
+                <textarea id="equilibrio"></textarea>
+            </div>
+            <div class="form-group">
+                <label>Test de Rendimiento Físico o Deportivo:</label>
+                <textarea id="testRendimiento"></textarea>
+            </div>
+        </div>
+
         <button type="submit">Guardar Registro</button>
     </form>
 
@@ -205,30 +238,43 @@
 
             // Recoger datos del formulario
             const data = {
-                // Información Personal
-                evaluador: document.getElementById('evaluador').value,
-                nombre: document.getElementById('nombre').value,
-                rut: document.getElementById('rut').value,
-                email: document.getElementById('email').value,
-                telefono: document.getElementById('telefono').value,
-                nacionalidad: document.getElementById('nacionalidad').value,
-                fechaNacimiento: document.getElementById('fechaNacimiento').value,
-                estadoCivil: document.getElementById('estadoCivil').value,
-                nivelEducacional: document.getElementById('nivelEducacional').value,
-                direccion: document.getElementById('direccion').value,
-                contactoEmergencia: document.getElementById('contactoEmergencia').value,
+                // Hábitos y Hobbies
+                tabaco: document.getElementById('tabaco').value,
+                alcohol: document.getElementById('alcohol').value,
+                drogas: document.getElementById('drogas').value,
+                hobbies: document.getElementById('hobbies').value,
+                habitosNutricionales: document.getElementById('habitosNutricionales').value,
+                sueno: document.getElementById('sueno').value,
+                estadoMental: document.getElementById('estadoMental').value,
+                dificultadesAVD: document.getElementById('dificultadesAVD').value,
 
-                // Información Clínica
-                ocupacion: document.getElementById('ocupacion').value,
-                lateralidad: document.getElementById('lateralidad').value,
-                motivoConsulta: document.getElementById('motivoConsulta').value,
-                diagnostico: document.getElementById('diagnostico').value,
-                expectativas: document.getElementById('expectativas').value,
+                // Hogar y Red de Apoyo
+                descripcionHogar: document.getElementById('descripcionHogar').value,
+                redApoyo: document.getElementById('redApoyo').value,
+                factoresSociales: document.getElementById('factoresSociales').value,
+                participacionSocial: document.getElementById('participacionSocial').value,
 
-                // Anamnesis
-                historiaDelCaso: document.getElementById('historiaDelCaso').value,
-                alicia: document.getElementById('alicia').value,
-                cambiosSintomatologia: document.getElementById('cambiosSintomatologia').value,
+                // Antropometría
+                peso: document.getElementById('peso').value,
+                talla: document.getElementById('talla').value,
+                circunferenciaCuello: document.getElementById('circunferenciaCuello').value,
+                circunferenciaBrazos: document.getElementById('circunferenciaBrazos').value,
+                circunferenciaCintura: document.getElementById('circunferenciaCintura').value,
+                circunferenciaCadera: document.getElementById('circunferenciaCadera').value,
+                circunferenciaMuslo: document.getElementById('circunferenciaMuslo').value,
+                circunferenciaPantorrilla: document.getElementById('circunferenciaPantorrilla').value,
+
+                // Examen Físico
+                observacion: document.getElementById('observacion').value,
+                inspeccion: document.getElementById('inspeccion').value,
+                palpacion: document.getElementById('palpacion').value,
+                rangosMovimiento: document.getElementById('rangosMovimiento').value,
+                fuerza: document.getElementById('fuerza').value,
+                evaluacionNeurologica: document.getElementById('evaluacionNeurologica').value,
+                flexibilidad: document.getElementById('flexibilidad').value,
+                testOrtopedicos: document.getElementById('testOrtopedicos').value,
+                equilibrio: document.getElementById('equilibrio').value,
+                testRendimiento: document.getElementById('testRendimiento').value,
 
                 // Metadata
                 fechaRegistro: new Date()
