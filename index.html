@@ -4,40 +4,31 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistema de Registro Clínico</title>
-    <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
-    <!-- jsPDF para exportar a PDF -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <!-- Chart.js para gráficos -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         :root {
             --primary-color: #2196F3;
             --secondary-color: #4CAF50;
-            --accent-color: #FFC107;
-            --error-color: #f44336;
-            --text-color: #333;
             --background-color: #f5f5f5;
+            --text-color: #333;
             --border-color: #ddd;
         }
 
-        /* Estilos base */
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
             padding: 0;
             background-color: var(--background-color);
             color: var(--text-color);
-            line-height: 1.6;
         }
 
-        /* Barra de navegación */
         .navbar {
             background-color: var(--primary-color);
-            color: white;
             padding: 1rem;
+            color: white;
             position: sticky;
             top: 0;
             z-index: 1000;
@@ -69,7 +60,7 @@
             padding: 0.5rem 1rem;
             border-radius: 4px;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.3s;
         }
 
         .nav-button:hover {
@@ -77,14 +68,12 @@
             color: var(--primary-color);
         }
 
-        /* Contenedor principal */
-        .main-container {
+        .container {
             max-width: 1200px;
             margin: 20px auto;
             padding: 20px;
         }
 
-        /* Tabs de navegación */
         .tabs {
             display: flex;
             background: white;
@@ -102,7 +91,7 @@
             background: none;
             color: var(--text-color);
             font-weight: 500;
-            transition: all 0.3s ease;
+            transition: all 0.3s;
             white-space: nowrap;
         }
 
@@ -111,140 +100,141 @@
             border-bottom: 2px solid var(--primary-color);
         }
 
-        /* Secciones del formulario */
         .form-section {
             background: white;
             padding: 20px;
+            margin-bottom: 20px;
             border-radius: 8px;
-            margin-bottom: 20px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: none;
         }
 
-        .form-section h2 {
-            color: var(--primary-color);
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid var(--border-color);
+        .form-section.active {
+            display: block;
         }
 
-        /* Campos del formulario */
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
 
         label {
             display: block;
-            margin-bottom: 8px;
-            font-weight: 500;
+            margin-bottom: 5px;
+            font-weight: bold;
         }
 
         input, textarea, select {
             width: 100%;
-            padding: 10px;
+            padding: 8px;
+            margin-bottom: 10px;
             border: 1px solid var(--border-color);
             border-radius: 4px;
-            font-size: 16px;
-            transition: border-color 0.3s ease;
+            box-sizing: border-box;
         }
 
-        input:focus, textarea:focus, select:focus {
-            outline: none;
-            border-color: var(--primary-color);
+        .range-container {
+            position: relative;
+            padding: 20px 0;
         }
 
-        textarea {
-            min-height: 100px;
-            resize: vertical;
-        }
-
-        /* Área de archivos */
-        .file-upload {
-            border: 2px dashed var(--border-color);
-            padding: 20px;
-            text-align: center;
-            border-radius: 8px;
-            background: #fafafa;
-            transition: all 0.3s ease;
-        }
-
-        .file-upload:hover {
-            border-color: var(--primary-color);
-            background: #f0f7ff;
-        }
-
-        .file-list {
-            margin-top: 20px;
-        }
-
-        .file-item {
-            display: flex;
-            align-items: center;
-            padding: 10px;
-            background: #f9f9f9;
-            margin-bottom: 8px;
-            border-radius: 4px;
-        }
-
-        .file-item button {
-            margin-left: auto;
-            background: var(--error-color);
+        .range-value {
+            position: absolute;
+            top: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--primary-color);
             color: white;
-            border: none;
-            padding: 5px 10px;
+            padding: 2px 8px;
             border-radius: 4px;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 10px;
+            border-radius: 5px;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            background: var(--primary-color);
+            border-radius: 50%;
             cursor: pointer;
         }
 
-        /* Botones */
         .btn {
             background: var(--primary-color);
             color: white;
-            padding: 12px 24px;
+            padding: 10px 20px;
             border: none;
             border-radius: 4px;
             cursor: pointer;
             font-size: 16px;
-            transition: all 0.3s ease;
+            transition: all 0.3s;
         }
 
         .btn:hover {
-            background: #1976D2;
+            opacity: 0.9;
             transform: translateY(-1px);
         }
 
-        .btn-secondary {
-            background: var(--secondary-color);
+        .search-panel {
+            background: white;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: none;
         }
 
-        .btn-secondary:hover {
-            background: #388E3C;
+        .search-panel.active {
+            display: block;
         }
 
-        /* Modo oscuro */
-        .dark-mode {
-            --text-color: #fff;
-            --background-color: #1a1a1a;
-            --border-color: #444;
+        .search-results {
+            margin-top: 20px;
         }
 
-        .dark-mode .form-section,
-        .dark-mode .tabs,
-        .dark-mode input,
-        .dark-mode textarea,
-        .dark-mode select {
-            background: #2d2d2d;
-            color: white;
+        .patient-card {
+            background: white;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s;
         }
 
-        /* Responsive */
+        .patient-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .status-message {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            display: none;
+        }
+
+        .success {
+            background: #dff0d8;
+            color: #3c763d;
+            display: block;
+        }
+
+        .error {
+            background: #f2dede;
+            color: #a94442;
+            display: block;
+        }
+
         @media (max-width: 768px) {
             .nav-container {
                 flex-direction: column;
                 gap: 1rem;
-            }
-
-            .form-section {
-                padding: 15px;
             }
 
             .tabs {
@@ -259,36 +249,41 @@
     </style>
 </head>
 <body>
-    <!-- Barra de navegación -->
     <nav class="navbar">
         <div class="nav-container">
             <div class="nav-brand">Sistema Clínico</div>
             <div class="nav-links">
                 <button class="nav-button" onclick="toggleSearch()">Buscar Paciente</button>
                 <button class="nav-button" onclick="showNewPatientForm()">Nuevo Paciente</button>
-                <button class="nav-button" onclick="toggleDarkMode()">🌙</button>
             </div>
         </div>
     </nav>
 
-    <!-- Contenedor principal -->
-    <div class="main-container">
+    <div class="container">
+        <!-- Panel de búsqueda -->
+        <div id="searchPanel" class="search-panel">
+            <div class="form-group">
+                <label for="searchInput">Buscar por RUT o Nombre:</label>
+                <input type="text" id="searchInput" onkeyup="searchPatients()">
+            </div>
+            <div id="searchResults" class="search-results"></div>
+        </div>
+
         <!-- Tabs de navegación -->
         <div class="tabs">
-            <button class="tab active" onclick="showTab('info')">Información Personal</button>
+            <button class="tab active" onclick="showTab('personal')">Información Personal</button>
             <button class="tab" onclick="showTab('anamnesis')">Anamnesis</button>
             <button class="tab" onclick="showTab('habitos')">Hábitos y Hobbies</button>
             <button class="tab" onclick="showTab('hogar')">Hogar y Red de Apoyo</button>
             <button class="tab" onclick="showTab('psfs')">PSFS</button>
             <button class="tab" onclick="showTab('evaluacion')">Evaluación Física</button>
-            <button class="tab" onclick="showTab('archivos')">Archivos</button>
         </div>
 
         <!-- Formulario principal -->
         <form id="clinicalForm" onsubmit="handleSubmit(event)">
             <!-- Sección de Información Personal -->
-            <div id="infoTab" class="form-section">
-                <h2>Información Personal y de Contacto</h2>
+            <div id="personalTab" class="form-section active">
+                <h2>Información Personal</h2>
                 <div class="form-group">
                     <label for="evaluador">Kinesiólogo/Evaluador:</label>
                     <input type="text" id="evaluador" required>
@@ -301,51 +296,70 @@
                     <label for="rut">RUT:</label>
                     <input type="text" id="rut" required placeholder="Sin puntos, con guión">
                 </div>
-                <!-- Resto de campos de información personal -->
+                <!-- Resto de campos personales -->
             </div>
 
             <!-- Sección de Anamnesis -->
-            <div id="anamnesisTab" class="form-section" style="display: none;">
+            <div id="anamnesisTab" class="form-section">
                 <h2>Anamnesis</h2>
                 <div class="form-group">
-                    <label for="historiaDelCaso">Historia del Caso:</label>
-                    <textarea id="historiaDelCaso" placeholder="¿Qué? ¿Cuándo? ¿Dónde? ¿Cómo?"></textarea>
+                    <label for="anamnesis_proxima">Anamnesis Próxima:</label>
+                    <textarea id="anamnesis_proxima" rows="4" placeholder="Historia del caso, ALICIA, cambios diurnos..."></textarea>
                 </div>
-                <!-- Resto de campos de anamnesis -->
+                <div class="form-group">
+                    <label for="anamnesis_remota">Anamnesis Remota:</label>
+                    <textarea id="anamnesis_remota" rows="4" placeholder="Antecedentes médicos, ortopédicos, enfermedades crónicas..."></textarea>
+                </div>
             </div>
 
             <!-- Sección de Hábitos y Hobbies -->
-            <div id="habitosTab" class="form-section" style="display: none;">
+            <div id="habitosTab" class="form-section">
                 <h2>Hábitos y Hobbies</h2>
-                <!-- Campos de hábitos y hobbies -->
+                <div class="form-group">
+                    <label for="habitos">Hábitos:</label>
+                    <textarea id="habitos" rows="4" placeholder="Tabaco, alcohol, drogas, deportes..."></textarea>
+                </div>
             </div>
 
             <!-- Sección de Hogar y Red de Apoyo -->
-            <div id="hogarTab" class="form-section" style="display: none;">
+            <div id="hogarTab" class="form-section">
                 <h2>Hogar y Red de Apoyo</h2>
-                <!-- Campos de hogar y red de apoyo -->
+                <div class="form-group">
+                    <label for="hogar">Descripción del Hogar y Red de Apoyo:</label>
+                    <textarea id="hogar" rows="4"></textarea>
+                </div>
             </div>
 
             <!-- Sección de PSFS -->
-            <div id="psfsTab" class="form-section" style="display: none;">
-                <h2>Cuestionario PSFS</h2>
-                <!-- Campos de PSFS -->
+            <div id="psfsTab" class="form-section">
+                <h2>PSFS</h2>
+                <div class="form-group">
+                    <label for="psfs1_actividad">PSFS 1 - Actividad:</label>
+                    <input type="text" id="psfs1_actividad">
+                    <div class="range-container">
+                        <span class="range-value" id="psfs1_value">5</span>
+                        <input type="range" id="psfs1_valor" min="0" max="10" value="5"
+                               oninput="updateRangeValue('psfs1_valor', 'psfs1_value')">
+                    </div>
+                </div>
+                <!-- PSFS 2 y 3 similares -->
             </div>
 
             <!-- Sección de Evaluación Física -->
-            <div id="evaluacionTab" class="form-section" style="display: none;">
+            <div id="evaluacionTab" class="form-section">
                 <h2>Evaluación Física</h2>
-                <!-- Campos de evaluación física -->
-            </div>
-
-            <!-- Sección de Archivos -->
-            <div id="archivosTab" class="form-section" style="display: none;">
-                <h2>Archivos Adjuntos</h2>
-                <div class="file-upload">
-                    <input type="file" id="fileInput" multiple onchange="handleFileUpload(event)">
-                    <p>Arrastra archivos aquí o haz clic para seleccionar</p>
+                <div class="form-group">
+                    <label for="signos_vitales">Signos Vitales:</label>
+                    <textarea id="signos_vitales" rows="4" placeholder="Saturación, pulso, presión arterial..."></textarea>
                 </div>
-                <div id="fileList" class="file-list"></div>
+                <div class="form-group">
+                    <label for="antropometria">Antropometría:</label>
+                    <textarea id="antropometria" rows="4" placeholder="Peso, talla, circunferencias..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="examen_fisico">Examen Físico:</label>
+                    <textarea id="examen_fisico" rows="4" placeholder="Observación, inspección, palpación..."></textarea>
+                </div>
             </div>
 
             <button type="submit" class="btn">Guardar Registro</button>
@@ -366,59 +380,42 @@
         // Inicializar Firebase
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
-        const storage = firebase.storage();
 
         // Funciones de navegación
         function showTab(tabName) {
-            // Ocultar todas las secciones
             document.querySelectorAll('.form-section').forEach(section => {
-                section.style.display = 'none';
+                section.classList.remove('active');
             });
-
-            // Mostrar la sección seleccionada
-            document.getElementById(tabName + 'Tab').style.display = 'block';
-
-            // Actualizar clases activas de los tabs
             document.querySelectorAll('.tab').forEach(tab => {
                 tab.classList.remove('active');
             });
+            document.getElementById(tabName + 'Tab').classList.add('active');
             document.querySelector(`[onclick="showTab('${tabName}')"]`).classList.add('active');
         }
 
-        // Modo oscuro
-        function toggleDarkMode() {
-            document.body.classList.toggle('dark-mode');
-            const button = document.querySelector('.nav-button:last-child');
-            button.textContent = document.body.classList.contains('dark-mode') ? '☀️' : '🌙';
+        function toggleSearch() {
+            const searchPanel = document.getElementById('searchPanel');
+            searchPanel.classList.toggle('active');
+            document.getElementById('clinicalForm').style.display =
+                searchPanel.classList.contains('active') ? 'none' : 'block';
         }
 
-        // Manejo de archivos
-        function handleFileUpload(event) {
-            const files = event.target.files;
-            const fileList = document.getElementById('fileList');
-
-            Array.from(files).forEach(file => {
-                const fileItem = document.createElement('div');
-                fileItem.className = 'file-item';
-                fileItem.innerHTML = `
-                    <span>${file.name}</span>
-                    <button onclick="removeFile(this)">Eliminar</button>
-                `;
-                fileList.appendChild(fileItem);
-
-                // Subir archivo a Firebase Storage
-                const storageRef = storage.ref(`patient_files/${file.name}`);
-                storageRef.put(file).then(snapshot => {
-                    console.log('Archivo subido exitosamente');
-                });
-            });
+        function showNewPatientForm() {
+            document.getElementById('searchPanel').classList.remove('active');
+            document.getElementById('clinicalForm').style.display = 'block';
+            document.getElementById('clinicalForm').reset();
+            showTab('personal');
         }
 
-        function removeFile(button) {
-            button.parentElement.remove();
+        // Funciones de PSFS
+        function updateRangeValue(rangeId, valueId) {
+            const range = document.getElementById(rangeId);
+            const value = document.getElementById(valueId);
+            value.textContent = range.value;
+            value.style.left = (range.value * 10) + '%';
         }
 
-        // Validación de RUT chileno
+        // Validación de RUT
         function validarRut(rut) {
             if (!/^[0-9]+-[0-9kK]{1}$/.test(rut)) return false;
             let [num, dv] = rut.split('-');
@@ -438,49 +435,102 @@
             return dvReal === dvEsperado.toString();
         }
 
+        // Búsqueda de pacientes
+        async function searchPatients() {
+            const searchInput = document.getElementById('searchInput').value.toLowerCase();
+            const searchResults = document.getElementById('searchResults');
+
+            if (searchInput.length < 3) {
+                searchResults.innerHTML = '';
+                return;
+            }
+
+            try {
+                const snapshot = await db.collection('pacientes')
+                    .where('rut', '>=', searchInput)
+                    .where('rut', '<=', searchInput + '\uf8ff')
+                    .get();
+
+                let resultsHTML = '';
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    resultsHTML += `
+                        <div class="patient-card" onclick="loadPatient('${doc.id}')">
+                            <h3>${data.nombre}</h3>
+                            <p>RUT: ${data.rut}</p>
+                        </div>
+                    `;
+                });
+
+                searchResults.innerHTML = resultsHTML || '<p>No se encontraron resultados</p>';
+            } catch (error) {
+                console.error('Error en la búsqueda:', error);
+                searchResults.innerHTML = '<p class="error">Error al buscar pacientes</p>';
+            }
+        }
+
+        // Cargar datos de paciente
+        async function loadPatient(patientId) {
+            try {
+                const doc = await db.collection('pacientes').doc(patientId).get();
+                if (doc.exists) {
+                    const data = doc.data();
+                    Object.keys(data).forEach(key => {
+                        const input = document.getElementById(key);
+                        if (input) {
+                            input.value = data[key];
+                            if (key.includes('psfs') && key.includes('valor')) {
+                                updateRangeValue(key, key.replace('valor', 'value'));
+                            }
+                        }
+                    });
+
+                    document.getElementById('searchPanel').classList.remove('active');
+                    document.getElementById('clinicalForm').style.display = 'block';
+                    showTab('personal');
+                }
+            } catch (error) {
+                console.error('Error al cargar paciente:', error);
+                alert('Error al cargar los datos del paciente');
+            }
+        }
+
         // Manejo del formulario
-        function handleSubmit(event) {
+        async function handleSubmit(event) {
             event.preventDefault();
 
             const formData = {};
-            const inputs = document.querySelectorAll('input, textarea, select');
+            const inputs = event.target.querySelectorAll('input, textarea, select');
             inputs.forEach(input => {
                 if (input.id) {
                     formData[input.id] = input.value;
                 }
             });
 
-            formData.fechaRegistro = new Date();
+            if (!validarRut(formData.rut)) {
+                alert('RUT inválido. Por favor verifique el formato (ej: 12345678-9)');
+                return;
+            }
 
-            // Guardar en Firestore
-            db.collection('pacientes').add(formData)
-                .then(() => {
-                    alert('Registro guardado exitosamente');
-                    event.target.reset();
-                })
-                .catch(error => {
-                    console.error('Error al guardar:', error);
-                    alert('Error al guardar el registro');
+            try {
+                await db.collection('pacientes').add({
+                    ...formData,
+                    fechaRegistro: new Date()
                 });
+
+                alert('Registro guardado exitosamente');
+                event.target.reset();
+                showTab('personal');
+            } catch (error) {
+                console.error('Error al guardar:', error);
+                alert('Error al guardar el registro');
+            }
         }
 
         // Inicialización
         document.addEventListener('DOMContentLoaded', () => {
-            // Mostrar la primera sección por defecto
-            showTab('info');
-
-            // Validación de RUT
-            const rutInput = document.getElementById('rut');
-            if (rutInput) {
-                rutInput.addEventListener('blur', function() {
-                    if (!validarRut(this.value)) {
-                        this.classList.add('invalid');
-                        alert('RUT inválido');
-                    } else {
-                        this.classList.remove('invalid');
-                    }
-                });
-            }
+            showTab('personal');
+            updateRangeValue('psfs1_valor', 'psfs1_value');
         });
     </script>
 </body>
