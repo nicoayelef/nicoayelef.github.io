@@ -74,6 +74,157 @@
     <h1>Sistema de Registro Clínico</h1>
 
     <form id="clinicalForm">
+        <!-- Información Personal -->
+        <div class="form-section">
+            <h2>Información Personal y de Contacto</h2>
+            <div class="form-group">
+                <label>Kinesiólogo/Evaluador:</label>
+                <input type="text" id="evaluador" required>
+            </div>
+            <div class="form-group">
+                <label>Nombre del Paciente:</label>
+                <input type="text" id="nombre" required>
+            </div>
+            <div class="form-group">
+                <label>RUT:</label>
+                <input type="text" id="rut" required placeholder="Sin puntos, con guión">
+            </div>
+            <div class="form-group">
+                <label>Email:</label>
+                <input type="email" id="email">
+            </div>
+            <div class="form-group">
+                <label>Número de Contacto:</label>
+                <input type="tel" id="telefono">
+            </div>
+            <div class="form-group">
+                <label>Nacionalidad:</label>
+                <input type="text" id="nacionalidad">
+            </div>
+            <div class="form-group">
+                <label>Edad:</label>
+                <input type="number" id="edad">
+            </div>
+            <div class="form-group">
+                <label>Fecha de Nacimiento:</label>
+                <input type="date" id="fechaNacimiento">
+            </div>
+            <div class="form-group">
+                <label>Estado Civil:</label>
+                <select id="estadoCivil">
+                    <option value="">Seleccione...</option>
+                    <option value="soltero">Soltero/a</option>
+                    <option value="casado">Casado/a</option>
+                    <option value="divorciado">Divorciado/a</option>
+                    <option value="viudo">Viudo/a</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Nivel Educacional:</label>
+                <input type="text" id="nivelEducacional">
+            </div>
+            <div class="form-group">
+                <label>Dirección:</label>
+                <input type="text" id="direccion">
+            </div>
+            <div class="form-group">
+                <label>Contacto de Emergencia:</label>
+                <input type="text" id="contactoEmergencia" placeholder="Nombre y parentesco">
+            </div>
+        </div>
+
+        <!-- Información Clínica -->
+        <div class="form-section">
+            <h2>Información Clínica</h2>
+            <div class="form-group">
+                <label>Ocupación y Actividad:</label>
+                <textarea id="ocupacion" placeholder="Describa movimientos involucrados, tiempo activo y sedentario"></textarea>
+            </div>
+            <div class="form-group">
+                <label>Lateralidad/Dominancia:</label>
+                <select id="lateralidad">
+                    <option value="">Seleccione...</option>
+                    <option value="diestro">Diestro</option>
+                    <option value="zurdo">Zurdo</option>
+                    <option value="ambidiestro">Ambidiestro</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Motivo de Consulta:</label>
+                <textarea id="motivoConsulta"></textarea>
+            </div>
+            <div class="form-group">
+                <label>Diagnóstico Principal:</label>
+                <input type="text" id="diagnostico">
+            </div>
+            <div class="form-group">
+                <label>Expectativas y Metas:</label>
+                <textarea id="expectativas" placeholder="Corto, mediano y largo plazo"></textarea>
+            </div>
+        </div>
+
+        <!-- Anamnesis -->
+        <div class="form-section">
+            <h2>Anamnesis</h2>
+            <div class="form-group">
+                <label>Historia del Caso:</label>
+                <textarea id="historiaDelCaso" placeholder="¿Qué? ¿Cuándo? ¿Dónde? ¿Cómo?"></textarea>
+            </div>
+            <div class="form-group">
+                <label>ALICIA:</label>
+                <textarea id="alicia" placeholder="Antigüedad, Localización, Intensidad, Carácter, Irradiación, Atenuantes/Agravantes"></textarea>
+            </div>
+            <div class="form-group">
+                <label>Cambios en Sintomatología:</label>
+                <textarea id="cambiosSintomatologia" placeholder="Cambios diurnos y vespertinos"></textarea>
+            </div>
+        </div>
+
+        <!-- Anamnesis Remota -->
+        <div class="form-section">
+            <h2>Anamnesis Remota</h2>
+            <div class="form-group">
+                <label>Antecedentes Médicos:</label>
+                <textarea id="antecedentesMedicos"></textarea>
+            </div>
+            <div class="form-group">
+                <label>Antecedentes Ortopédicos:</label>
+                <textarea id="antecedentesOrtopedicos" placeholder="Lesiones, fracturas, lesiones ligamentosas"></textarea>
+            </div>
+            <div class="form-group">
+                <label>Enfermedades Crónicas:</label>
+                <textarea id="enfermedadesCronicas" placeholder="HTA/DBM/DLP/OBESIDAD/EPOC/OTROS"></textarea>
+            </div>
+            <div class="form-group">
+                <label>Antecedentes Familiares:</label>
+                <textarea id="antecedentesFamiliares" placeholder="Madre, padre, hermanos, hijos"></textarea>
+            </div>
+            <div class="form-group">
+                <label>Medicamentos:</label>
+                <textarea id="medicamentos"></textarea>
+            </div>
+            <div class="form-group">
+                <label>Intervenciones Quirúrgicas:</label>
+                <textarea id="intervencionesQx"></textarea>
+            </div>
+            <div class="form-group">
+                <label>Hospitalizaciones último año:</label>
+                <textarea id="hospitalizaciones"></textarea>
+            </div>
+            <div class="form-group">
+                <label>Alergias:</label>
+                <textarea id="alergias"></textarea>
+            </div>
+            <div class="form-group">
+                <label>Inmunizaciones:</label>
+                <textarea id="inmunizaciones"></textarea>
+            </div>
+            <div class="form-group">
+                <label>Historial de Caídas:</label>
+                <textarea id="historialCaidas"></textarea>
+            </div>
+        </div>
+
         <!-- Hábitos y Hobbies -->
         <div class="form-section">
             <h2>Hábitos y Hobbies</h2>
@@ -95,19 +246,15 @@
             </div>
             <div class="form-group">
                 <label>Hábitos Nutricionales:</label>
-                <textarea id="habitosNutricionales" placeholder="Alimentación, N° de comidas, alimentos ultra procesados, suplementos, hidratación, café, etc"></textarea>
+                <textarea id="habitosNutricionales"></textarea>
             </div>
             <div class="form-group">
                 <label>Sueño y Calidad del Sueño:</label>
-                <textarea id="sueno" placeholder="Calidad, número de horas, tiempo para conciliar, despertares nocturnos"></textarea>
+                <textarea id="sueno"></textarea>
             </div>
             <div class="form-group">
                 <label>Estado Mental:</label>
-                <textarea id="estadoMental" placeholder="Salud mental, estrés percibido, preguntas asociadas a depresión"></textarea>
-            </div>
-            <div class="form-group">
-                <label>Dificultades en Actividades Diarias:</label>
-                <textarea id="dificultadesAVD" placeholder="Dificultades en tareas diarias o aspectos a mejorar"></textarea>
+                <textarea id="estadoMental"></textarea>
             </div>
         </div>
 
@@ -127,8 +274,65 @@
                 <textarea id="factoresSociales"></textarea>
             </div>
             <div class="form-group">
-                <label>Participación Social / Restricción de Participación:</label>
+                <label>Participación Social:</label>
                 <textarea id="participacionSocial"></textarea>
+            </div>
+        </div>
+
+        <!-- PSFS -->
+        <div class="form-section">
+            <h2>Cuestionario PSFS</h2>
+            <div class="form-group">
+                <label>PSFS 1:</label>
+                <input type="text" id="psfs1_actividad" placeholder="Describa la actividad">
+                <input type="range" id="psfs1_valor" min="0" max="10" step="1">
+                <div class="range-labels">
+                    <span>0 = No lo puede realizar</span>
+                    <span>10 = Lo logra igual o mejor que antes</span>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>PSFS 2:</label>
+                <input type="text" id="psfs2_actividad" placeholder="Describa la actividad">
+                <input type="range" id="psfs2_valor" min="0" max="10" step="1">
+                <div class="range-labels">
+                    <span>0 = No lo puede realizar</span>
+                    <span>10 = Lo logra igual o mejor que antes</span>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>PSFS 3:</label>
+                <input type="text" id="psfs3_actividad" placeholder="Describa la actividad">
+                <input type="range" id="psfs3_valor" min="0" max="10" step="1">
+                <div class="range-labels">
+                    <span>0 = No lo puede realizar</span>
+                    <span>10 = Lo logra igual o mejor que antes</span>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Otros Cuestionarios:</label>
+                <textarea id="otrosCuestionarios"></textarea>
+            </div>
+        </div>
+
+        <!-- Signos Vitales -->
+        <div class="form-section">
+            <h2>Signos Vitales</h2>
+            <div class="form-group">
+                <label>Saturación (%):</label>
+                <input type="number" id="saturacion" min="0" max="100">
+            </div>
+            <div class="form-group">
+                <label>Pulso (bpm):</label>
+                <input type="number" id="pulso">
+            </div>
+            <div class="form-group">
+                <label>Presión Arterial:</label>
+                <input type="text" id="presionArterial" placeholder="120/80">
+            </div>
+            <div class="form-group">
+                <label>Frecuencia Respiratoria:</label>
+                <input type="number" id="frecuenciaRespiratoria">
             </div>
         </div>
 
@@ -236,52 +440,18 @@
         document.getElementById('clinicalForm').addEventListener('submit', function(e) {
             e.preventDefault();
 
-            // Recoger datos del formulario
-            const data = {
-                // Hábitos y Hobbies
-                tabaco: document.getElementById('tabaco').value,
-                alcohol: document.getElementById('alcohol').value,
-                drogas: document.getElementById('drogas').value,
-                hobbies: document.getElementById('hobbies').value,
-                habitosNutricionales: document.getElementById('habitosNutricionales').value,
-                sueno: document.getElementById('sueno').value,
-                estadoMental: document.getElementById('estadoMental').value,
-                dificultadesAVD: document.getElementById('dificultadesAVD').value,
+            // Recoger todos los datos del formulario
+            const formData = {};
+            const inputs = this.querySelectorAll('input, textarea, select');
+            inputs.forEach(input => {
+                formData[input.id] = input.value;
+            });
 
-                // Hogar y Red de Apoyo
-                descripcionHogar: document.getElementById('descripcionHogar').value,
-                redApoyo: document.getElementById('redApoyo').value,
-                factoresSociales: document.getElementById('factoresSociales').value,
-                participacionSocial: document.getElementById('participacionSocial').value,
-
-                // Antropometría
-                peso: document.getElementById('peso').value,
-                talla: document.getElementById('talla').value,
-                circunferenciaCuello: document.getElementById('circunferenciaCuello').value,
-                circunferenciaBrazos: document.getElementById('circunferenciaBrazos').value,
-                circunferenciaCintura: document.getElementById('circunferenciaCintura').value,
-                circunferenciaCadera: document.getElementById('circunferenciaCadera').value,
-                circunferenciaMuslo: document.getElementById('circunferenciaMuslo').value,
-                circunferenciaPantorrilla: document.getElementById('circunferenciaPantorrilla').value,
-
-                // Examen Físico
-                observacion: document.getElementById('observacion').value,
-                inspeccion: document.getElementById('inspeccion').value,
-                palpacion: document.getElementById('palpacion').value,
-                rangosMovimiento: document.getElementById('rangosMovimiento').value,
-                fuerza: document.getElementById('fuerza').value,
-                evaluacionNeurologica: document.getElementById('evaluacionNeurologica').value,
-                flexibilidad: document.getElementById('flexibilidad').value,
-                testOrtopedicos: document.getElementById('testOrtopedicos').value,
-                equilibrio: document.getElementById('equilibrio').value,
-                testRendimiento: document.getElementById('testRendimiento').value,
-
-                // Metadata
-                fechaRegistro: new Date()
-            };
+            // Agregar metadata
+            formData.fechaRegistro = new Date();
 
             // Guardar en Firebase
-            db.collection('pacientes').add(data)
+            db.collection('pacientes').add(formData)
                 .then((docRef) => {
                     alert('Registro guardado exitosamente');
                     this.reset();
