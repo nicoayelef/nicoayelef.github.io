@@ -4,243 +4,109 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistema de Registro Clínico</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Firebase App (la base) -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <!-- Firebase productos -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script>
+        // Tu configuración de Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyAuUnWj4tyzWEzluB__RqW7JKGNJnLsMrA",
+            authDomain: "sistema-clinico-6d42e.firebaseapp.com",
+            projectId: "sistema-clinico-6d42e",
+            storageBucket: "sistema-clinico-6d42e.firebasestorage.app",
+            messagingSenderId: "150606305292",
+            appId: "1:150606305292:web:1234fe31e3f40acbf0f629"
+        };
+
+        // Inicializar Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+    </script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Arial', sans-serif;
-        }
-
+        /* Estilos del formulario */
         body {
-            background-color: #f0f2f5;
-        }
-
-        .container {
+            font-family: Arial, sans-serif;
             max-width: 1200px;
             margin: 0 auto;
             padding: 20px;
         }
-
-        header {
-            background-color: #2c3e50;
-            color: white;
-            padding: 1rem;
-            margin-bottom: 2rem;
-        }
-
-        .logo {
-            font-size: 24px;
-            font-weight: bold;
-        }
-
-        .main-content {
-            display: grid;
-            grid-template-columns: 250px 1fr;
-            gap: 20px;
-        }
-
-        .sidebar {
-            background: white;
+        .form-section {
+            margin-bottom: 30px;
             padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #f9f9f9;
         }
-
-        .menu-item {
-            padding: 10px;
-            margin: 5px 0;
-            cursor: pointer;
-            border-radius: 4px;
-            transition: background 0.3s;
-        }
-
-        .menu-item:hover {
-            background: #f0f2f5;
-        }
-
-        .menu-item i {
-            margin-right: 10px;
-        }
-
-        .content {
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-
         .form-group {
-            margin-bottom: 1rem;
+            margin-bottom: 15px;
         }
-
         label {
             display: block;
-            margin-bottom: 0.5rem;
+            margin-bottom: 5px;
             font-weight: bold;
         }
-
-        input, select, textarea {
+        input, textarea, select {
             width: 100%;
             padding: 8px;
+            margin-bottom: 10px;
             border: 1px solid #ddd;
             border-radius: 4px;
-            margin-bottom: 10px;
         }
-
-        .btn {
-            background: #3498db;
-            color: white;
+        button {
             padding: 10px 20px;
+            background: #4CAF50;
+            color: white;
             border: none;
             border-radius: 4px;
             cursor: pointer;
-            transition: background 0.3s;
         }
-
-        .btn:hover {
-            background: #2980b9;
-        }
-
-        .grid-form {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 20px;
-        }
-
-        .full-width {
-            grid-column: 1 / -1;
+        button:hover {
+            background: #45a049;
         }
     </style>
 </head>
 <body>
-    <header>
-        <div class="container">
-            <div class="logo">
-                <i class="fas fa-hospital-user"></i> MediSystem
+    <h1>Sistema de Registro Clínico</h1>
+    <form id="clinicalForm">
+        <!-- Información Personal -->
+        <div class="form-section">
+            <h2>Información Personal</h2>
+            <div class="form-group">
+                <label>Kinesiólogo/Evaluador:</label>
+                <input type="text" id="evaluador" required>
             </div>
+            <div class="form-group">
+                <label>Nombre del Paciente:</label>
+                <input type="text" id="nombre" required>
+            </div>
+            <!-- Agrega aquí el resto de los campos del formulario -->
         </div>
-    </header>
 
-    <div class="container">
-        <div class="main-content">
-            <div class="sidebar">
-                <div class="menu-item">
-                    <i class="fas fa-home"></i> Inicio
-                </div>
-                <div class="menu-item">
-                    <i class="fas fa-user-plus"></i> Nuevo Paciente
-                </div>
-                <div class="menu-item">
-                    <i class="fas fa-calendar-alt"></i> Citas
-                </div>
-                <div class="menu-item">
-                    <i class="fas fa-folder-open"></i> Expedientes
-                </div>
-                <div class="menu-item">
-                    <i class="fas fa-chart-bar"></i> Reportes
-                </div>
-                <div class="menu-item">
-                    <i class="fas fa-cog"></i> Configuración
-                </div>
-            </div>
-
-            <div class="content">
-                <h2>Registro de Ficha Clínica</h2>
-                <form id="clinicalForm">
-                    <div class="grid-form">
-                        <div class="form-group">
-                            <label>Nombre del Paciente</label>
-                            <input type="text" required>
-                        </div>
-
-                        <div class="form-group">
-                            <label>Fecha de Nacimiento</label>
-                            <input type="date" required>
-                        </div>
-
-                        <div class="form-group">
-                            <label>Género</label>
-                            <select required>
-                                <option value="">Seleccionar</option>
-                                <option value="M">Masculino</option>
-                                <option value="F">Femenino</option>
-                                <option value="O">Otro</option>
-                            </select>
-                        </div>
-
-                        <div class="form-group">
-                            <label>Número de Identificación</label>
-                            <input type="text" required>
-                        </div>
-
-                        <div class="form-group">
-                            <label>Teléfono</label>
-                            <input type="tel" required>
-                        </div>
-
-                        <div class="form-group">
-                            <label>Email</label>
-                            <input type="email" required>
-                        </div>
-
-                        <div class="form-group full-width">
-                            <label>Dirección</label>
-                            <input type="text" required>
-                        </div>
-
-                        <div class="form-group full-width">
-                            <label>Antecedentes Médicos</label>
-                            <textarea rows="4" required></textarea>
-                        </div>
-
-                        <div class="form-group">
-                            <label>Tipo de Sangre</label>
-                            <select required>
-                                <option value="">Seleccionar</option>
-                                <option value="A+">A+</option>
-                                <option value="A-">A-</option>
-                                <option value="B+">B+</option>
-                                <option value="B-">B-</option>
-                                <option value="AB+">AB+</option>
-                                <option value="AB-">AB-</option>
-                                <option value="O+">O+</option>
-                                <option value="O-">O-</option>
-                            </select>
-                        </div>
-
-                        <div class="form-group">
-                            <label>Alergias</label>
-                            <input type="text">
-                        </div>
-
-                        <div class="form-group full-width">
-                            <label>Medicamentos Actuales</label>
-                            <textarea rows="3"></textarea>
-                        </div>
-
-                        <div class="form-group full-width">
-                            <button type="submit" class="btn">
-                                <i class="fas fa-save"></i> Guardar Registro
-                            </button>
-                        </div>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
+        <button type="submit">Guardar Registro</button>
+    </form>
 
     <script>
         document.getElementById('clinicalForm').addEventListener('submit', function(e) {
             e.preventDefault();
-            alert('Registro guardado exitosamente');
-        });
 
-        document.querySelectorAll('.menu-item').forEach(item => {
-            item.addEventListener('click', function() {
-                alert('Navegando a: ' + this.textContent.trim());
-            });
+            // Recoger datos del formulario
+            const data = {
+                evaluador: document.getElementById('evaluador').value,
+                nombre: document.getElementById('nombre').value,
+                fechaRegistro: new Date()
+            };
+
+            // Guardar en Firebase
+            db.collection('pacientes').add(data)
+                .then((docRef) => {
+                    alert('Registro guardado exitosamente');
+                    this.reset();
+                })
+                .catch((error) => {
+                    console.error("Error al guardar: ", error);
+                    alert('Error al guardar el registro');
+                });
         });
     </script>
 </body>
