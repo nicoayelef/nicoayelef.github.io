@@ -4,12 +4,188 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistema de Registro Clínico</title>
-    <!-- Firebase App (la base) -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <!-- Firebase productos -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .form-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #333;
+        }
+        input, textarea, select {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        textarea {
+            height: 100px;
+            resize: vertical;
+        }
+        button {
+            padding: 12px 24px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        h1, h2 {
+            color: #2c3e50;
+        }
+        .radio-group {
+            display: flex;
+            gap: 20px;
+            margin: 10px 0;
+        }
+        .radio-option {
+            display: flex;
+            align-items: center;
+        }
+        .radio-option input[type="radio"] {
+            width: auto;
+            margin-right: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Sistema de Registro Clínico</h1>
+
+    <form id="clinicalForm">
+        <!-- Información Personal -->
+        <div class="form-section">
+            <h2>Información Personal y de Contacto</h2>
+            <div class="form-group">
+                <label>Kinesiólogo/Evaluador:</label>
+                <input type="text" id="evaluador" required>
+            </div>
+            <div class="form-group">
+                <label>Nombre del Paciente:</label>
+                <input type="text" id="nombre" required>
+            </div>
+            <div class="form-group">
+                <label>RUT:</label>
+                <input type="text" id="rut" required placeholder="Sin puntos, con guión">
+            </div>
+            <div class="form-group">
+                <label>Email:</label>
+                <input type="email" id="email">
+            </div>
+            <div class="form-group">
+                <label>Número de Contacto:</label>
+                <input type="tel" id="telefono">
+            </div>
+            <div class="form-group">
+                <label>Nacionalidad:</label>
+                <input type="text" id="nacionalidad">
+            </div>
+            <div class="form-group">
+                <label>Fecha de Nacimiento:</label>
+                <input type="date" id="fechaNacimiento">
+            </div>
+            <div class="form-group">
+                <label>Estado Civil:</label>
+                <select id="estadoCivil">
+                    <option value="">Seleccione...</option>
+                    <option value="soltero">Soltero/a</option>
+                    <option value="casado">Casado/a</option>
+                    <option value="divorciado">Divorciado/a</option>
+                    <option value="viudo">Viudo/a</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Nivel Educacional:</label>
+                <input type="text" id="nivelEducacional">
+            </div>
+            <div class="form-group">
+                <label>Dirección:</label>
+                <input type="text" id="direccion">
+            </div>
+            <div class="form-group">
+                <label>Contacto de Emergencia:</label>
+                <input type="text" id="contactoEmergencia" placeholder="Nombre y parentesco">
+            </div>
+        </div>
+
+        <!-- Información Clínica -->
+        <div class="form-section">
+            <h2>Información Clínica</h2>
+            <div class="form-group">
+                <label>Ocupación y Actividad:</label>
+                <textarea id="ocupacion" placeholder="Describa movimientos involucrados, tiempo activo y sedentario"></textarea>
+            </div>
+            <div class="form-group">
+                <label>Lateralidad/Dominancia:</label>
+                <select id="lateralidad">
+                    <option value="">Seleccione...</option>
+                    <option value="diestro">Diestro</option>
+                    <option value="zurdo">Zurdo</option>
+                    <option value="ambidiestro">Ambidiestro</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Motivo de Consulta:</label>
+                <textarea id="motivoConsulta"></textarea>
+            </div>
+            <div class="form-group">
+                <label>Diagnóstico Principal:</label>
+                <input type="text" id="diagnostico">
+            </div>
+            <div class="form-group">
+                <label>Expectativas y Metas:</label>
+                <textarea id="expectativas" placeholder="Corto, mediano y largo plazo"></textarea>
+            </div>
+        </div>
+
+        <!-- Anamnesis -->
+        <div class="form-section">
+            <h2>Anamnesis</h2>
+            <div class="form-group">
+                <label>Historia del Caso:</label>
+                <textarea id="historiaDelCaso" placeholder="¿Qué? ¿Cuándo? ¿Dónde? ¿Cómo?"></textarea>
+            </div>
+            <div class="form-group">
+                <label>ALICIA:</label>
+                <textarea id="alicia" placeholder="Antigüedad, Localización, Intensidad, Carácter, Irradiación, Atenuantes/Agravantes"></textarea>
+            </div>
+            <div class="form-group">
+                <label>Cambios en Sintomatología:</label>
+                <textarea id="cambiosSintomatologia" placeholder="Cambios diurnos y vespertinos"></textarea>
+            </div>
+        </div>
+
+        <!-- Botón de envío -->
+        <button type="submit">Guardar Registro</button>
+    </form>
+
     <script>
-        // Tu configuración de Firebase
+        // Configuración de Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyAuUnWj4tyzWEzluB__RqW7JKGNJnLsMrA",
             authDomain: "sistema-clinico-6d42e.firebaseapp.com",
@@ -22,78 +198,39 @@
         // Inicializar Firebase
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
-    </script>
-    <style>
-        /* Estilos del formulario */
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        .form-section {
-            margin-bottom: 30px;
-            padding: 20px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            background-color: #f9f9f9;
-        }
-        .form-group {
-            margin-bottom: 15px;
-        }
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-        }
-        input, textarea, select {
-            width: 100%;
-            padding: 8px;
-            margin-bottom: 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-        }
-        button {
-            padding: 10px 20px;
-            background: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        button:hover {
-            background: #45a049;
-        }
-    </style>
-</head>
-<body>
-    <h1>Sistema de Registro Clínico</h1>
-    <form id="clinicalForm">
-        <!-- Información Personal -->
-        <div class="form-section">
-            <h2>Información Personal</h2>
-            <div class="form-group">
-                <label>Kinesiólogo/Evaluador:</label>
-                <input type="text" id="evaluador" required>
-            </div>
-            <div class="form-group">
-                <label>Nombre del Paciente:</label>
-                <input type="text" id="nombre" required>
-            </div>
-            <!-- Agrega aquí el resto de los campos del formulario -->
-        </div>
 
-        <button type="submit">Guardar Registro</button>
-    </form>
-
-    <script>
+        // Manejar el envío del formulario
         document.getElementById('clinicalForm').addEventListener('submit', function(e) {
             e.preventDefault();
 
             // Recoger datos del formulario
             const data = {
+                // Información Personal
                 evaluador: document.getElementById('evaluador').value,
                 nombre: document.getElementById('nombre').value,
+                rut: document.getElementById('rut').value,
+                email: document.getElementById('email').value,
+                telefono: document.getElementById('telefono').value,
+                nacionalidad: document.getElementById('nacionalidad').value,
+                fechaNacimiento: document.getElementById('fechaNacimiento').value,
+                estadoCivil: document.getElementById('estadoCivil').value,
+                nivelEducacional: document.getElementById('nivelEducacional').value,
+                direccion: document.getElementById('direccion').value,
+                contactoEmergencia: document.getElementById('contactoEmergencia').value,
+
+                // Información Clínica
+                ocupacion: document.getElementById('ocupacion').value,
+                lateralidad: document.getElementById('lateralidad').value,
+                motivoConsulta: document.getElementById('motivoConsulta').value,
+                diagnostico: document.getElementById('diagnostico').value,
+                expectativas: document.getElementById('expectativas').value,
+
+                // Anamnesis
+                historiaDelCaso: document.getElementById('historiaDelCaso').value,
+                alicia: document.getElementById('alicia').value,
+                cambiosSintomatologia: document.getElementById('cambiosSintomatologia').value,
+
+                // Metadata
                 fechaRegistro: new Date()
             };
 
