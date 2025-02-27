@@ -4,10 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistema de Registro Clínico</title>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-storage-compat.js"></script>
     <style>
         /* Estilos base */
         :root {
@@ -135,6 +135,11 @@
             box-sizing: border-box;
         }
 
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
         .range-container {
             position: relative;
             padding: 20px 0;
@@ -215,6 +220,28 @@
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
 
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .error-message {
+            color: #f44336;
+            margin-top: 5px;
+            font-size: 0.9em;
+        }
+
+        .success-message {
+            color: #4CAF50;
+            margin-top: 5px;
+            font-size: 0.9em;
+        }
+
         @media (max-width: 768px) {
             .nav-container {
                 flex-direction: column;
@@ -254,7 +281,7 @@
         </div>
 
         <!-- Formulario principal -->
-        <form id="clinicalForm" style="display: none;">
+        <form id="clinicalForm" style="display: none;" onsubmit="handleSubmit(event)">
             <!-- Tabs de navegación -->
             <div class="tabs">
                 <button type="button" class="tab active" onclick="showTab('info')">Información Personal</button>
@@ -281,16 +308,24 @@
                     <input type="text" id="rut" required placeholder="Sin puntos, con guión">
                 </div>
                 <div class="form-group">
+                    <label for="numeroContacto">Número de Contacto:</label>
+                    <input type="tel" id="numeroContacto">
+                </div>
+                <div class="form-group">
+                    <label for="email">Email:</label>
+                    <input type="email" id="email">
+                </div>
+                <div class="form-group">
+                    <label for="nacionalidad">Nacionalidad:</label>
+                    <input type="text" id="nacionalidad">
+                </div>
+                <div class="form-group">
                     <label for="edad">Edad:</label>
                     <input type="number" id="edad" required>
                 </div>
                 <div class="form-group">
                     <label for="fechaNacimiento">Fecha de Nacimiento:</label>
                     <input type="date" id="fechaNacimiento" required>
-                </div>
-                <div class="form-group">
-                    <label for="nacionalidad">Nacionalidad:</label>
-                    <input type="text" id="nacionalidad">
                 </div>
                 <div class="form-group">
                     <label for="estadoCivil">Estado Civil:</label>
@@ -313,8 +348,25 @@
                     </select>
                 </div>
                 <div class="form-group">
+                    <label for="direccion">Dirección:</label>
+                    <input type="text" id="direccion">
+                </div>
+                <div class="form-group">
+                    <label for="contactoEmergencia">Contacto de Emergencia y Parentesco:</label>
+                    <input type="text" id="contactoEmergencia">
+                </div>
+                <div class="form-group">
                     <label for="ocupacion">Ocupación:</label>
                     <textarea id="ocupacion" placeholder="Describa movimientos involucrados, tiempo activo/sedentario..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="lateralidad">Lateralidad o Dominancia:</label>
+                    <select id="lateralidad">
+                        <option value="">Seleccione...</option>
+                        <option value="diestro">Diestro</option>
+                        <option value="zurdo">Zurdo</option>
+                        <option value="ambidiestro">Ambidiestro</option>
+                    </select>
                 </div>
             </div>
 
@@ -330,16 +382,16 @@
                     <input type="text" id="diagnosticoPrincipal">
                 </div>
                 <div class="form-group">
+                    <label for="expectativas">Expectativas y Metas:</label>
+                    <textarea id="expectativas" placeholder="Corto, mediano y largo plazo..."></textarea>
+                </div>
+                <div class="form-group">
                     <label for="anamnesisProxima">Anamnesis Próxima:</label>
                     <textarea id="anamnesisProxima" placeholder="Historia del caso, ALICIA, cambios diurnos..."></textarea>
                 </div>
                 <div class="form-group">
                     <label for="anamnesisRemota">Anamnesis Remota:</label>
                     <textarea id="anamnesisRemota" placeholder="Antecedentes médicos, ortopédicos, enfermedades..."></textarea>
-                </div>
-                <div class="form-group">
-                    <label for="expectativas">Expectativas y Metas:</label>
-                    <textarea id="expectativas" placeholder="Corto, mediano y largo plazo..."></textarea>
                 </div>
             </div>
 
@@ -373,6 +425,10 @@
                 <div class="form-group">
                     <label for="estadoMental">Estado Mental:</label>
                     <textarea id="estadoMental" placeholder="Salud mental, estrés percibido..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="dificultadesDiarias">Dificultades en Actividades Diarias:</label>
+                    <textarea id="dificultadesDiarias" placeholder="Actividades que le gustaría mejorar..."></textarea>
                 </div>
             </div>
 
@@ -552,17 +608,21 @@
 
             <button type="submit" class="btn">Guardar Registro</button>
         </form>
+
+        <div id="loading" class="loading">
+            <p>Cargando...</p>
+        </div>
     </div>
 
     <script>
         // Configuración de Firebase
         const firebaseConfig = {
-            apiKey: "AIzaSyAuUnWj4tyzWEzluB__RqW7JKGNJnLsMrA",
-            authDomain: "sistema-clinico-6d42e.firebaseapp.com",
-            projectId: "sistema-clinico-6d42e",
-            storageBucket: "sistema-clinico-6d42e.appspot.com",
-            messagingSenderId: "150606305292",
-            appId: "1:150606305292:web:1234fe31e3f40acbf0f629"
+            apiKey: "tu-api-key",
+            authDomain: "tu-proyecto.firebaseapp.com",
+            projectId: "tu-proyecto",
+            storageBucket: "tu-proyecto.appspot.com",
+            messagingSenderId: "tu-messaging-id",
+            appId: "tu-app-id"
         };
 
         // Inicializar Firebase
@@ -584,15 +644,18 @@
         function toggleSearch() {
             const searchPanel = document.getElementById('searchPanel');
             const clinicalForm = document.getElementById('clinicalForm');
+            const loading = document.getElementById('loading');
 
             searchPanel.classList.toggle('active');
             clinicalForm.style.display = searchPanel.classList.contains('active') ? 'none' : 'block';
+            loading.classList.remove('active');
         }
 
         function showNewPatientForm() {
             document.getElementById('searchPanel').classList.remove('active');
             document.getElementById('clinicalForm').style.display = 'block';
             document.getElementById('clinicalForm').reset();
+            document.getElementById('loading').classList.remove('active');
             showTab('info');
         }
 
@@ -607,8 +670,9 @@
 
         // Búsqueda de pacientes
         async function searchPatients() {
-            const searchInput = document.getElementById('searchInput').value.toLowerCase();
+            const searchInput = document.getElementById('searchInput').value.toLowerCase().trim();
             const searchResults = document.getElementById('searchResults');
+            const loading = document.getElementById('loading');
 
             if (searchInput.length < 3) {
                 searchResults.innerHTML = '';
@@ -616,29 +680,37 @@
             }
 
             try {
+                loading.classList.add('active');
+
                 const [rutSnapshot, nombreSnapshot] = await Promise.all([
                     db.collection('pacientes')
                         .where('rut', '>=', searchInput)
                         .where('rut', '<=', searchInput + '\uf8ff')
                         .get(),
                     db.collection('pacientes')
-                        .where('nombre', '>=', searchInput)
-                        .where('nombre', '<=', searchInput + '\uf8ff')
+                        .where('nombreLower', '>=', searchInput)
+                        .where('nombreLower', '<=', searchInput + '\uf8ff')
                         .get()
                 ]);
 
-                const results = new Set();
+                const results = new Map();
 
-                rutSnapshot.forEach(doc => results.add({id: doc.id, data: doc.data()}));
-                nombreSnapshot.forEach(doc => results.add({id: doc.id, data: doc.data()}));
+                rutSnapshot.docs.forEach(doc => {
+                    results.set(doc.id, { id: doc.id, data: doc.data() });
+                });
+
+                nombreSnapshot.docs.forEach(doc => {
+                    results.set(doc.id, { id: doc.id, data: doc.data() });
+                });
 
                 let resultsHTML = '';
-                results.forEach(({id, data}) => {
+                results.forEach(({ id, data }) => {
                     resultsHTML += `
                         <div class="patient-card" onclick="loadPatient('${id}')">
                             <h3>${data.nombre}</h3>
                             <p>RUT: ${data.rut}</p>
-                            <p>Edad: ${data.edad}</p>
+                            <p>Edad: ${data.edad} años</p>
+                            <p>Motivo de consulta: ${data.motivoConsulta || 'No especificado'}</p>
                         </div>
                     `;
                 });
@@ -646,14 +718,19 @@
                 searchResults.innerHTML = resultsHTML || '<p>No se encontraron resultados</p>';
             } catch (error) {
                 console.error('Error en la búsqueda:', error);
-                searchResults.innerHTML = '<p class="error">Error al buscar pacientes</p>';
+                searchResults.innerHTML = '<p class="error-message">Error al buscar pacientes</p>';
+            } finally {
+                loading.classList.remove('active');
             }
         }
 
         // Cargar datos de paciente
         async function loadPatient(patientId) {
+            const loading = document.getElementById('loading');
             try {
+                loading.classList.add('active');
                 const doc = await db.collection('pacientes').doc(patientId).get();
+
                 if (doc.exists) {
                     const data = doc.data();
                     Object.keys(data).forEach(key => {
@@ -666,6 +743,7 @@
                         }
                     });
 
+                    document.getElementByI
                     document.getElementById('searchPanel').classList.remove('active');
                     document.getElementById('clinicalForm').style.display = 'block';
                     showTab('info');
@@ -673,66 +751,82 @@
             } catch (error) {
                 console.error('Error al cargar paciente:', error);
                 alert('Error al cargar los datos del paciente');
+            } finally {
+                loading.classList.remove('active');
             }
-        }
-
-        // Validación de RUT
-        function validarRut(rut) {
-            if (!/^[0-9]+-[0-9kK]{1}$/.test(rut)) return false;
-            let [num, dv] = rut.split('-');
-            let suma = 0;
-            let multiplo = 2;
-
-            for (let i = num.length - 1; i >= 0; i--) {
-                suma += num[i] * multiplo;
-                multiplo = multiplo === 7 ? 2 : multiplo + 1;
-            }
-
-            const dvEsperado = 11 - (suma % 11);
-            const dvReal = dv.toLowerCase();
-
-            if (dvEsperado === 11) return dvReal === '0';
-            if (dvEsperado === 10) return dvReal === 'k';
-            return dvReal === dvEsperado.toString();
         }
 
         // Manejo del formulario
-        document.getElementById('clinicalForm').addEventListener('submit', async function(event) {
+        async function handleSubmit(event) {
             event.preventDefault();
-
-            const formData = {};
-            const inputs = this.querySelectorAll('input, textarea, select');
-            inputs.forEach(input => {
-                if (input.id) {
-                    formData[input.id] = input.value;
-                }
-            });
-
-            if (!validarRut(formData.rut)) {
-                alert('RUT inválido. Por favor verifique el formato (ej: 12345678-9)');
-                return;
-            }
+            const loading = document.getElementById('loading');
 
             try {
-                await db.collection('pacientes').add({
+                loading.classList.add('active');
+                const formData = {};
+                const inputs = event.target.querySelectorAll('input, textarea, select');
+                
+                inputs.forEach(input => {
+                    if (input.id) {
+                        formData[input.id] = input.value;
+                        if (input.type === 'text') {
+                            formData[input.id + 'Lower'] = input.value.toLowerCase();
+                        }
+                    }
+                });
+
+                if (!validarRut(formData.rut)) {
+                    alert('RUT inválido. Por favor verifique el formato (ej: 12345678-9)');
+                    return;
+                }
+
+                // Calcular IMC si peso y talla están disponibles
+                if (formData.peso && formData.talla) {
+                    const peso = parseFloat(formData.peso);
+                    const talla = parseFloat(formData.talla) / 100; // convertir cm a m
+                    formData.imc = (peso / (talla * talla)).toFixed(2);
+                }
+
+                const docRef = await db.collection('pacientes').add({
                     ...formData,
-                    fechaRegistro: new Date()
+                    fechaRegistro: new Date(),
+                    ultimaActualizacion: new Date()
                 });
 
                 alert('Registro guardado exitosamente');
-                this.reset();
-                showTab('info');
+                
+                // Opcional: Redirigir a la vista del paciente
+                loadPatient(docRef.id);
             } catch (error) {
                 console.error('Error al guardar:', error);
-                alert('Error al guardar el registro');
+                alert('Error al guardar el registro: ' + error.message);
+            } finally {
+                loading.classList.remove('active');
             }
-        });
+        }
 
         // Inicialización
         document.addEventListener('DOMContentLoaded', () => {
+            // Mostrar la primera pestaña
             showTab('info');
+            
             // Inicializar valores de PSFS
             ['psfs1', 'psfs2', 'psfs3'].forEach(id => {
                 updateRangeValue(`${id}_valor`, `${id}_value`);
             });
+
+            // Calcular IMC automáticamente
+            const peso = document.getElementById('peso');
+            const talla = document.getElementById('talla');
+            const calcularIMC = () => {
+                if (peso.value && talla.value) {
+                    const imc = (peso.value / Math.pow(talla.value/100, 2)).toFixed(2);
+                    document.getElementById('imc').value = imc;
+                }
+            };
+            peso.addEventListener('input', calcularIMC);
+            talla.addEventListener('input', calcularIMC);
         });
+    </script>
+</body>
+</html>
