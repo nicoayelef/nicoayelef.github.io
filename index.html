@@ -9,6 +9,7 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
+        /* Estilos base */
         :root {
             --primary-color: #2196F3;
             --secondary-color: #4CAF50;
@@ -74,37 +75,6 @@
             padding: 20px;
         }
 
-        .search-panel {
-            background: white;
-            padding: 20px;
-            margin-bottom: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            display: none;
-        }
-
-        .search-panel.active {
-            display: block;
-        }
-
-        .search-results {
-            margin-top: 20px;
-        }
-
-        .patient-card {
-            background: white;
-            padding: 15px;
-            margin-bottom: 10px;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .patient-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-
         .tabs {
             display: flex;
             background: white;
@@ -113,6 +83,7 @@
             margin-bottom: 20px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             overflow-x: auto;
+            flex-wrap: nowrap;
         }
 
         .tab {
@@ -124,6 +95,7 @@
             font-weight: 500;
             transition: all 0.3s;
             white-space: nowrap;
+            min-width: fit-content;
         }
 
         .tab.active {
@@ -212,6 +184,37 @@
             transform: translateY(-1px);
         }
 
+        .search-panel {
+            background: white;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: none;
+        }
+
+        .search-panel.active {
+            display: block;
+        }
+
+        .search-results {
+            margin-top: 20px;
+        }
+
+        .patient-card {
+            background: white;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .patient-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
         @media (max-width: 768px) {
             .nav-container {
                 flex-direction: column;
@@ -254,12 +257,12 @@
         <form id="clinicalForm" style="display: none;">
             <!-- Tabs de navegación -->
             <div class="tabs">
-                <button class="tab active" onclick="showTab('info')">Información Personal</button>
-                <button class="tab" onclick="showTab('anamnesis')">Anamnesis</button>
-                <button class="tab" onclick="showTab('habitos')">Hábitos</button>
-                <button class="tab" onclick="showTab('hogar')">Hogar</button>
-                <button class="tab" onclick="showTab('psfs')">PSFS</button>
-                <button class="tab" onclick="showTab('evaluacion')">Evaluación</button>
+                <button type="button" class="tab active" onclick="showTab('info')">Información Personal</button>
+                <button type="button" class="tab" onclick="showTab('anamnesis')">Anamnesis</button>
+                <button type="button" class="tab" onclick="showTab('habitos')">Hábitos</button>
+                <button type="button" class="tab" onclick="showTab('hogar')">Hogar</button>
+                <button type="button" class="tab" onclick="showTab('psfs')">PSFS</button>
+                <button type="button" class="tab" onclick="showTab('evaluacion')">Evaluación</button>
             </div>
 
             <!-- Sección de Información Personal -->
@@ -334,9 +337,219 @@
                     <label for="anamnesisRemota">Anamnesis Remota:</label>
                     <textarea id="anamnesisRemota" placeholder="Antecedentes médicos, ortopédicos, enfermedades..."></textarea>
                 </div>
+                <div class="form-group">
+                    <label for="expectativas">Expectativas y Metas:</label>
+                    <textarea id="expectativas" placeholder="Corto, mediano y largo plazo..."></textarea>
+                </div>
             </div>
 
-            <!-- Botón de guardar -->
+            <!-- Sección de Hábitos -->
+            <div id="habitosTab" class="form-section">
+                <h2>Hábitos y Hobbies</h2>
+                <div class="form-group">
+                    <label for="tabaco">Tabaco:</label>
+                    <textarea id="tabaco" placeholder="Cantidad, años de fumador..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="alcohol">Alcohol:</label>
+                    <textarea id="alcohol" placeholder="Frecuencia de consumo..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="drogas">Drogas:</label>
+                    <textarea id="drogas"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="hobbies">Hobbies y Deportes:</label>
+                    <textarea id="hobbies" placeholder="Actividades que realiza, ha realizado o quiere realizar..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="habitosNutricionales">Hábitos Nutricionales:</label>
+                    <textarea id="habitosNutricionales" placeholder="Alimentación, N° de comidas, suplementos..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="sueno">Sueño y Calidad del Sueño:</label>
+                    <textarea id="sueno" placeholder="Horas de sueño, calidad, despertares nocturnos..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="estadoMental">Estado Mental:</label>
+                    <textarea id="estadoMental" placeholder="Salud mental, estrés percibido..."></textarea>
+                </div>
+            </div>
+
+            <!-- Sección de Hogar -->
+            <div id="hogarTab" class="form-section">
+                <h2>Hogar y Red de Apoyo</h2>
+                <div class="form-group">
+                    <label for="descripcionHogar">Descripción del Hogar:</label>
+                    <textarea id="descripcionHogar"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="redApoyo">Red de Apoyo:</label>
+                    <textarea id="redApoyo"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="factoresSociales">Factores Sociales Relevantes:</label>
+                    <textarea id="factoresSociales"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="participacionSocial">Participación Social:</label>
+                    <textarea id="participacionSocial" placeholder="Restricciones de participación..."></textarea>
+                </div>
+            </div>
+
+            <!-- Sección de PSFS -->
+            <div id="psfsTab" class="form-section">
+                <h2>PSFS (Patient Specific Functional Scale)</h2>
+                <div class="form-group">
+                    <label for="psfs1_actividad">PSFS 1 - Actividad:</label>
+                    <input type="text" id="psfs1_actividad">
+                    <div class="range-container">
+                        <span class="range-value" id="psfs1_value">5</span>
+                        <input type="range" id="psfs1_valor" min="0" max="10" value="5"
+                               oninput="updateRangeValue('psfs1_valor', 'psfs1_value')">
+                        <div style="display: flex; justify-content: space-between; margin-top: 5px;">
+                            <span>No lo puede realizar</span>
+                            <span>Lo logra igual o mejor que antes</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="psfs2_actividad">PSFS 2 - Actividad:</label>
+                    <input type="text" id="psfs2_actividad">
+                    <div class="range-container">
+                        <span class="range-value" id="psfs2_value">5</span>
+                        <input type="range" id="psfs2_valor" min="0" max="10" value="5"
+                               oninput="updateRangeValue('psfs2_valor', 'psfs2_value')">
+                        <div style="display: flex; justify-content: space-between; margin-top: 5px;">
+                            <span>No lo puede realizar</span>
+                            <span>Lo logra igual o mejor que antes</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="psfs3_actividad">PSFS 3 - Actividad:</label>
+                    <input type="text" id="psfs3_actividad">
+                    <div class="range-container">
+                        <span class="range-value" id="psfs3_value">5</span>
+                        <input type="range" id="psfs3_valor" min="0" max="10" value="5"
+                               oninput="updateRangeValue('psfs3_valor', 'psfs3_value')">
+                        <div style="display: flex; justify-content: space-between; margin-top: 5px;">
+                            <span>No lo puede realizar</span>
+                            <span>Lo logra igual o mejor que antes</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="outcomeMeasures">Cuestionarios u Outcome Measures Extra:</label>
+                    <textarea id="outcomeMeasures"></textarea>
+                </div>
+            </div>
+
+            <!-- Sección de Evaluación -->
+            <div id="evaluacionTab" class="form-section">
+                <h2>Evaluación Física</h2>
+
+                <!-- Signos Vitales -->
+                <h3>Signos Vitales</h3>
+                <div class="form-group">
+                    <label for="saturacion">Saturación:</label>
+                    <input type="text" id="saturacion">
+                </div>
+                <div class="form-group">
+                    <label for="pulso">Pulso:</label>
+                    <input type="text" id="pulso">
+                </div>
+                <div class="form-group">
+                    <label for="presionArterial">Presión Arterial:</label>
+                    <input type="text" id="presionArterial">
+                </div>
+                <div class="form-group">
+                    <label for="frecuenciaRespiratoria">Frecuencia Respiratoria:</label>
+                    <input type="text" id="frecuenciaRespiratoria">
+                </div>
+
+                <!-- Antropometría -->
+                <h3>Antropometría</h3>
+                <div class="form-group">
+                    <label for="peso">Peso (kg):</label>
+                    <input type="number" id="peso" step="0.1">
+                </div>
+                <div class="form-group">
+                    <label for="talla">Talla (cm):</label>
+                    <input type="number" id="talla" step="0.1">
+                </div>
+                <div class="form-group">
+                    <label for="circunferenciaCuello">Circunferencia de Cuello (cm):</label>
+                    <input type="number" id="circunferenciaCuello" step="0.1">
+                </div>
+                <div class="form-group">
+                    <label for="circunferenciaBrazos">Circunferencia de Brazos (cm):</label>
+                    <input type="number" id="circunferenciaBrazos" step="0.1">
+                </div>
+                <div class="form-group">
+                    <label for="circunferenciaCintura">Circunferencia de Cintura (cm):</label>
+                    <input type="number" id="circunferenciaCintura" step="0.1">
+                </div>
+                <div class="form-group">
+                    <label for="circunferenciaCadera">Circunferencia de Cadera (cm):</label>
+                    <input type="number" id="circunferenciaCadera" step="0.1">
+                </div>
+                <div class="form-group">
+                    <label for="circunferenciaMuslo">Circunferencia de Muslo (cm):</label>
+                    <input type="number" id="circunferenciaMuslo" step="0.1">
+                </div>
+                <div class="form-group">
+                    <label for="circunferenciaPantorrilla">Circunferencia de Pantorrilla (cm):</label>
+                    <input type="number" id="circunferenciaPantorrilla" step="0.1">
+                </div>
+
+                <!-- Examen Físico -->
+                <h3>Examen Físico</h3>
+                <div class="form-group">
+                    <label for="observacion">Observación:</label>
+                    <textarea id="observacion" placeholder="Marcha, posición, postura en todos los planos..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="inspeccion">Inspección:</label>
+                    <textarea id="inspeccion"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="palpacion">Palpación:</label>
+                    <textarea id="palpacion"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="rangosMovimiento">Evaluación de Rangos de Movimientos:</label>
+                    <textarea id="rangosMovimiento" placeholder="FUNCIONAL / AROM / PROM / ACCESORIOS..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="fuerza">Fuerza:</label>
+                    <textarea id="fuerza" placeholder="Global como ejercicios o analítica MRC/KENDALLS..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="neurologico">Neurológico:</label>
+                    <textarea id="neurologico" placeholder="Dermatomas/Miotomas/Reflejo ASIA VS NERVIO PERIFERICO..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="flexibilidad">Flexibilidad:</label>
+                    <textarea id="flexibilidad"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="testOrtopedicos">Test Ortopédicos:</label>
+                    <textarea id="testOrtopedicos"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="equilibrio">Equilibrio y Riesgo de Caída:</label>
+                    <textarea id="equilibrio"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="testRendimiento">Test de Rendimiento Físico o Deportivo:</label>
+                    <textarea id="testRendimiento"></textarea>
+                </div>
+            </div>
+
             <button type="submit" class="btn">Guardar Registro</button>
         </form>
     </div>
@@ -383,6 +596,15 @@
             showTab('info');
         }
 
+        // Funciones PSFS
+        function updateRangeValue(rangeId, valueId) {
+            const range = document.getElementById(rangeId);
+            const value = document.getElementById(valueId);
+            value.textContent = range.value;
+            const percent = (range.value - range.min) / (range.max - range.min) * 100;
+            value.style.left = `${percent}%`;
+        }
+
         // Búsqueda de pacientes
         async function searchPatients() {
             const searchInput = document.getElementById('searchInput').value.toLowerCase();
@@ -416,6 +638,7 @@
                         <div class="patient-card" onclick="loadPatient('${id}')">
                             <h3>${data.nombre}</h3>
                             <p>RUT: ${data.rut}</p>
+                            <p>Edad: ${data.edad}</p>
                         </div>
                     `;
                 });
@@ -437,6 +660,9 @@
                         const input = document.getElementById(key);
                         if (input) {
                             input.value = data[key];
+                            if (key.includes('psfs') && key.includes('valor')) {
+                                updateRangeValue(key, key.replace('valor', 'value'));
+                            }
                         }
                     });
 
@@ -505,7 +731,8 @@
         // Inicialización
         document.addEventListener('DOMContentLoaded', () => {
             showTab('info');
+            // Inicializar valores de PSFS
+            ['psfs1', 'psfs2', 'psfs3'].forEach(id => {
+                updateRangeValue(`${id}_valor`, `${id}_value`);
+            });
         });
-    </script>
-</body>
-</html>
