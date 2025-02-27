@@ -7,6 +7,279 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
     <style>
+        /* Estilos existentes */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+        }
+
+        /* Estilos para la barra de navegación */
+        .navbar {
+            background-color: #2196F3;
+            padding: 1rem;
+            color: white;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-brand {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .nav-links button {
+            background: transparent;
+            border: 1px solid white;
+            color: white;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.3s;
+        }
+
+        .nav-links button:hover {
+            background: white;
+            color: #2196F3;
+        }
+
+        /* Panel de búsqueda */
+        .search-panel {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: none;
+        }
+
+        .search-panel.active {
+            display: block;
+        }
+
+        .search-form {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .search-form input {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .search-results {
+            border-top: 1px solid #ddd;
+            padding-top: 20px;
+        }
+
+        .patient-card {
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .patient-card:hover {
+            background: #f5f5f5;
+        }
+
+        /* Resto de tus estilos existentes */
+        .form-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .main-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+        }
+
+        /* Estilos para validación */
+        .invalid {
+            border-color: #ff0000 !important;
+        }
+
+        .error-message {
+            color: #ff0000;
+            font-size: 0.8em;
+            margin-top: -8px;
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Barra de navegación -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">Sistema Clínico</div>
+            <div class="nav-links">
+                <button onclick="toggleSearch()">Buscar Paciente</button>
+                <button onclick="showNewPatientForm()">Nuevo Paciente</button>
+                <button onclick="toggleDarkMode()">Modo Oscuro</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Panel de búsqueda -->
+    <div class="search-panel" id="searchPanel">
+        <div class="search-form">
+            <input type="text" id="searchInput" placeholder="Buscar por RUT o nombre...">
+            <button onclick="searchPatients()">Buscar</button>
+        </div>
+        <div class="search-results" id="searchResults"></div>
+    </div>
+
+    <!-- Contenedor principal -->
+    <div class="main-container">
+        <!-- Tu formulario existente aquí -->
+        <form id="clinicalForm">
+            <!-- ... resto del formulario ... -->
+        </form>
+    </div>
+
+    <script>
+        // Configuración de Firebase (mantener la existente)
+        const firebaseConfig = {
+            apiKey: "AIzaSyAuUnWj4tyzWEzluB__RqW7JKGNJnLsMrA",
+            authDomain: "sistema-clinico-6d42e.firebaseapp.com",
+            projectId: "sistema-clinico-6d42e",
+            storageBucket: "sistema-clinico-6d42e.firebasestorage.app",
+            messagingSenderId: "150606305292",
+            appId: "1:150606305292:web:1234fe31e3f40acbf0f629"
+        };
+
+        // Inicializar Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        // Funciones de navegación
+        function toggleSearch() {
+            const searchPanel = document.getElementById('searchPanel');
+            searchPanel.classList.toggle('active');
+        }
+
+        function showNewPatientForm() {
+            document.getElementById('clinicalForm').reset();
+            document.getElementById('searchPanel').classList.remove('active');
+        }
+
+        // Función de búsqueda
+        function searchPatients() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const resultsDiv = document.getElementById('searchResults');
+            resultsDiv.innerHTML = 'Buscando...';
+
+            db.collection('pacientes')
+                .where('rut', '>=', searchTerm)
+                .where('rut', '<=', searchTerm + '\uf8ff')
+                .get()
+                .then((querySnapshot) => {
+                    resultsDiv.innerHTML = '';
+                    if (querySnapshot.empty) {
+                        resultsDiv.innerHTML = 'No se encontraron resultados';
+                        return;
+                    }
+                    querySnapshot.forEach((doc) => {
+                        const data = doc.data();
+                        const card = document.createElement('div');
+                        card.className = 'patient-card';
+                        card.innerHTML = `
+                            <h3>${data.nombre}</h3>
+                            <p>RUT: ${data.rut}</p>
+                            <p>Email: ${data.email}</p>
+                        `;
+                        card.onclick = () => loadPatientData(doc.id);
+                        resultsDiv.appendChild(card);
+                    });
+                })
+                .catch((error) => {
+                    console.error("Error en la búsqueda: ", error);
+                    resultsDiv.innerHTML = 'Error al realizar la búsqueda';
+                });
+        }
+
+        // Función para cargar datos del paciente
+        function loadPatientData(patientId) {
+            db.collection('pacientes').doc(patientId).get()
+                .then((doc) => {
+                    if (doc.exists) {
+                        const data = doc.data();
+                        Object.keys(data).forEach(key => {
+                            const element = document.getElementById(key);
+                            if (element) {
+                                element.value = data[key];
+                            }
+                        });
+                        document.getElementById('searchPanel').classList.remove('active');
+                    }
+                })
+                .catch((error) => {
+                    console.error("Error al cargar los datos: ", error);
+                    alert('Error al cargar los datos del paciente');
+                });
+        }
+
+        // Validación de RUT
+        function validarRut(rut) {
+            // Implementar la validación del RUT chileno
+            return true; // Implementar la lógica real
+        }
+
+        // Cálculo de IMC
+        function calcularIMC() {
+            const peso = parseFloat(document.getElementById('peso').value);
+            const talla = parseFloat(document.getElementById('talla').value) / 100; // convertir a metros
+            if (peso && talla) {
+                const imc = peso / (talla * talla);
+                // Agregar el resultado al formulario
+                document.getElementById('imc').value = imc.toFixed(2);
+            }
+        }
+
+        // Agregar eventos para el cálculo automático del IMC
+        document.getElementById('peso').addEventListener('input', calcularIMC);
+        document.getElementById('talla').addEventListener('input', calcularIMC);
+
+        // Resto de tu código existente...
+    </script>
+</body>
+</html>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Registro Clínico</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <style>
         body {
             font-family: Arial, sans-serif;
             max-width: 1200px;
