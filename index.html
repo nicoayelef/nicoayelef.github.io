@@ -74,6 +74,37 @@
             padding: 20px;
         }
 
+        .search-panel {
+            background: white;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: none;
+        }
+
+        .search-panel.active {
+            display: block;
+        }
+
+        .search-results {
+            margin-top: 20px;
+        }
+
+        .patient-card {
+            background: white;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .patient-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
         .tabs {
             display: flex;
             background: white;
@@ -181,56 +212,6 @@
             transform: translateY(-1px);
         }
 
-        .search-panel {
-            background: white;
-            padding: 20px;
-            margin-bottom: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            display: none;
-        }
-
-        .search-panel.active {
-            display: block;
-        }
-
-        .search-results {
-            margin-top: 20px;
-        }
-
-        .patient-card {
-            background: white;
-            padding: 15px;
-            margin-bottom: 10px;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .patient-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-
-        .status-message {
-            padding: 10px;
-            margin: 10px 0;
-            border-radius: 4px;
-            display: none;
-        }
-
-        .success {
-            background: #dff0d8;
-            color: #3c763d;
-            display: block;
-        }
-
-        .error {
-            background: #f2dede;
-            color: #a94442;
-            display: block;
-        }
-
         @media (max-width: 768px) {
             .nav-container {
                 flex-direction: column;
@@ -269,20 +250,20 @@
             <div id="searchResults" class="search-results"></div>
         </div>
 
-        <!-- Tabs de navegación -->
-        <div class="tabs">
-            <button class="tab active" onclick="showTab('personal')">Información Personal</button>
-            <button class="tab" onclick="showTab('anamnesis')">Anamnesis</button>
-            <button class="tab" onclick="showTab('habitos')">Hábitos y Hobbies</button>
-            <button class="tab" onclick="showTab('hogar')">Hogar y Red de Apoyo</button>
-            <button class="tab" onclick="showTab('psfs')">PSFS</button>
-            <button class="tab" onclick="showTab('evaluacion')">Evaluación Física</button>
-        </div>
-
         <!-- Formulario principal -->
-        <form id="clinicalForm" onsubmit="handleSubmit(event)">
+        <form id="clinicalForm" style="display: none;">
+            <!-- Tabs de navegación -->
+            <div class="tabs">
+                <button class="tab active" onclick="showTab('info')">Información Personal</button>
+                <button class="tab" onclick="showTab('anamnesis')">Anamnesis</button>
+                <button class="tab" onclick="showTab('habitos')">Hábitos</button>
+                <button class="tab" onclick="showTab('hogar')">Hogar</button>
+                <button class="tab" onclick="showTab('psfs')">PSFS</button>
+                <button class="tab" onclick="showTab('evaluacion')">Evaluación</button>
+            </div>
+
             <!-- Sección de Información Personal -->
-            <div id="personalTab" class="form-section active">
+            <div id="infoTab" class="form-section active">
                 <h2>Información Personal</h2>
                 <div class="form-group">
                     <label for="evaluador">Kinesiólogo/Evaluador:</label>
@@ -296,72 +277,66 @@
                     <label for="rut">RUT:</label>
                     <input type="text" id="rut" required placeholder="Sin puntos, con guión">
                 </div>
-                <!-- Resto de campos personales -->
+                <div class="form-group">
+                    <label for="edad">Edad:</label>
+                    <input type="number" id="edad" required>
+                </div>
+                <div class="form-group">
+                    <label for="fechaNacimiento">Fecha de Nacimiento:</label>
+                    <input type="date" id="fechaNacimiento" required>
+                </div>
+                <div class="form-group">
+                    <label for="nacionalidad">Nacionalidad:</label>
+                    <input type="text" id="nacionalidad">
+                </div>
+                <div class="form-group">
+                    <label for="estadoCivil">Estado Civil:</label>
+                    <select id="estadoCivil">
+                        <option value="">Seleccione...</option>
+                        <option value="soltero">Soltero/a</option>
+                        <option value="casado">Casado/a</option>
+                        <option value="divorciado">Divorciado/a</option>
+                        <option value="viudo">Viudo/a</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="nivelEducacional">Nivel Educacional:</label>
+                    <select id="nivelEducacional">
+                        <option value="">Seleccione...</option>
+                        <option value="basica">Básica</option>
+                        <option value="media">Media</option>
+                        <option value="superior">Superior</option>
+                        <option value="postgrado">Postgrado</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="ocupacion">Ocupación:</label>
+                    <textarea id="ocupacion" placeholder="Describa movimientos involucrados, tiempo activo/sedentario..."></textarea>
+                </div>
             </div>
 
             <!-- Sección de Anamnesis -->
             <div id="anamnesisTab" class="form-section">
                 <h2>Anamnesis</h2>
                 <div class="form-group">
-                    <label for="anamnesis_proxima">Anamnesis Próxima:</label>
-                    <textarea id="anamnesis_proxima" rows="4" placeholder="Historia del caso, ALICIA, cambios diurnos..."></textarea>
+                    <label for="motivoConsulta">Motivo de Consulta:</label>
+                    <textarea id="motivoConsulta" required></textarea>
                 </div>
                 <div class="form-group">
-                    <label for="anamnesis_remota">Anamnesis Remota:</label>
-                    <textarea id="anamnesis_remota" rows="4" placeholder="Antecedentes médicos, ortopédicos, enfermedades crónicas..."></textarea>
+                    <label for="diagnosticoPrincipal">Diagnóstico Principal:</label>
+                    <input type="text" id="diagnosticoPrincipal">
+                </div>
+                <div class="form-group">
+                    <label for="anamnesisProxima">Anamnesis Próxima:</label>
+                    <textarea id="anamnesisProxima" placeholder="Historia del caso, ALICIA, cambios diurnos..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="anamnesisRemota">Anamnesis Remota:</label>
+                    <textarea id="anamnesisRemota" placeholder="Antecedentes médicos, ortopédicos, enfermedades..."></textarea>
                 </div>
             </div>
 
-            <!-- Sección de Hábitos y Hobbies -->
-            <div id="habitosTab" class="form-section">
-                <h2>Hábitos y Hobbies</h2>
-                <div class="form-group">
-                    <label for="habitos">Hábitos:</label>
-                    <textarea id="habitos" rows="4" placeholder="Tabaco, alcohol, drogas, deportes..."></textarea>
-                </div>
-            </div>
-
-            <!-- Sección de Hogar y Red de Apoyo -->
-            <div id="hogarTab" class="form-section">
-                <h2>Hogar y Red de Apoyo</h2>
-                <div class="form-group">
-                    <label for="hogar">Descripción del Hogar y Red de Apoyo:</label>
-                    <textarea id="hogar" rows="4"></textarea>
-                </div>
-            </div>
-
-            <!-- Sección de PSFS -->
-            <div id="psfsTab" class="form-section">
-                <h2>PSFS</h2>
-                <div class="form-group">
-                    <label for="psfs1_actividad">PSFS 1 - Actividad:</label>
-                    <input type="text" id="psfs1_actividad">
-                    <div class="range-container">
-                        <span class="range-value" id="psfs1_value">5</span>
-                        <input type="range" id="psfs1_valor" min="0" max="10" value="5"
-                               oninput="updateRangeValue('psfs1_valor', 'psfs1_value')">
-                    </div>
-                </div>
-                <!-- PSFS 2 y 3 similares -->
-            </div>
-
-            <!-- Sección de Evaluación Física -->
-            <div id="evaluacionTab" class="form-section">
-                <h2>Evaluación Física</h2>
-                <div class="form-group">
-                    <label for="signos_vitales">Signos Vitales:</label>
-                    <textarea id="signos_vitales" rows="4" placeholder="Saturación, pulso, presión arterial..."></textarea>
-                </div>
-                <div class="form-group">
-                    <label for="antropometria">Antropometría:</label>
-                    <textarea id="antropometria" rows="4" placeholder="Peso, talla, circunferencias..."></textarea>
-                </div>
-                <div class="form-group">
-                    <label for="examen_fisico">Examen Físico:</label>
-                    <textarea id="examen_fisico" rows="4" placeholder="Observación, inspección, palpación..."></textarea>
-                </div>
-            </div>
-
+            <!-- Botón de guardar -->
             <button type="submit" class="btn">Guardar Registro</button>
         </form>
     </div>
@@ -395,44 +370,17 @@
 
         function toggleSearch() {
             const searchPanel = document.getElementById('searchPanel');
+            const clinicalForm = document.getElementById('clinicalForm');
+
             searchPanel.classList.toggle('active');
-            document.getElementById('clinicalForm').style.display =
-                searchPanel.classList.contains('active') ? 'none' : 'block';
+            clinicalForm.style.display = searchPanel.classList.contains('active') ? 'none' : 'block';
         }
 
         function showNewPatientForm() {
             document.getElementById('searchPanel').classList.remove('active');
             document.getElementById('clinicalForm').style.display = 'block';
             document.getElementById('clinicalForm').reset();
-            showTab('personal');
-        }
-
-        // Funciones de PSFS
-        function updateRangeValue(rangeId, valueId) {
-            const range = document.getElementById(rangeId);
-            const value = document.getElementById(valueId);
-            value.textContent = range.value;
-            value.style.left = (range.value * 10) + '%';
-        }
-
-        // Validación de RUT
-        function validarRut(rut) {
-            if (!/^[0-9]+-[0-9kK]{1}$/.test(rut)) return false;
-            let [num, dv] = rut.split('-');
-            let suma = 0;
-            let multiplo = 2;
-
-            for (let i = num.length - 1; i >= 0; i--) {
-                suma += num[i] * multiplo;
-                multiplo = multiplo === 7 ? 2 : multiplo + 1;
-            }
-
-            const dvEsperado = 11 - (suma % 11);
-            const dvReal = dv.toLowerCase();
-
-            if (dvEsperado === 11) return dvReal === '0';
-            if (dvEsperado === 10) return dvReal === 'k';
-            return dvReal === dvEsperado.toString();
+            showTab('info');
         }
 
         // Búsqueda de pacientes
@@ -446,16 +394,26 @@
             }
 
             try {
-                const snapshot = await db.collection('pacientes')
-                    .where('rut', '>=', searchInput)
-                    .where('rut', '<=', searchInput + '\uf8ff')
-                    .get();
+                const [rutSnapshot, nombreSnapshot] = await Promise.all([
+                    db.collection('pacientes')
+                        .where('rut', '>=', searchInput)
+                        .where('rut', '<=', searchInput + '\uf8ff')
+                        .get(),
+                    db.collection('pacientes')
+                        .where('nombre', '>=', searchInput)
+                        .where('nombre', '<=', searchInput + '\uf8ff')
+                        .get()
+                ]);
+
+                const results = new Set();
+
+                rutSnapshot.forEach(doc => results.add({id: doc.id, data: doc.data()}));
+                nombreSnapshot.forEach(doc => results.add({id: doc.id, data: doc.data()}));
 
                 let resultsHTML = '';
-                snapshot.forEach(doc => {
-                    const data = doc.data();
+                results.forEach(({id, data}) => {
                     resultsHTML += `
-                        <div class="patient-card" onclick="loadPatient('${doc.id}')">
+                        <div class="patient-card" onclick="loadPatient('${id}')">
                             <h3>${data.nombre}</h3>
                             <p>RUT: ${data.rut}</p>
                         </div>
@@ -479,15 +437,12 @@
                         const input = document.getElementById(key);
                         if (input) {
                             input.value = data[key];
-                            if (key.includes('psfs') && key.includes('valor')) {
-                                updateRangeValue(key, key.replace('valor', 'value'));
-                            }
                         }
                     });
 
                     document.getElementById('searchPanel').classList.remove('active');
                     document.getElementById('clinicalForm').style.display = 'block';
-                    showTab('personal');
+                    showTab('info');
                 }
             } catch (error) {
                 console.error('Error al cargar paciente:', error);
@@ -495,12 +450,32 @@
             }
         }
 
+        // Validación de RUT
+        function validarRut(rut) {
+            if (!/^[0-9]+-[0-9kK]{1}$/.test(rut)) return false;
+            let [num, dv] = rut.split('-');
+            let suma = 0;
+            let multiplo = 2;
+
+            for (let i = num.length - 1; i >= 0; i--) {
+                suma += num[i] * multiplo;
+                multiplo = multiplo === 7 ? 2 : multiplo + 1;
+            }
+
+            const dvEsperado = 11 - (suma % 11);
+            const dvReal = dv.toLowerCase();
+
+            if (dvEsperado === 11) return dvReal === '0';
+            if (dvEsperado === 10) return dvReal === 'k';
+            return dvReal === dvEsperado.toString();
+        }
+
         // Manejo del formulario
-        async function handleSubmit(event) {
+        document.getElementById('clinicalForm').addEventListener('submit', async function(event) {
             event.preventDefault();
 
             const formData = {};
-            const inputs = event.target.querySelectorAll('input, textarea, select');
+            const inputs = this.querySelectorAll('input, textarea, select');
             inputs.forEach(input => {
                 if (input.id) {
                     formData[input.id] = input.value;
@@ -519,18 +494,17 @@
                 });
 
                 alert('Registro guardado exitosamente');
-                event.target.reset();
-                showTab('personal');
+                this.reset();
+                showTab('info');
             } catch (error) {
                 console.error('Error al guardar:', error);
                 alert('Error al guardar el registro');
             }
-        }
+        });
 
         // Inicialización
         document.addEventListener('DOMContentLoaded', () => {
-            showTab('personal');
-            updateRangeValue('psfs1_valor', 'psfs1_value');
+            showTab('info');
         });
     </script>
 </body>
