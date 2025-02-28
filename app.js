@@ -3,7 +3,7 @@ const firebaseConfig = {
   apiKey: "AIzaSyBYaNbZWHUS-Pvm49kmMtHw9LqqxUDySYA",
   authDomain: "base-de-datos-poli.firebaseapp.com",
   projectId: "base-de-datos-poli",
-  storageBucket: "base-de-datos-poli.firebasestorage.app", // Corregido el storageBucket
+  storageBucket: "base-de-datos-poli.appspot.com",
   messagingSenderId: "954754202697",
   appId: "1:954754202697:web:e06171f6b0ade314259398"
 };
@@ -11,8 +11,13 @@ const firebaseConfig = {
 // Inicializar Firebase
 firebase.initializeApp(firebaseConfig);
 
-// Inicializar Firestore
+// Inicializar Firestore con configuración para evitar errores de timestamp
 const db = firebase.firestore();
+db.settings({
+  timestampsInSnapshots: true
+});
+
+console.log("Firebase inicializado correctamente");
 
 // Variables globales
 let currentPatientId = null;
