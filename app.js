@@ -189,9 +189,10 @@ function showPatientDetails(patientId) {
                 // Formatear fecha de creación
                 const createdDate = patient.createdAt ? new Date(patient.createdAt).toLocaleDateString() : 'No disponible';
                 
-                // Construir contenido del modal (mantén tu código existente para construir el HTML)
+                // Construir contenido del modal con todas las secciones
                 modalContent.innerHTML = `
                     <div class="container-fluid">
+                        <!-- Información Personal -->
                         <div class="row mb-4">
                             <div class="col-12">
                                 <h4 class="text-primary">Información Personal</h4>
@@ -212,11 +213,105 @@ function showPatientDetails(patientId) {
                                 <p><strong>Dirección:</strong> ${patient.address || 'No especificada'}</p>
                                 <p><strong>Contacto emergencia:</strong> ${patient.emergencyContact || 'No especificado'}</p>
                                 <p><strong>Lateralidad:</strong> ${patient.laterality || 'No especificada'}</p>
+                                <p><strong>Ocupación:</strong> ${patient.occupation || 'No especificada'}</p>
                             </div>
                         </div>
                         
-                        <!-- Resto de secciones del modal -->
-                        <!-- ... -->
+                        <!-- Información Clínica -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h4 class="text-primary">Información Clínica</h4>
+                                <hr>
+                            </div>
+                            <div class="col-12">
+                                <p><strong>Motivo de consulta:</strong> ${patient.consultReason || 'No especificado'}</p>
+                                <p><strong>Diagnóstico:</strong> ${patient.diagnosis || 'No especificado'}</p>
+                                <p><strong>Expectativas y metas:</strong> ${patient.expectations || 'No especificadas'}</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Anamnesis -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h4 class="text-primary">Anamnesis</h4>
+                                <hr>
+                            </div>
+                            <div class="col-md-6">
+                                <p><strong>Anamnesis próxima:</strong> ${patient.proximateAnamnesis || 'No especificada'}</p>
+                            </div>
+                            <div class="col-md-6">
+                                <p><strong>Anamnesis remota:</strong> ${patient.remoteAnamnesis || 'No especificada'}</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Hábitos y Entorno -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h4 class="text-primary">Hábitos y Entorno</h4>
+                                <hr>
+                            </div>
+                            <div class="col-md-6">
+                                <p><strong>Hábitos y hobbies:</strong> ${patient.habitsHobbies || 'No especificados'}</p>
+                            </div>
+                            <div class="col-md-6">
+                                <p><strong>Hogar y red de apoyo:</strong> ${patient.homeSupport || 'No especificados'}</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Cuestionarios PSFS -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h4 class="text-primary">Cuestionarios PSFS</h4>
+                                <hr>
+                            </div>
+                            <div class="col-12">
+                                ${patient.psfs1 && patient.psfs1.activity ? 
+                                    `<p><strong>PSFS 1:</strong> ${patient.psfs1.activity} - Puntuación: ${patient.psfs1.rating || 'No especificada'}</p>` : ''}
+                                ${patient.psfs2 && patient.psfs2.activity ? 
+                                    `<p><strong>PSFS 2:</strong> ${patient.psfs2.activity} - Puntuación: ${patient.psfs2.rating || 'No especificada'}</p>` : ''}
+                                ${patient.psfs3 && patient.psfs3.activity ? 
+                                    `<p><strong>PSFS 3:</strong> ${patient.psfs3.activity} - Puntuación: ${patient.psfs3.rating || 'No especificada'}</p>` : ''}
+                                <p><strong>Cuestionario adicional:</strong> ${patient.extraQuestionnaire || 'No especificado'}</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Evaluación Física -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h4 class="text-primary">Evaluación Física</h4>
+                                <hr>
+                            </div>
+                            <div class="col-md-4">
+                                <p><strong>Signos vitales:</strong> ${patient.vitalSigns || 'No especificados'}</p>
+                            </div>
+                            <div class="col-md-4">
+                                <p><strong>Antropometría:</strong> ${patient.anthropometry || 'No especificada'}</p>
+                            </div>
+                            <div class="col-md-4">
+                                <p><strong>Examen físico:</strong> ${patient.physicalExam || 'No especificado'}</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Información del Evaluador -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h4 class="text-primary">Información del Evaluador</h4>
+                                <hr>
+                            </div>
+                            <div class="col-md-6">
+                                <p><strong>Evaluador:</strong> ${patient.evaluator || 'No especificado'}</p>
+                            </div>
+                            <div class="col-md-6">
+                                <p><strong>Email del evaluador:</strong> ${patient.email || 'No especificado'}</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Fecha de Creación -->
+                        <div class="row">
+                            <div class="col-12 text-end">
+                                <p class="text-muted"><small>Fecha de creación: ${createdDate}</small></p>
+                            </div>
+                        </div>
                     </div>
                 `;
                 
@@ -224,7 +319,7 @@ function showPatientDetails(patientId) {
                 const exportButton = document.getElementById('exportPatientButton');
                 if (exportButton) {
                     exportButton.onclick = function() {
-                        exportPatientToPDF(patientId);
+                        exportPatientToPDF(patient.id);
                     };
                 }
                 
