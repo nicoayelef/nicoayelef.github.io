@@ -453,218 +453,223 @@ function exportPatientToPDF(patientId) {
                     return;
                 }
                 
-                // Crear nuevo documento PDF
-                const pdf = new jspdf.jsPDF();
-                
-                // Variables para controlar la posición
-                let y = 20;
-                const pageWidth = pdf.internal.pageSize.width;
-                const margin = 20;
-                const contentWidth = pageWidth - 2 * margin;
-                
-                // Función para agregar texto con saltos de línea automáticos
-                function addWrappedText(text, x, y, maxWidth, lineHeight) {
-                    if (!text) return y;
+                try {
+                    // Crear nuevo documento PDF
+                    const pdf = new jspdf.jsPDF();
                     
-                    const lines = pdf.splitTextToSize(text, maxWidth);
-                    pdf.text(lines, x, y);
-                    return y + (lines.length * lineHeight);
-                }
-                
-                // Función para agregar una sección con título
-                function addSection(title, content, x, y, maxWidth, lineHeight) {
-                    // Título de la sección
-                    pdf.setFont(undefined, 'bold');
-                    pdf.setTextColor(44, 62, 80);
-                    pdf.text(title, x, y);
-                    y += 7;
+                    // Variables para controlar la posición
+                    let y = 20;
+                    const pageWidth = pdf.internal.pageSize.width;
+                    const margin = 20;
+                    const contentWidth = pageWidth - 2 * margin;
                     
-                    // Contenido de la sección
-                    pdf.setFont(undefined, 'normal');
-                    pdf.setTextColor(0, 0, 0);
-                    if (typeof content === 'string') {
-                        y = addWrappedText(content, x, y, maxWidth, lineHeight);
-                    } else if (Array.isArray(content)) {
-                        content.forEach(item => {
-                            if (y > 270) {
-                                pdf.addPage();
-                                y = 20;
-                            }
-                            y = addWrappedText(item, x, y, maxWidth, lineHeight);
-                            y += 5;
-                        });
+                    // Función para agregar texto con saltos de línea automáticos
+                    function addWrappedText(text, x, y, maxWidth, lineHeight) {
+                        if (!text) return y;
+                        
+                        const lines = pdf.splitTextToSize(text, maxWidth);
+                        pdf.text(lines, x, y);
+                        return y + (lines.length * lineHeight);
                     }
                     
-                    return y + 10;
-                }
-                
-                // Encabezado del documento
-                pdf.setFontSize(18);
-                pdf.setFont(undefined, 'bold');
-                pdf.setTextColor(41, 128, 185);
-                pdf.text('FICHA CLÍNICA KINESIOLÓGICA', pageWidth / 2, y, { align: 'center' });
-                y += 10;
-                
-                // Fecha de creación
-                const createdDate = patient.createdAt ? new Date(patient.createdAt).toLocaleDateString() : 'No disponible';
-                pdf.setFontSize(10);
-                pdf.setTextColor(100, 100, 100);
-                pdf.text(`Fecha de creación: ${createdDate}`, pageWidth - margin, y, { align: 'right' });
-                y += 15;
-                
-                // Información personal
-                pdf.setFontSize(14);
-                pdf.setTextColor(41, 128, 185);
-                pdf.text('INFORMACIÓN PERSONAL', margin, y);
-                y += 10;
-                
-                pdf.setFontSize(11);
-                pdf.setTextColor(0, 0, 0);
-                
-                // Tabla de información personal
-                const infoPersonal = [
-                    [`Nombre: ${patient.name || 'No especificado'}`, `RUT: ${patient.rut || 'No especificado'}`],
-                    [`Edad: ${patient.age || 'No especificada'} años`, `Fecha de nacimiento: ${patient.birthdate || 'No especificada'}`],
-                    [`Teléfono: ${patient.contactNumber || 'No especificado'}`, `Email: ${patient.patientEmail || 'No especificado'}`],
-                    [`Nacionalidad: ${patient.nationality || 'No especificada'}`, `Estado civil: ${patient.civilStatus || 'No especificado'}`],
-                    [`Nivel educacional: ${patient.education || 'No especificado'}`, `Dirección: ${patient.address || 'No especificada'}`],
-                    [`Contacto emergencia: ${patient.emergencyContact || 'No especificado'}`, `Lateralidad: ${patient.laterality || 'No especificada'}`],
-                    [`Ocupación: ${patient.occupation || 'No especificada'}`, '']
-                ];
-                
-                infoPersonal.forEach(row => {
-                    pdf.text(row[0], margin, y);
-                    pdf.text(row[1], margin + contentWidth / 2, y);
-                    y += 8;
-                });
-                
-                y += 10;
-                
-                // Verificar si necesitamos una nueva página
-                if (y > 250) {
-                    pdf.addPage();
-                    y = 20;
-                }
-                
-                // Información clínica
-                pdf.setFontSize(14);
-                pdf.setTextColor(41, 128, 185);
-                pdf.text('INFORMACIÓN CLÍNICA', margin, y);
-                y += 10;
-                
-                pdf.setFontSize(11);
-                pdf.setTextColor(0, 0, 0);
-                
-                y = addSection('Motivo de consulta:', patient.consultReason, margin, y, contentWidth, 7);
-                y = addSection('Diagnóstico:', patient.diagnosis, margin, y, contentWidth, 7);
-                y = addSection('Expectativas y metas:', patient.expectations, margin, y, contentWidth, 7);
-                
-                // Verificar si necesitamos una nueva página
-                if (y > 220) {
-                    pdf.addPage();
-                    y = 20;
-                }
-                
-                // Anamnesis
-                pdf.setFontSize(14);
-                pdf.setTextColor(41, 128, 185);
-                pdf.text('ANAMNESIS', margin, y);
-                y += 10;
-                
-                pdf.setFontSize(11);
-                pdf.setTextColor(0, 0, 0);
-                
-                y = addSection('Anamnesis próxima:', patient.proximateAnamnesis, margin, y, contentWidth, 7);
-                y = addSection('Anamnesis remota:', patient.remoteAnamnesis, margin, y, contentWidth, 7);
-                
-                // Verificar si necesitamos una nueva página
-                if (y > 220) {
-                    pdf.addPage();
-                    y = 20;
-                }
-                
-                // Hábitos y entorno
-                pdf.setFontSize(14);
-                pdf.setTextColor(41, 128, 185);
-                pdf.text('HÁBITOS Y ENTORNO', margin, y);
-                y += 10;
-                
-                pdf.setFontSize(11);
-                pdf.setTextColor(0, 0, 0);
-                
-                y = addSection('Hábitos y hobbies:', patient.habitsHobbies, margin, y, contentWidth, 7);
-                y = addSection('Hogar y red de apoyo:', patient.homeSupport, margin, y, contentWidth, 7);
-                
-                // Verificar si necesitamos una nueva página
-                if (y > 220) {
-                    pdf.addPage();
-                    y = 20;
-                }
-                
-                // Cuestionarios PSFS
-                pdf.setFontSize(14);
-                pdf.setTextColor(41, 128, 185);
-                pdf.text('CUESTIONARIOS', margin, y);
-                y += 10;
-                
-                pdf.setFontSize(11);
-                pdf.setTextColor(0, 0, 0);
-                
-                // PSFS 1
-                if (patient.psfs1 && patient.psfs1.activity) {
-                    pdf.text(`PSFS 1: ${patient.psfs1.activity} - Puntuación: ${patient.psfs1.rating || 'No especificada'}`, margin, y);
-                    y += 8;
-                }
-                
-                // PSFS 2
-                if (patient.psfs2 && patient.psfs2.activity) {
-                    pdf.text(`PSFS 2: ${patient.psfs2.activity} - Puntuación: ${patient.psfs2.rating || 'No especificada'}`, margin, y);
-                    y += 8;
-                }
-                
-                // PSFS 3
-                if (patient.psfs3 && patient.psfs3.activity) {
-                    pdf.text(`PSFS 3: ${patient.psfs3.activity} - Puntuación: ${patient.psfs3.rating || 'No especificada'}`, margin, y);
-                    y += 8;
-                }
-                
-                // Cuestionario extra
-                if (patient.extraQuestionnaire) {
-                    y = addSection('Cuestionario adicional:', patient.extraQuestionnaire, margin, y, contentWidth, 7);
-                }
-                
-                // Verificar si necesitamos una nueva página
-                if (y > 220) {
-                    pdf.addPage();
-                    y = 20;
-                }
-                
-                // Evaluación física
-                pdf.setFontSize(14);
-                pdf.setTextColor(41, 128, 185);
-                pdf.text('EVALUACIÓN FÍSICA', margin, y);
-                y += 10;
-                
-                pdf.setFontSize(11);
-                pdf.setTextColor(0, 0, 0);
-                
-                y = addSection('Signos vitales:', patient.vitalSigns, margin, y, contentWidth, 7);
-                y = addSection('Antropometría:', patient.anthropometry, margin, y, contentWidth, 7);
-                y = addSection('Examen físico:', patient.physicalExam, margin, y, contentWidth, 7);
-                
-                // Agregar pie de página con numeración
-                const totalPages = pdf.internal.getNumberOfPages();
-                for (let i = 1; i <= totalPages; i++) {
-                    pdf.setPage(i);
+                    // Función para agregar una sección con título
+                    function addSection(title, content, x, y, maxWidth, lineHeight) {
+                        // Título de la sección
+                        pdf.setFont(undefined, 'bold');
+                        pdf.setTextColor(44, 62, 80);
+                        pdf.text(title, x, y);
+                        y += 7;
+                        
+                        // Contenido de la sección
+                        pdf.setFont(undefined, 'normal');
+                        pdf.setTextColor(0, 0, 0);
+                        if (typeof content === 'string') {
+                            y = addWrappedText(content, x, y, maxWidth, lineHeight);
+                        } else if (Array.isArray(content)) {
+                            content.forEach(item => {
+                                if (y > 270) {
+                                    pdf.addPage();
+                                    y = 20;
+                                }
+                                y = addWrappedText(item, x, y, maxWidth, lineHeight);
+                                y += 5;
+                            });
+                        }
+                        
+                        return y + 10;
+                    }
+                    
+                    // Encabezado del documento
+                    pdf.setFontSize(18);
+                    pdf.setFont(undefined, 'bold');
+                    pdf.setTextColor(41, 128, 185);
+                    pdf.text('FICHA CLÍNICA KINESIOLÓGICA', pageWidth / 2, y, { align: 'center' });
+                    y += 10;
+                    
+                    // Fecha de creación
+                    const createdDate = patient.createdAt ? new Date(patient.createdAt).toLocaleDateString() : 'No disponible';
                     pdf.setFontSize(10);
-                    pdf.setTextColor(150, 150, 150);
-                    pdf.text(`Página ${i} de ${totalPages}`, pageWidth / 2, 290, { align: 'center' });
-                    pdf.text('Sistema de Fichas Clínicas Kinesiológicas', margin, 290);
-                    pdf.text(`Evaluador: ${patient.evaluator || 'No especificado'}`, pageWidth - margin, 290, { align: 'right' });
+                    pdf.setTextColor(100, 100, 100);
+                    pdf.text(`Fecha de creación: ${createdDate}`, pageWidth - margin, y, { align: 'right' });
+                    y += 15;
+                    
+                    // Información personal
+                    pdf.setFontSize(14);
+                    pdf.setTextColor(41, 128, 185);
+                    pdf.text('INFORMACIÓN PERSONAL', margin, y);
+                    y += 10;
+                    
+                    pdf.setFontSize(11);
+                    pdf.setTextColor(0, 0, 0);
+                    
+                    // Tabla de información personal
+                    const infoPersonal = [
+                        [`Nombre: ${patient.name || 'No especificado'}`, `RUT: ${patient.rut || 'No especificado'}`],
+                        [`Edad: ${patient.age || 'No especificada'} años`, `Fecha de nacimiento: ${patient.birthdate || 'No especificada'}`],
+                        [`Teléfono: ${patient.contactNumber || 'No especificado'}`, `Email: ${patient.patientEmail || 'No especificado'}`],
+                        [`Nacionalidad: ${patient.nationality || 'No especificada'}`, `Estado civil: ${patient.civilStatus || 'No especificado'}`],
+                        [`Nivel educacional: ${patient.education || 'No especificado'}`, `Dirección: ${patient.address || 'No especificada'}`],
+                        [`Contacto emergencia: ${patient.emergencyContact || 'No especificado'}`, `Lateralidad: ${patient.laterality || 'No especificada'}`],
+                        [`Ocupación: ${patient.occupation || 'No especificada'}`, '']
+                    ];
+                    
+                    infoPersonal.forEach(row => {
+                        pdf.text(row[0], margin, y);
+                        pdf.text(row[1], margin + contentWidth / 2, y);
+                        y += 8;
+                    });
+                    
+                    y += 10;
+                    
+                    // Verificar si necesitamos una nueva página
+                    if (y > 250) {
+                        pdf.addPage();
+                        y = 20;
+                    }
+                    
+                    // Información clínica
+                    pdf.setFontSize(14);
+                    pdf.setTextColor(41, 128, 185);
+                    pdf.text('INFORMACIÓN CLÍNICA', margin, y);
+                    y += 10;
+                    
+                    pdf.setFontSize(11);
+                    pdf.setTextColor(0, 0, 0);
+                    
+                    y = addSection('Motivo de consulta:', patient.consultReason, margin, y, contentWidth, 7);
+                    y = addSection('Diagnóstico:', patient.diagnosis, margin, y, contentWidth, 7);
+                    y = addSection('Expectativas y metas:', patient.expectations, margin, y, contentWidth, 7);
+                    
+                    // Verificar si necesitamos una nueva página
+                    if (y > 220) {
+                        pdf.addPage();
+                        y = 20;
+                    }
+                    
+                    // Anamnesis
+                    pdf.setFontSize(14);
+                    pdf.setTextColor(41, 128, 185);
+                    pdf.text('ANAMNESIS', margin, y);
+                    y += 10;
+                    
+                    pdf.setFontSize(11);
+                    pdf.setTextColor(0, 0, 0);
+                    
+                    y = addSection('Anamnesis próxima:', patient.proximateAnamnesis, margin, y, contentWidth, 7);
+                    y = addSection('Anamnesis remota:', patient.remoteAnamnesis, margin, y, contentWidth, 7);
+                    
+                    // Verificar si necesitamos una nueva página
+                    if (y > 220) {
+                        pdf.addPage();
+                        y = 20;
+                    }
+                    
+                    // Hábitos y entorno
+                    pdf.setFontSize(14);
+                    pdf.setTextColor(41, 128, 185);
+                    pdf.text('HÁBITOS Y ENTORNO', margin, y);
+                    y += 10;
+                    
+                    pdf.setFontSize(11);
+                    pdf.setTextColor(0, 0, 0);
+                    
+                    y = addSection('Hábitos y hobbies:', patient.habitsHobbies, margin, y, contentWidth, 7);
+                    y = addSection('Hogar y red de apoyo:', patient.homeSupport, margin, y, contentWidth, 7);
+                    
+                    // Verificar si necesitamos una nueva página
+                    if (y > 220) {
+                        pdf.addPage();
+                        y = 20;
+                    }
+                    
+                    // Cuestionarios PSFS
+                    pdf.setFontSize(14);
+                    pdf.setTextColor(41, 128, 185);
+                    pdf.text('CUESTIONARIOS', margin, y);
+                    y += 10;
+                    
+                    pdf.setFontSize(11);
+                    pdf.setTextColor(0, 0, 0);
+                    
+                    // PSFS 1
+                    if (patient.psfs1 && patient.psfs1.activity) {
+                        pdf.text(`PSFS 1: ${patient.psfs1.activity} - Puntuación: ${patient.psfs1.rating || 'No especificada'}`, margin, y);
+                        y += 8;
+                    }
+                    
+                    // PSFS 2
+                    if (patient.psfs2 && patient.psfs2.activity) {
+                        pdf.text(`PSFS 2: ${patient.psfs2.activity} - Puntuación: ${patient.psfs2.rating || 'No especificada'}`, margin, y);
+                        y += 8;
+                    }
+                    
+                    // PSFS 3
+                    if (patient.psfs3 && patient.psfs3.activity) {
+                        pdf.text(`PSFS 3: ${patient.psfs3.activity} - Puntuación: ${patient.psfs3.rating || 'No especificada'}`, margin, y);
+                        y += 8;
+                    }
+                    
+                    // Cuestionario extra
+                    if (patient.extraQuestionnaire) {
+                        y = addSection('Cuestionario adicional:', patient.extraQuestionnaire, margin, y, contentWidth, 7);
+                    }
+                    
+                    // Verificar si necesitamos una nueva página
+                    if (y > 220) {
+                        pdf.addPage();
+                        y = 20;
+                    }
+                    
+                    // Evaluación física
+                    pdf.setFontSize(14);
+                    pdf.setTextColor(41, 128, 185);
+                    pdf.text('EVALUACIÓN FÍSICA', margin, y);
+                    y += 10;
+                    
+                    pdf.setFontSize(11);
+                    pdf.setTextColor(0, 0, 0);
+                    
+                    y = addSection('Signos vitales:', patient.vitalSigns, margin, y, contentWidth, 7);
+                    y = addSection('Antropometría:', patient.anthropometry, margin, y, contentWidth, 7);
+                    y = addSection('Examen físico:', patient.physicalExam, margin, y, contentWidth, 7);
+                    
+                    // Agregar pie de página con numeración
+                    const totalPages = pdf.internal.getNumberOfPages();
+                    for (let i = 1; i <= totalPages; i++) {
+                        pdf.setPage(i);
+                        pdf.setFontSize(10);
+                        pdf.setTextColor(150, 150, 150);
+                        pdf.text(`Página ${i} de ${totalPages}`, pageWidth / 2, 290, { align: 'center' });
+                        pdf.text('Sistema de Fichas Clínicas Kinesiológicas', margin, 290);
+                        pdf.text(`Evaluador: ${patient.evaluator || 'No especificado'}`, pageWidth - margin, 290, { align: 'right' });
+                    }
+                    
+                    // Guardar el PDF
+                    pdf.save(`Ficha_${patient.name || 'Paciente'}_${patient.rut || ''}.pdf`);
+                } catch (error) {
+                    console.error("Error al generar PDF:", error);
+                    alert("Error al generar PDF: " + error.message);
                 }
-                
-                // Guardar el PDF
-                pdf.save(`Ficha_${patient.name || 'Paciente'}_${patient.rut || ''}.pdf`);
             } else {
                 alert('Paciente no encontrado');
             }
