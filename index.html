@@ -625,6 +625,9 @@
 
         // Inicializar Firestore
         const db = firebase.firestore();
+
+        // Inicializar Firebase Storage
+const storage = firebase.storage();
         
         console.log("Verificando conexión con Firebase...");
         db.collection("test").add({
