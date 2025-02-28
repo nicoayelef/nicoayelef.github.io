@@ -1,19 +1,4 @@
-// Código básico para el formulario
+// Esperar a que el DOM esté completamente cargado
 document.addEventListener('DOMContentLoaded', function() {
-    const patientForm = document.getElementById('patientForm');
-    
-    if (patientForm) {
-        patientForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const evaluator = document.getElementById('evaluator').value;
-            const patientName = document.getElementById('patientName').value;
-            const patientId = document.getElementById('patientId').value;
-            
-            // Por ahora, solo mostraremos un mensaje
-            alert(`Formulario enviado:\nEvaluador: ${evaluator}\nPaciente: ${patientName}\nRUT: ${patientId}`);
-            
-            // Aquí más adelante conectaremos con Firebase
-        });
-    }
-});
+    // Referencia al formulario
+    const patientForm = document.getElementById('pat
