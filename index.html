@@ -11,30 +11,408 @@
 <body>
     <div class="container">
         <h1 class="text-center my-4">Sistema de Fichas Clínicas Kinesiológicas</h1>
-        <div class="alert alert-info">
-            <p>Este sistema está en construcción. Pronto estará disponible con todas las funcionalidades.</p>
-        </div>
         
-        <div class="card">
-            <div class="card-header bg-primary text-white">
-                <h2 class="h5 mb-0">Formulario de Ingreso</h2>
-            </div>
-            <div class="card-body">
-                <form id="patientForm">
-                    <div class="mb-3">
-                        <label for="evaluator" class="form-label">Kinesiólogo / Interno / Estudiante evaluador</label>
-                        <input type="text" class="form-control" id="evaluator">
+        <!-- Navegación por pestañas -->
+        <ul class="nav nav-tabs" id="myTab" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="form-tab" data-bs-toggle="tab" data-bs-target="#form" type="button" role="tab" aria-controls="form" aria-selected="true">
+                    Formulario de Ingreso
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="records-tab" data-bs-toggle="tab" data-bs-target="#records" type="button" role="tab" aria-controls="records" aria-selected="false">
+                    Registros
+                </button>
+            </li>
+        </ul>
+        
+        <!-- Contenido de las pestañas -->
+        <div class="tab-content" id="myTabContent">
+            <!-- Pestaña de Formulario -->
+            <div class="tab-pane fade show active" id="form" role="tabpanel" aria-labelledby="form-tab">
+                <form id="patientForm" class="mt-3">
+                    <div class="accordion" id="formAccordion">
+                        <!-- Sección 1: Información Personal -->
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="headingOne">
+                                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                                    Información Personal y de Contacto
+                                </button>
+                            </h2>
+                            <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#formAccordion">
+                                <div class="accordion-body">
+                                    <div class="mb-3">
+                                        <label for="evaluator" class="form-label">Kinesiólogo / Interno / Estudiante evaluador *</label>
+                                        <input type="text" class="form-control" id="evaluator" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="patientName" class="form-label">Nombre usuario *</label>
+                                        <input type="text" class="form-control" id="patientName" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="patientId" class="form-label">RUT (sin puntos, con guión) *</label>
+                                        <input type="text" class="form-control" id="patientId" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="patientPhone" class="form-label">Número de contacto</label>
+                                        <input type="tel" class="form-control" id="patientPhone">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="patientEmail" class="form-label">Email</label>
+                                        <input type="email" class="form-control" id="patientEmail">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="patientNationality" class="form-label">Nacionalidad</label>
+                                        <input type="text" class="form-control" id="patientNationality">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="patientAge" class="form-label">Edad *</label>
+                                        <input type="number" class="form-control" id="patientAge" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="patientBirthdate" class="form-label">Fecha de nacimiento</label>
+                                        <input type="date" class="form-control" id="patientBirthdate">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="patientMaritalStatus" class="form-label">Estado civil</label>
+                                        <select class="form-select" id="patientMaritalStatus">
+                                            <option value="">Seleccionar</option>
+                                            <option value="Soltero/a">Soltero/a</option>
+                                            <option value="Casado/a">Casado/a</option>
+                                            <option value="Divorciado/a">Divorciado/a</option>
+                                            <option value="Viudo/a">Viudo/a</option>
+                                            <option value="Conviviente">Conviviente</option>
+                                        </select>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="patientEducation" class="form-label">Nivel educacional</label>
+                                        <select class="form-select" id="patientEducation">
+                                            <option value="">Seleccionar</option>
+                                            <option value="Sin estudios">Sin estudios</option>
+                                            <option value="Básica incompleta">Básica incompleta</option>
+                                            <option value="Básica completa">Básica completa</option>
+                                            <option value="Media incompleta">Media incompleta</option>
+                                            <option value="Media completa">Media completa</option>
+                                            <option value="Técnica incompleta">Técnica incompleta</option>
+                                            <option value="Técnica completa">Técnica completa</option>
+                                            <option value="Universitaria incompleta">Universitaria incompleta</option>
+                                            <option value="Universitaria completa">Universitaria completa</option>
+                                            <option value="Postgrado">Postgrado</option>
+                                        </select>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="patientAddress" class="form-label">Dirección</label>
+                                        <input type="text" class="form-control" id="patientAddress">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="patientEmergencyContact" class="form-label">Número de contacto de emergencia y parentesco</label>
+                                        <input type="text" class="form-control" id="patientEmergencyContact">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="patientOccupation" class="form-label">Ocupación (movimientos involucrados; tiempo activo y tiempos sedentarios)</label>
+                                        <textarea class="form-control" id="patientOccupation" rows="3"></textarea>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="patientLaterality" class="form-label">Lateralidad o dominancia</label>
+                                        <select class="form-select" id="patientLaterality">
+                                            <option value="">Seleccionar</option>
+                                            <option value="Diestro">Diestro</option>
+                                            <option value="Zurdo">Zurdo</option>
+                                            <option value="Ambidiestro">Ambidiestro</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Sección 2: Motivo de Consulta -->
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="headingTwo">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                                    Motivo de Consulta
+                                </button>
+                            </h2>
+                            <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#formAccordion">
+                                <div class="accordion-body">
+                                    <div class="mb-3">
+                                        <label for="consultReason" class="form-label">Motivo de consulta *</label>
+                                        <textarea class="form-control" id="consultReason" rows="3" required></textarea>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="mainDiagnosis" class="form-label">Diagnóstico principal (en caso de que exista)</label>
+                                        <textarea class="form-control" id="mainDiagnosis" rows="3"></textarea>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="patientExpectations" class="form-label">Expectativas y metas del usuario a corto, mediano o largo plazo</label>
+                                        <textarea class="form-control" id="patientExpectations" rows="3"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Sección 3: Anamnesis -->
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="headingThree">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                                    Anamnesis
+                                </button>
+                            </h2>
+                            <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#formAccordion">
+                                <div class="accordion-body">
+                                    <div class="mb-3">
+                                        <label for="proximateAnamnesis" class="form-label">Anamnesis próxima</label>
+                                        <small class="form-text d-block mb-2">
+                                            1. Historia de como sucedió (qué? Cuándo?, Dónde?, Cómo?, etc)<br>
+                                            2. A (Antigüedad) - L (localización) - I (intensidad) - C (Carácter) - I (Irradiación) - A (atenuantes y agravantes)<br>
+                                            3. Cambios diurnos y vespertinos de la sintomatología.
+                                        </small>
+                                        <textarea class="form-control" id="proximateAnamnesis" rows="5"></textarea>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="remoteAnamnesis" class="form-label">Anamnesis remota</label>
+                                        <small class="form-text d-block mb-2">
+                                            1. Antecedentes médicos<br>
+                                            2. Antecedentes ortopédicos (lesiones, fracturas, lesiones ligamentosas)<br>
+                                            3. Antecedentes de enfermedades crónicas (HTA/DBM/DLP/OBESIDAD/EPOC/OTROS)<br>
+                                            4. Antecedentes de enfermedades familiares (madre, padre, hermanos, hijos)<br>
+                                            5. Medicamentos<br>
+                                            6. Intervenciones Qx<br>
+                                            7. Hospitalizaciones ultimo año<br>
+                                            8. Alergias<br>
+                                            9. Inmunizaciones<br>
+                                            10. Historial de caídas
+                                        </small>
+                                        <textarea class="form-control" id="remoteAnamnesis" rows="5"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Sección 4: Hábitos y Hobbies -->
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="headingFour">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFour" aria-expanded="false" aria-controls="collapseFour">
+                                    Hábitos y Hobbies
+                                </button>
+                            </h2>
+                            <div id="collapseFour" class="accordion-collapse collapse" aria-labelledby="headingFour" data-bs-parent="#formAccordion">
+                                <div class="accordion-body">
+                                    <div class="mb-3">
+                                        <label for="habitsHobbies" class="form-label">Hábitos y hobbies</label>
+                                        <small class="form-text d-block mb-2">
+                                            1. Tabaco (cantidad, años de fumador, etc)<br>
+                                            2. Alcohol (bebedor frecuentemente o social)<br>
+                                            3. Drogas<br>
+                                            4. Hobbies o deportes (que realiza, ha realizado o quiere realizar)<br>
+                                            5. Hábitos nutricionales<br>
+                                            6. Sueño y calidad del sueño<br>
+                                            7. Estado mental (salud mental, estrés percibido)<br>
+                                            8. Dificultad para la realización de tareas de la vida diaria
+                                        </small>
+                                        <textarea class="form-control" id="habitsHobbies" rows="5"></textarea>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="homeDescription" class="form-label">Hogar y red de apoyo</label>
+                                        <small class="form-text d-block mb-2">
+                                            1. Descripción del hogar<br>
+                                            2. Red de apoyo<br>
+                                            3. Factores sociales relevantes<br>
+                                            4. Participación social / restricción de participación
+                                        </small>
+                                        <textarea class="form-control" id="homeDescription" rows="4"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Sección 5: Cuestionarios -->
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="headingFive">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFive" aria-expanded="false" aria-controls="collapseFive">
+                                    Cuestionarios (PSFS)
+                                </button>
+                            </h2>
+                            <div id="collapseFive" class="accordion-collapse collapse" aria-labelledby="headingFive" data-bs-parent="#formAccordion">
+                                <div class="accordion-body">
+                                    <div class="mb-3">
+                                        <label for="psfs1Activity" class="form-label">PSFS 1 (actividad que se dificulte o sea relevante)</label>
+                                        <input type="text" class="form-control" id="psfs1Activity">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label>Valoración PSFS 1</label>
+                                        <div class="rating-scale">
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input" type="radio" name="psfs1Rating" id="psfs1Rating1" value="1">
+                                                <label class="form-check-label" for="psfs1Rating1">1</label>
+                                            </div>
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input" type="radio" name="psfs1Rating" id="psfs1Rating2" value="2">
+                                                <label class="form-check-label" for="psfs1Rating2">2</label>
+                                            </div>
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input" type="radio" name="psfs1Rating" id="psfs1Rating3" value="3">
+                                                <label class="form-check-label" for="psfs1Rating3">3</label>
+                                            </div>
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input" type="radio" name="psfs1Rating" id="psfs1Rating4" value="4">
+                                                <label class="form-check-label" for="psfs1Rating4">4</label>
+                                            </div>
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input" type="radio" name="psfs1Rating" id="psfs1Rating5" value="5">
+                                                <label class="form-check-label" for="psfs1Rating5">5</label>
+                                            </div>
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input" type="radio" name="psfs1Rating" id="psfs1Rating6" value="6">
+                                                <label class="form-check-label" for="psfs1Rating6">6</label>
+                                            </div>
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input" type="radio" name="psfs1Rating" id="psfs1Rating7" value="7">
+                                                <label class="form-check-label" for="psfs1Rating7">7</label>
+                                            </div>
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input" type="radio" name="psfs1Rating" id="psfs1Rating8" value="8">
+                                                <label class="form-check-label" for="psfs1Rating8">8</label>
+                                            </div>
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input" type="radio" name="psfs1Rating" id="psfs1Rating9" value="9">
+                                                <label class="form-check-label" for="psfs1Rating9">9</label>
+                                            </div>
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input" type="radio" name="psfs1Rating" id="psfs1Rating10" value="10">
+                                                <label class="form-check-label" for="psfs1Rating10">10</label>
+                                            </div>
+                                        </div>
+                                        <div class="rating-endpoints">
+                                            <span>No lo puede realizar</span>
+                                            <span>Lo logra igual o mejor que antes</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="psfs2Activity" class="form-label">PSFS 2 (actividad que se dificulte o sea relevante)</label>
+                                        <input type="text" class="form-control" id="psfs2Activity">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label>Valoración PSFS 2</label>
+                                        <div class="rating-scale">
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input" type="radio" name="psfs2Rating" id="psfs2Rating1" value="1">
+                                                <label class="form-check-label" for="psfs2Rating1">1</label>
+                                            </div>
+                                            <!-- Repetir para valores 2-10 -->
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input" type="radio" name="psfs2Rating" id="psfs2Rating10" value="10">
+                                                <label class="form-check-label" for="psfs2Rating10">10</label>
+                                            </div>
+                                        </div>
+                                        <div class="rating-endpoints">
+                                            <span>No lo puede realizar</span>
+                                            <span>Lo logra igual o mejor que antes</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="psfs3Activity" class="form-label">PSFS 3 (actividad que se dificulte o sea relevante)</label>
+                                        <input type="text" class="form-control" id="psfs3Activity">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label>Valoración PSFS 3</label>
+                                        <div class="rating-scale">
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input" type="radio" name="psfs3Rating" id="psfs3Rating1" value="1">
+                                                <label class="form-check-label" for="psfs3Rating1">1</label>
+                                            </div>
+                                            <!-- Repetir para valores 2-10 -->
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input" type="radio" name="psfs3Rating" id="psfs3Rating10" value="10">
+                                                <label class="form-check-label" for="psfs3Rating10">10</label>
+                                            </div>
+                                        </div>
+                                        <div class="rating-endpoints">
+                                            <span>No lo puede realizar</span>
+                                            <span>Lo logra igual o mejor que antes</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="extraQuestionnaire" class="form-label">Cuestionario u outcome measures extra</label>
+                                        <textarea class="form-control" id="extraQuestionnaire" rows="3"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Sección 6: Evaluación Física -->
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="headingSix">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSix" aria-expanded="false" aria-controls="collapseSix">
+                                    Evaluación Física
+                                </button>
+                            </h2>
+                            <div id="collapseSix" class="accordion-collapse collapse" aria-labelledby="headingSix" data-bs-parent="#formAccordion">
+                                <div class="accordion-body">
+                                    <div class="mb-3">
+                                        <label for="vitalSigns" class="form-label">Signos vitales</label>
+                                        <small class="form-text d-block mb-2">
+                                            1. Saturación<br>
+                                            2. Pulso<br>
+                                            3. Presión arterial<br>
+                                            4. Frecuencia respiratoria
+                                        </small>
+                                        <textarea class="form-control" id="vitalSigns" rows="4"></textarea>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="anthropometry" class="form-label">Antropometría</label>
+                                        <small class="form-text d-block mb-2">
+                                            Peso<br>
+                                            Talla<br>
+                                            Circunferencia de cuello<br>
+                                            Circunferencia de brazos<br>
+                                            Circunferencia de cintura<br>
+                                            Circunferencia de cadera<br>
+                                            Circunferencia de muslo<br>
+                                            Circunferencia de pantorrilla
+                                        </small>
+                                        <textarea class="form-control" id="anthropometry" rows="4"></textarea>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="physicalExam" class="form-label">Examen físico</label>
+                                        <small class="form-text d-block mb-2">
+                                            1. Observación (Marcha / posición del usuario / Postura en todos los planos<br>
+                                            2. Inspección<br>
+                                            3. Palpación<br>
+                                            4. Evaluación de rangos de movimientos (FUNCIONAL / AROM / PROM / ACCESORIOS) Resalte signo comparable<br>
+                                            5. Fuerza (Global como ejercicios o analítica MRC/KENDALLS)<br>
+                                            6. Neurológico (Dermatomas/Miotomas/Reflejo) ASIA VS NERVIO PERIFERICO<br>
+                                            7. Flexibilidad<br>
+                                            8. Test ortopédicos<br>
+                                            9. Equilibrio y riesgo de caída<br>
+                                            10. Test de rendimiento físico o deportivo
+                                        </small>
+                                        <textarea class="form-control" id="physicalExam" rows="6"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="mb-3">
-                        <label for="patientName" class="form-label">Nombre usuario</label>
-                        <input type="text" class="form-control" id="patientName">
+                    
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                        <button type="reset" class="btn btn-outline-secondary me-md-2">Limpiar</button>
+                        <button type="submit" class="btn btn-primary">Guardar</button>
                     </div>
-                    <div class="mb-3">
-                        <label for="patientId" class="form-label">RUT (sin puntos, con guión)</label>
-                        <input type="text" class="form-control" id="patientId">
-                    </div>
-                    <button type="submit" class="btn btn-primary">Guardar</button>
                 </form>
+            </div>
+            
+            <!-- Pestaña de Registros -->
+            <div class="tab-pane fade" id="records" role="tabpanel" aria-labelledby="records-tab">
+                <div class="alert alert-info mt-3">
+                    <p>Aquí se mostrarán los registros guardados. Por ahora, estamos trabajando en la implementación del almacenamiento.</p>
+                </div>
+                <div id="patientsList" class="row">
+                    <!-- Aquí se mostrarán los pacientes guardados -->
+                </div>
             </div>
         </div>
     </div>
