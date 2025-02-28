@@ -1,57 +1,155 @@
+/* Estilos generales */
 body {
-    padding-top: 20px;
+    font-family: 'Arial', sans-serif;
     background-color: #f8f9fa;
+    padding-top: 20px;
+    padding-bottom: 40px;
 }
+
 .container {
     max-width: 1200px;
+    margin: 0 auto;
 }
-.tab-content {
-    background-color: white;
-    border: 1px solid #dee2e6;
-    border-top: none;
-    padding: 20px;
-    border-radius: 0 0 5px 5px;
+
+h1 {
+    text-align: center;
+    margin-bottom: 30px;
+    color: #333;
 }
-.nav-tabs .nav-link {
-    font-weight: 500;
-}
-.card {
+
+/* Estilos para las pestañas */
+.nav-tabs {
     margin-bottom: 20px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
-.patient-card {
-    cursor: pointer;
-    transition: transform 0.2s;
-}
-.patient-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-}
-.form-label {
+
+.nav-tabs .nav-link {
+    color: #495057;
     font-weight: 500;
 }
-.accordion-button:not(.collapsed) {
-    background-color: #e7f1ff;
-    color: #0c63e4;
+
+.nav-tabs .nav-link.active {
+    color: #007bff;
+    font-weight: 600;
 }
-.accordion-item {
-    margin-bottom: 10px;
-    border-radius: 5px;
-    overflow: hidden;
+
+/* Estilos para el formulario */
+.form-container {
+    background-color: white;
+    padding: 25px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    margin-bottom: 30px;
 }
-.rating-scale {
+
+.form-label {
+    font-weight: 600;
+    color: #495057;
+}
+
+.form-text {
+    color: #6c757d;
+    font-size: 0.85rem;
+}
+
+.form-section {
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #eee;
+}
+
+.form-section:last-child {
+    border-bottom: none;
+}
+
+.section-title {
+    border-bottom: 2px solid #007bff;
+    padding-bottom: 5px;
+    margin-bottom: 15px;
+    color: #007bff;
+}
+
+/* Estilos para los sliders de valoración */
+.rating-container {
     display: flex;
-    flex-wrap: wrap;
-    margin-bottom: 5px;
-}
-.rating-endpoints {
-    display: flex;
-    justify-content: space-between;
-    width: 100%;
-    font-size: 0.8rem;
+    align-items: center;
     margin-top: 5px;
 }
-.form-text {
-    font-size: 0.875em;
+
+.rating-label {
+    margin: 0 10px;
+    font-size: 0.8rem;
     color: #6c757d;
+}
+
+.rating-value {
+    font-weight: bold;
+    margin-left: 10px;
+    color: #007bff;
+}
+
+/* Estilos para la lista de pacientes */
+.patient-card {
+    margin-bottom: 15px;
+    border-left: 4px solid #007bff;
+    transition: transform 0.2s;
+}
+
+.patient-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.search-container {
+    margin-bottom: 20px;
+}
+
+.btn-export {
+    margin-left: 10px;
+}
+
+/* Estilos para el modal de detalles */
+.modal-xl {
+    max-width: 90%;
+}
+
+.modal-body h4 {
+    color: #007bff;
+    margin-top: 15px;
+}
+
+/* Estilos para los mensajes de alerta */
+.alert {
+    margin-top: 20px;
+}
+
+/* Estilos para los botones */
+.btn-primary {
+    background-color: #007bff;
+    border-color: #007bff;
+}
+
+.btn-primary:hover {
+    background-color: #0069d9;
+    border-color: #0062cc;
+}
+
+.btn-danger {
+    background-color: #dc3545;
+    border-color: #dc3545;
+}
+
+.btn-danger:hover {
+    background-color: #c82333;
+    border-color: #bd2130;
+}
+
+/* Estilos para dispositivos móviles */
+@media (max-width: 768px) {
+    .form-container {
+        padding: 15px;
+    }
+    
+    .modal-xl {
+        max-width: 100%;
+    }
 }
