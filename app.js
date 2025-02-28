@@ -22,50 +22,12 @@ function getPatients() {
 
 // Función para guardar un nuevo paciente
 function savePatient() {
-    // Obtener valores del formulario
+    // Obtener valores del formulario (mantén tu código existente para obtener los valores)
     const evaluator = document.getElementById('evaluator').value;
     const email = document.getElementById('email').value;
     const name = document.getElementById('name').value;
     const rut = document.getElementById('rut').value;
-    const contactNumber = document.getElementById('contactNumber').value;
-    const patientEmail = document.getElementById('patientEmail').value;
-    const nationality = document.getElementById('nationality').value;
-    const age = document.getElementById('age').value;
-    const birthdate = document.getElementById('birthdate').value;
-    const civilStatus = document.getElementById('civilStatus').value;
-    const education = document.getElementById('education').value;
-    const address = document.getElementById('address').value;
-    const emergencyContact = document.getElementById('emergencyContact').value;
-    const occupation = document.getElementById('occupation').value;
-    const laterality = document.getElementById('laterality').value;
-    const consultReason = document.getElementById('consultReason').value;
-    const diagnosis = document.getElementById('diagnosis').value;
-    const expectations = document.getElementById('expectations').value;
-    const proximateAnamnesis = document.getElementById('proximateAnamnesis').value;
-    const remoteAnamnesis = document.getElementById('remoteAnamnesis').value;
-    const habitsHobbies = document.getElementById('habitsHobbies').value;
-    const homeSupport = document.getElementById('homeSupport').value;
-    
-    // Obtener valores de PSFS
-    const psfs1 = {
-        activity: document.getElementById('psfs1Activity').value,
-        rating: document.getElementById('psfs1Rating').value
-    };
-    
-    const psfs2 = {
-        activity: document.getElementById('psfs2Activity').value,
-        rating: document.getElementById('psfs2Rating').value
-    };
-    
-    const psfs3 = {
-        activity: document.getElementById('psfs3Activity').value,
-        rating: document.getElementById('psfs3Rating').value
-    };
-    
-    const extraQuestionnaire = document.getElementById('extraQuestionnaire').value;
-    const vitalSigns = document.getElementById('vitalSigns').value;
-    const anthropometry = document.getElementById('anthropometry').value;
-    const physicalExam = document.getElementById('physicalExam').value;
+    // ... (resto de campos)
     
     // Validar campos obligatorios
     if (!evaluator || !email) {
@@ -75,61 +37,66 @@ function savePatient() {
     
     // Crear objeto paciente
     const patient = {
-        id: Date.now().toString(), // ID único basado en timestamp
         evaluator,
         email,
         name,
         rut,
-        contactNumber,
-        patientEmail,
-        nationality,
-        age,
-        birthdate,
-        civilStatus,
-        education,
-        address,
-        emergencyContact,
-        occupation,
-        laterality,
-        consultReason,
-        diagnosis,
-        expectations,
-        proximateAnamnesis,
-        remoteAnamnesis,
-        habitsHobbies,
-        homeSupport,
-        psfs1,
-        psfs2,
-        psfs3,
-        extraQuestionnaire,
-        vitalSigns,
-        anthropometry,
-        physicalExam,
+        contactNumber: document.getElementById('contactNumber').value,
+        patientEmail: document.getElementById('patientEmail').value,
+        nationality: document.getElementById('nationality').value,
+        age: document.getElementById('age').value,
+        birthdate: document.getElementById('birthdate').value,
+        civilStatus: document.getElementById('civilStatus').value,
+        education: document.getElementById('education').value,
+        address: document.getElementById('address').value,
+        emergencyContact: document.getElementById('emergencyContact').value,
+        occupation: document.getElementById('occupation').value,
+        laterality: document.getElementById('laterality').value,
+        consultReason: document.getElementById('consultReason').value,
+        diagnosis: document.getElementById('diagnosis').value,
+        expectations: document.getElementById('expectations').value,
+        proximateAnamnesis: document.getElementById('proximateAnamnesis').value,
+        remoteAnamnesis: document.getElementById('remoteAnamnesis').value,
+        habitsHobbies: document.getElementById('habitsHobbies').value,
+        homeSupport: document.getElementById('homeSupport').value,
+        psfs1: {
+            activity: document.getElementById('psfs1Activity').value,
+            rating: document.getElementById('psfs1Rating').value
+        },
+        psfs2: {
+            activity: document.getElementById('psfs2Activity').value,
+            rating: document.getElementById('psfs2Rating').value
+        },
+        psfs3: {
+            activity: document.getElementById('psfs3Activity').value,
+            rating: document.getElementById('psfs3Rating').value
+        },
+        extraQuestionnaire: document.getElementById('extraQuestionnaire').value,
+        vitalSigns: document.getElementById('vitalSigns').value,
+        anthropometry: document.getElementById('anthropometry').value,
+        physicalExam: document.getElementById('physicalExam').value,
         createdAt: new Date().toISOString()
     };
     
-    // Obtener pacientes existentes
-    const patients = getPatients();
-    
-    // Agregar nuevo paciente
-    patients.push(patient);
-    
-    // Guardar en localStorage
-    localStorage.setItem('patients', JSON.stringify(patients));
-    
-    // Mostrar mensaje de éxito
-    alert('Paciente guardado correctamente');
-    
-    // Limpiar formulario
-    document.getElementById('patientForm').reset();
-    
-    // Reiniciar valores de los deslizadores
-    document.getElementById('psfs1Value').textContent = '5';
-    document.getElementById('psfs2Value').textContent = '5';
-    document.getElementById('psfs3Value').textContent = '5';
-    
-    // Recargar lista de pacientes
-    loadPatients();
+    // Guardar en Firestore
+    db.collection("patients").add(patient)
+        .then((docRef) => {
+            console.log("Paciente guardado con ID: ", docRef.id);
+            alert('Paciente guardado correctamente');
+            document.getElementById('patientForm').reset();
+            
+            // Reiniciar valores de los deslizadores
+            document.getElementById('psfs1Value').textContent = '5';
+            document.getElementById('psfs2Value').textContent = '5';
+            document.getElementById('psfs3Value').textContent = '5';
+            
+            // Recargar lista de pacientes
+            loadPatients();
+        })
+        .catch((error) => {
+            console.error("Error al guardar el paciente: ", error);
+            alert('Error al guardar el paciente: ' + error.message);
+        });
 }
 
 // Función para cargar pacientes en la lista
