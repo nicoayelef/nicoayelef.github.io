@@ -667,4 +667,650 @@ document.addEventListener('DOMContentLoaded', function() {
             alert('Funcionalidad de exportar todos los pacientes en desarrollo.');
         });
     }
+// Funciones para manejar evoluciones
+
+// Cargar pacientes en el selector
+function loadPatientsIntoSelect() {
+    const patientSelect = document.getElementById('patientSelect');
+    if (!patientSelect) return;
+    
+    // Limpiar opciones existentes
+    patientSelect.innerHTML = '<option value="">Seleccione un paciente</option>';
+    
+    // Obtener pacientes de Firestore
+    db.collection("patients").get()
+        .then((querySnapshot) => {
+            querySnapshot.forEach((doc) => {
+                const patient = doc.data();
+                const option = document.createElement('option');
+                option.value = doc.id;
+                option.textContent = `${patient.name} (${patient.rut})`;
+                patientSelect.appendChild(option);
+            });
+        })
+        .catch((error) => {
+            console.error("Error cargando pacientes: ", error);
+            alert("Error al cargar la lista de pacientes");
+        });
+}
+
+// Mostrar actividades PSFS del paciente seleccionado
+function loadPatientPSFS() {
+    const patientId = document.getElementById('patientSelect').value;
+    const psfsUpdateContainer = document.getElementById('psfsUpdateContainer');
+    
+    if (!patientId || !psfsUpdateContainer) return;
+    
+    psfsUpdateContainer.innerHTML = '<p>Cargando actividades PSFS...</p>';
+    
+    db.collection("patients").doc(patientId).get()
+        .then((doc) => {
+            if (doc.exists) {
+                const patient = doc.data();
+                let psfsHtml = '';
+                
+                // Verificar si el paciente tiene actividades PSFS
+                if (patient.psfs1 && patient.psfs1.activity) {
+                    psfsHtml += createPSFSUpdateHtml('psfs1', patient.psfs1.activity, patient.psfs1.rating);
+                }
+                
+                if (patient.psfs2 && patient.psfs2.activity) {
+                    psfsHtml += createPSFSUpdateHtml('psfs2', patient.psfs2.activity, patient.psfs2.rating);
+                }
+                
+                if (patient.psfs3 && patient.psfs3.activity) {
+                    psfsHtml += createPSFSUpdateHtml('psfs3', patient.psfs3.activity, patient.psfs3.rating);
+                }
+                
+                if (psfsHtml) {
+                    psfsUpdateContainer.innerHTML = psfsHtml;
+                    // Inicializar los sliders
+                    document.querySelectorAll('.psfs-update-slider').forEach(slider => {
+                        updateRatingValue(slider.id, slider.value);
+                        slider.addEventListener('input', function() {
+                            updateRatingValue(this.id, this.value);
+                        });
+                    });
+                } else {
+                    psfsUpdateContainer.innerHTML = '<p>Este paciente no tiene actividades PSFS registradas.</p>';
+                }
+            } else {
+                psfsUpdateContainer.innerHTML = '<p>No se encontró información del paciente.</p>';
+            }
+        })
+        .catch((error) => {
+            console.error("Error cargando PSFS: ", error);
+            psfsUpdateContainer.innerHTML = '<p>Error al cargar actividades PSFS.</p>';
+        });
+}
+
+// Crear HTML para actualización de PSFS
+function createPSFSUpdateHtml(psfsId, activity, currentRating) {
+    return `
+        <div class="mb-3 border p-3 rounded">
+            <label class="form-label"><strong>${activity}</strong></label>
+            <div class="d-flex align-items-center">
+                <input type="range" class="form-range psfs-update-slider" id="${psfsId}UpdateSlider" name="${psfsId}Update" min="1" max="10" value="${currentRating || 1}">
+                <span class="ms-2" id="${psfsId}UpdateValue">${currentRating || 1}</span>
+            </div>
+            <div class="d-flex justify-content-between">
+                <small>No lo puede realizar</small>
+                <small>Lo logra igual o mejor que antes</small>
+            </div>
+        </div>
+    `;
+}
+
+// Guardar una nueva evolución
+function saveEvolution(event) {
+    event.preventDefault();
+    
+    const patientId = document.getElementById('patientSelect').value;
+    const date = document.getElementById('evolutionDate').value;
+    const progress = document.getElementById('evolutionProgress').value;
+    const treatment = document.getElementById('evolutionTreatment').value;
+    const plan = document.getElementById('evolutionPlan').value;
+    const evaluator = document.getElementById('evolutionEvaluator').value;
+    
+    if (!patientId || !date || !progress || !treatment || !plan || !evaluator) {
+        alert('Por favor complete todos los campos requeridos');
+        return;
+    }
+    
+    // Crear objeto de evolución
+    const evolution = {
+        patientId: patientId,
+        date: date,
+        progress: progress,
+        treatment: treatment,
+        plan: plan,
+        evaluator: evaluator,
+        createdAt: new Date().toISOString()
+    };
+    
+    // Añadir actualizaciones de PSFS si existen
+    const psfs1Slider = document.getElementById('psfs1UpdateSlider');
+    if (psfs1Slider) {
+        const activity = psfs1Slider.closest('.mb-3').querySelector('.form-label strong').textContent;
+        evolution.psfs1Update = {
+            activity: activity,
+            rating: parseInt(psfs1Slider.value)
+        };
+    }
+    
+    const psfs2Slider = document.getElementById('psfs2UpdateSlider');
+    if (psfs2Slider) {
+        const activity = psfs2Slider.closest('.mb-3').querySelector('.form-label strong').textContent;
+        evolution.psfs2Update = {
+            activity: activity,
+            rating: parseInt(psfs2Slider.value)
+        };
+    }
+    
+    const psfs3Slider = document.getElementById('psfs3UpdateSlider');
+    if (psfs3Slider) {
+        const activity = psfs3Slider.closest('.mb-3').querySelector('.form-label strong').textContent;
+        evolution.psfs3Update = {
+            activity: activity,
+            rating: parseInt(psfs3Slider.value)
+        };
+    }
+    
+    // Guardar en Firestore
+    db.collection("evolutions").add(evolution)
+        .then((docRef) => {
+            alert('Evolución guardada correctamente');
+            document.getElementById('evolutionForm').reset();
+            document.getElementById('psfsUpdateContainer').innerHTML = '';
+            loadEvolutions();
+        })
+        .catch((error) => {
+            console.error("Error al guardar evolución: ", error);
+            alert('Error al guardar la evolución');
+        });
+}
+
+// Cargar y mostrar evoluciones
+function loadEvolutions() {
+    const evolutionsTableBody = document.getElementById('evolutionsTableBody');
+    if (!evolutionsTableBody) return;
+    
+    evolutionsTableBody.innerHTML = '<tr><td colspan="4" class="text-center">Cargando evoluciones...</td></tr>';
+    
+    db.collection("evolutions").orderBy("date", "desc").get()
+        .then((querySnapshot) => {
+            if (querySnapshot.empty) {
+                evolutionsTableBody.innerHTML = '<tr><td colspan="4" class="text-center">No hay evoluciones registradas</td></tr>';
+                return;
+            }
+            
+            evolutionsTableBody.innerHTML = '';
+            const patientPromises = [];
+            
+            querySnapshot.forEach((doc) => {
+                const evolution = doc.data();
+                const patientPromise = db.collection("patients").doc(evolution.patientId).get();
+                patientPromises.push({ evolution, doc, patientPromise });
+            });
+            
+            // Resolver todas las promesas de pacientes
+            Promise.all(patientPromises.map(item => item.patientPromise))
+                .then(patientDocs => {
+                    patientPromises.forEach((item, index) => {
+                        const patientDoc = patientDocs[index];
+                        const evolution = item.evolution;
+                        const doc = item.doc;
+                        
+                        let patientName = "Paciente desconocido";
+                        let patientRut = "";
+                        
+                        if (patientDoc.exists) {
+                            const patientData = patientDoc.data();
+                            patientName = patientData.name || "Sin nombre";
+                            patientRut = patientData.rut || "";
+                        }
+                        
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${patientName} ${patientRut ? `(${patientRut})` : ''}</td>
+                            <td>${formatDate(evolution.date)}</td>
+                            <td>${evolution.evaluator}</td>
+                            <td>
+                                <button class="btn btn-sm btn-primary view-evolution" data-id="${doc.id}">
+                                    <i class="fas fa-eye"></i> Ver
+                                </button>
+                            </td>
+                        `;
+                        
+                        evolutionsTableBody.appendChild(row);
+                    });
+                    
+                    // Añadir event listeners a los botones de ver
+                    document.querySelectorAll('.view-evolution').forEach(button => {
+                        button.addEventListener('click', function() {
+                            const evolutionId = this.getAttribute('data-id');
+                            showEvolutionDetails(evolutionId);
+                        });
+                    });
+                })
+                .catch(error => {
+                    console.error("Error cargando datos de pacientes: ", error);
+                    evolutionsTableBody.innerHTML = '<tr><td colspan="4" class="text-center">Error al cargar evoluciones</td></tr>';
+                });
+        })
+        .catch((error) => {
+            console.error("Error cargando evoluciones: ", error);
+            evolutionsTableBody.innerHTML = '<tr><td colspan="4" class="text-center">Error al cargar evoluciones</td></tr>';
+        });
+}
+
+// Formatear fecha para mostrar
+function formatDate(dateString) {
+    const options = { year: 'numeric', month: 'long', day: 'numeric' };
+    const date = new Date(dateString);
+    return date.toLocaleDateString('es-ES', options);
+}
+
+// Mostrar detalles de una evolución
+function showEvolutionDetails(evolutionId) {
+    const evolutionDetailsContent = document.getElementById('evolutionDetailsContent');
+    const deleteEvolutionBtn = document.getElementById('deleteEvolutionBtn');
+    const exportEvolutionBtn = document.getElementById('exportEvolutionBtn');
+    
+    evolutionDetailsContent.innerHTML = '<p class="text-center">Cargando detalles...</p>';
+    
+    // Obtener datos de la evolución
+    db.collection("evolutions").doc(evolutionId).get()
+        .then((doc) => {
+            if (doc.exists) {
+                const evolution = doc.data();
+                
+                // Obtener datos del paciente
+                db.collection("patients").doc(evolution.patientId).get()
+                    .then((patientDoc) => {
+                        let patientName = "Paciente desconocido";
+                        let patientRut = "";
+                        
+                        if (patientDoc.exists) {
+                            const patientData = patientDoc.data();
+                            patientName = patientData.name || "Sin nombre";
+                            patientRut = patientData.rut || "";
+                        }
+                        
+                        // Construir HTML de detalles
+                        let detailsHtml = `
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <h5>Paciente:</h5>
+                                    <p>${patientName} ${patientRut ? `(${patientRut})` : ''}</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <h5>Fecha:</h5>
+                                    <p>${formatDate(evolution.date)}</p>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <h5>Progreso del Paciente:</h5>
+                                <p>${evolution.progress}</p>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <h5>Tratamiento Realizado:</h5>
+                                <p>${evolution.treatment}</p>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <h5>Plan y Recomendaciones:</h5>
+                                <p>${evolution.plan}</p>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <h5>Kinesiólogo Evaluador:</h5>
+                                <p>${evolution.evaluator}</p>
+                            </div>
+                        `;
+                        
+                        // Añadir actualizaciones de PSFS si existen
+                        if (evolution.psfs1Update || evolution.psfs2Update || evolution.psfs3Update) {
+                            detailsHtml += `<div class="mb-3"><h5>Actualización de PSFS:</h5><div class="row">`;
+                            
+                            if (evolution.psfs1Update) {
+                                detailsHtml += createPSFSDetailHtml(evolution.psfs1Update);
+                            }
+                            
+                            if (evolution.psfs2Update) {
+                                detailsHtml += createPSFSDetailHtml(evolution.psfs2Update);
+                            }
+                            
+                            if (evolution.psfs3Update) {
+                                detailsHtml += createPSFSDetailHtml(evolution.psfs3Update);
+                            }
+                            
+                            detailsHtml += `</div></div>`;
+                        }
+                        
+                        evolutionDetailsContent.innerHTML = detailsHtml;
+                        
+                        // Configurar botones
+                        deleteEvolutionBtn.onclick = function() {
+                            if (confirm('¿Está seguro de que desea eliminar esta evolución?')) {
+                                deleteEvolution(evolutionId);
+                            }
+                        };
+                        
+                        exportEvolutionBtn.onclick = function() {
+                            exportEvolutionToPDF(evolutionId);
+                        };
+                        
+                        // Mostrar modal
+                        const evolutionDetailsModal = new bootstrap.Modal(document.getElementById('evolutionDetailsModal'));
+                        evolutionDetailsModal.show();
+                    })
+                    .catch((error) => {
+                        console.error("Error obteniendo datos del paciente: ", error);
+                        evolutionDetailsContent.innerHTML = '<p class="text-center">Error al cargar detalles del paciente</p>';
+                    });
+            } else {
+                evolutionDetailsContent.innerHTML = '<p class="text-center">No se encontró la evolución</p>';
+            }
+        })
+        .catch((error) => {
+            console.error("Error obteniendo evolución: ", error);
+            evolutionDetailsContent.innerHTML = '<p class="text-center">Error al cargar detalles</p>';
+        });
+}
+
+// Crear HTML para mostrar PSFS en detalles
+function createPSFSDetailHtml(psfsUpdate) {
+    return `
+        <div class="col-md-4 mb-2">
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="card-title">${psfsUpdate.activity}</h6>
+                    <div class="progress">
+                        <div class="progress-bar" role="progressbar" style="width: ${psfsUpdate.rating * 10}%;" 
+                            aria-valuenow="${psfsUpdate.rating}" aria-valuemin="1" aria-valuemax="10">
+                            ${psfsUpdate.rating}/10
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+// Eliminar una evolución
+function deleteEvolution(evolutionId) {
+    db.collection("evolutions").doc(evolutionId).delete()
+        .then(() => {
+            alert('Evolución eliminada correctamente');
+            // Cerrar modal
+            const evolutionDetailsModal = bootstrap.Modal.getInstance(document.getElementById('evolutionDetailsModal'));
+            evolutionDetailsModal.hide();
+            // Recargar evoluciones
+            loadEvolutions();
+        })
+        .catch((error) => {
+            console.error("Error eliminando evolución: ", error);
+            alert('Error al eliminar la evolución');
+        });
+}
+
+// Exportar evolución a PDF
+function exportEvolutionToPDF(evolutionId) {
+    // Verificar si jsPDF está disponible
+    if (typeof jspdf === 'undefined') {
+        alert('Error: La biblioteca jsPDF no está disponible');
+        return;
+    }
+    
+    // Obtener datos de la evolución
+    db.collection("evolutions").doc(evolutionId).get()
+        .then((doc) => {
+            if (doc.exists) {
+                const evolution = doc.data();
+                
+                // Obtener datos del paciente
+                db.collection("patients").doc(evolution.patientId).get()
+                    .then((patientDoc) => {
+                        let patientName = "Paciente desconocido";
+                        let patientRut = "";
+                        
+                        if (patientDoc.exists) {
+                            const patientData = patientDoc.data();
+                            patientName = patientData.name || "Sin nombre";
+                            patientRut = patientData.rut || "";
+                        }
+                        
+                        // Crear PDF
+                        const pdf = new jspdf.jsPDF();
+                        
+                        // Configuración de página
+                        pdf.setFont("helvetica", "bold");
+                        pdf.setFontSize(16);
+                        pdf.text("Evolución Kinesiológica", 105, 20, { align: "center" });
+                        
+                        pdf.setFont("helvetica", "normal");
+                        pdf.setFontSize(12);
+                        
+                        // Información del paciente
+                        pdf.setFont("helvetica", "bold");
+                        pdf.text("Información del Paciente:", 20, 35);
+                        pdf.setFont("helvetica", "normal");
+                        pdf.text(`Nombre: ${patientName}`, 20, 45);
+                        if (patientRut) {
+                            pdf.text(`RUT: ${patientRut}`, 20, 52);
+                        }
+                        
+                        // Información de la evolución
+                        pdf.setFont("helvetica", "bold");
+                        pdf.text("Detalles de la Evolución:", 20, 65);
+                        pdf.setFont("helvetica", "normal");
+                        pdf.text(`Fecha: ${formatDate(evolution.date)}`, 20, 75);
+                        pdf.text(`Kinesiólogo Evaluador: ${evolution.evaluator}`, 20, 82);
+                        
+                        // Progreso
+                        pdf.setFont("helvetica", "bold");
+                        pdf.text("Progreso del Paciente:", 20, 95);
+                        pdf.setFont("helvetica", "normal");
+                        
+                        // Manejar texto largo con saltos de línea automáticos
+                        const splitProgress = pdf.splitTextToSize(evolution.progress, 170);
+                        pdf.text(splitProgress, 20, 105);
+                        
+                        // Tratamiento
+                        let yPos = 105 + (splitProgress.length * 7);
+                        pdf.setFont("helvetica", "bold");
+                        pdf.text("Tratamiento Realizado:", 20, yPos);
+                        pdf.setFont("helvetica", "normal");
+                        
+                        const splitTreatment = pdf.splitTextToSize(evolution.treatment, 170);
+                        yPos += 10;
+                        pdf.text(splitTreatment, 20, yPos);
+                        
+                        // Plan
+                        yPos += (splitTreatment.length * 7);
+                        pdf.setFont("helvetica", "bold");
+                        pdf.text("Plan y Recomendaciones:", 20, yPos);
+                        pdf.setFont("helvetica", "normal");
+                        
+                        const splitPlan = pdf.splitTextToSize(evolution.plan, 170);
+                        yPos += 10;
+                        pdf.text(splitPlan, 20, yPos);
+                        
+                        // PSFS
+                        if (evolution.psfs1Update || evolution.psfs2Update || evolution.psfs3Update) {
+                            yPos += (splitPlan.length * 7) + 10;
+                            
+                            // Verificar si necesitamos una nueva página
+                            if (yPos > 250) {
+                                pdf.addPage();
+                                yPos = 20;
+                            }
+                            
+                            pdf.setFont("helvetica", "bold");
+                            pdf.text("Actualización de PSFS:", 20, yPos);
+                            pdf.setFont("helvetica", "normal");
+                            yPos += 10;
+                            
+                            if (evolution.psfs1Update) {
+                                pdf.text(`• ${evolution.psfs1Update.activity}: ${evolution.psfs1Update.rating}/10`, 20, yPos);
+                                yPos += 7;
+                            }
+                            
+                            if (evolution.psfs2Update) {
+                                pdf.text(`• ${evolution.psfs2Update.activity}: ${evolution.psfs2Update.rating}/10`, 20, yPos);
+                                yPos += 7;
+                            }
+                            
+                            if (evolution.psfs3Update) {
+                                pdf.text(`• ${evolution.psfs3Update.activity}: ${evolution.psfs3Update.rating}/10`, 20, yPos);
+                            }
+                        }
+                        
+                        // Guardar PDF
+                        pdf.save(`Evolucion_${patientName.replace(/\s+/g, '_')}_${evolution.date}.pdf`);
+                    })
+                    .catch((error) => {
+                        console.error("Error obteniendo datos del paciente: ", error);
+                        alert('Error al exportar a PDF: No se pudieron obtener los datos del paciente');
+                    });
+            } else {
+                alert('Error al exportar a PDF: No se encontró la evolución');
+            }
+        })
+        .catch((error) => {
+            console.error("Error obteniendo evolución: ", error);
+            alert('Error al exportar a PDF');
+        });
+}
+
+// Buscar evoluciones
+function searchEvolutions() {
+    const searchTerm = document.getElementById('searchEvolution').value.toLowerCase();
+    
+    if (!searchTerm) {
+        loadEvolutions();
+        return;
+    }
+    
+    const evolutionsTableBody = document.getElementById('evolutionsTableBody');
+    evolutionsTableBody.innerHTML = '<tr><td colspan="4" class="text-center">Buscando...</td></tr>';
+    
+    // Primero buscar pacientes que coincidan con el término de búsqueda
+    db.collection("patients").get()
+        .then((patientsSnapshot) => {
+            const matchingPatientIds = [];
+            
+            patientsSnapshot.forEach((doc) => {
+                const patient = doc.data();
+                if (
+                    (patient.name && patient.name.toLowerCase().includes(searchTerm)) ||
+                    (patient.rut && patient.rut.toLowerCase().includes(searchTerm))
+                ) {
+                    matchingPatientIds.push(doc.id);
+                }
+            });
+            
+            // Si no hay pacientes coincidentes y el término no parece ser un nombre o RUT
+            if (matchingPatientIds.length === 0) {
+                evolutionsTableBody.innerHTML = '<tr><td colspan="4" class="text-center">No se encontraron resultados</td></tr>';
+                return;
+            }
+            
+            // Buscar evoluciones para los pacientes coincidentes
+            db.collection("evolutions").get()
+                .then((evolutionsSnapshot) => {
+                    const matchingEvolutions = [];
+                    
+                    evolutionsSnapshot.forEach((doc) => {
+                        const evolution = doc.data();
+                        if (matchingPatientIds.includes(evolution.patientId)) {
+                            matchingEvolutions.push({ doc, evolution });
+                        }
+                    });
+                    
+                    if (matchingEvolutions.length === 0) {
+                        evolutionsTableBody.innerHTML = '<tr><td colspan="4" class="text-center">No se encontraron evoluciones para los pacientes buscados</td></tr>';
+                        return;
+                    }
+                    
+                    // Mostrar evoluciones coincidentes
+                    evolutionsTableBody.innerHTML = '';
+                    
+                    // Crear un mapa de pacientes para evitar múltiples consultas
+                    const patientMap = {};
+                    patientsSnapshot.forEach(doc => {
+                        patientMap[doc.id] = doc.data();
+                    });
+                    
+                    matchingEvolutions.forEach((item) => {
+                        const evolution = item.evolution;
+                        const doc = item.doc;
+                        const patient = patientMap[evolution.patientId] || {};
+                        
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${patient.name || 'Paciente desconocido'} ${patient.rut ? `(${patient.rut})` : ''}</td>
+                            <td>${formatDate(evolution.date)}</td>
+                            <td>${evolution.evaluator}</td>
+                            <td>
+                                <button class="btn btn-sm btn-primary view-evolution" data-id="${doc.id}">
+                                    <i class="fas fa-eye"></i> Ver
+                                </button>
+                            </td>
+                        `;
+                        
+                        evolutionsTableBody.appendChild(row);
+                    });
+                    
+                    // Añadir event listeners a los botones de ver
+                    document.querySelectorAll('.view-evolution').forEach(button => {
+                        button.addEventListener('click', function() {
+                            const evolutionId = this.getAttribute('data-id');
+                            showEvolutionDetails(evolutionId);
+                        });
+                    });
+                })
+                .catch((error) => {
+                    console.error("Error buscando evoluciones: ", error);
+                    evolutionsTableBody.innerHTML = '<tr><td colspan="4" class="text-center">Error al buscar evoluciones</td></tr>';
+                });
+        })
+        .catch((error) => {
+            console.error("Error buscando pacientes: ", error);
+            evolutionsTableBody.innerHTML = '<tr><td colspan="4" class="text-center">Error al buscar pacientes</td></tr>';
+        });
+}
+
+// Inicializar eventos cuando se carga la página
+document.addEventListener('DOMContentLoaded', function() {
+    // Cargar pacientes en el selector
+    loadPatientsIntoSelect();
+    
+    // Cargar evoluciones
+    loadEvolutions();
+    
+    // Event listener para el selector de pacientes
+    const patientSelect = document.getElementById('patientSelect');
+    if (patientSelect) {
+        patientSelect.addEventListener('change', loadPatientPSFS);
+    }
+    
+    // Event listener para el formulario de evolución
+    const evolutionForm = document.getElementById('evolutionForm');
+    if (evolutionForm) {
+        evolutionForm.addEventListener('submit', saveEvolution);
+    }
+    
+    // Event listener para la búsqueda de evoluciones
+    const searchEvolutionInput = document.getElementById('searchEvolution');
+    if (searchEvolutionInput) {
+        searchEvolutionInput.addEventListener('input', function() {
+            // Debounce para evitar muchas búsquedas
+            clearTimeout(this.searchTimeout);
+            this.searchTimeout = setTimeout(searchEvolutions, 500);
+        });
+    }    
 });
