@@ -145,6 +145,95 @@
 </ul>
 
         <div class="tab-content" id="myTabContent">
+            <div class="tab-content" id="myTabContent">
+    <div class="tab-pane fade show active" id="form-tab-pane" role="tabpanel" aria-labelledby="form-tab" tabindex="0">
+        <!-- Contenido del formulario de ingreso -->
+    </div>
+    <div class="tab-pane fade" id="records-tab-pane" role="tabpanel" aria-labelledby="records-tab" tabindex="0">
+        <!-- Contenido de registros -->
+    </div>
+    <div class="tab-pane fade" id="evolutions-tab-pane" role="tabpanel" aria-labelledby="evolutions-tab" tabindex="0">
+        <div class="container mt-4">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header bg-primary text-white">
+                            <h5>Registrar Nueva Evolución</h5>
+                        </div>
+                        <div class="card-body">
+                            <form id="evolutionForm">
+                                <div class="mb-3">
+                                    <label for="patientSelect" class="form-label">Seleccionar Paciente</label>
+                                    <select class="form-select" id="patientSelect" required>
+                                        <option value="">Seleccione un paciente</option>
+                                        <!-- Las opciones se cargarán dinámicamente desde JavaScript -->
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="evolutionDate" class="form-label">Fecha de Evolución</label>
+                                    <input type="date" class="form-control" id="evolutionDate" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="evolutionProgress" class="form-label">Progreso del Paciente</label>
+                                    <textarea class="form-control" id="evolutionProgress" rows="3" placeholder="Describa el progreso del paciente" required></textarea>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="evolutionTreatment" class="form-label">Tratamiento Realizado</label>
+                                    <textarea class="form-control" id="evolutionTreatment" rows="3" placeholder="Describa el tratamiento realizado" required></textarea>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="evolutionPlan" class="form-label">Plan y Recomendaciones</label>
+                                    <textarea class="form-control" id="evolutionPlan" rows="3" placeholder="Describa el plan y recomendaciones" required></textarea>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">Actualización de PSFS</label>
+                                    <div id="psfsUpdateContainer">
+                                        <!-- Se cargará dinámicamente desde JavaScript -->
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="evolutionEvaluator" class="form-label">Kinesiólogo Evaluador</label>
+                                    <input type="text" class="form-control" id="evolutionEvaluator" required>
+                                </div>
+                                
+                                <button type="submit" class="btn btn-primary">Guardar Evolución</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header bg-primary text-white">
+                            <h5>Historial de Evoluciones</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <input type="text" class="form-control" id="searchEvolution" placeholder="Buscar por nombre o RUT del paciente">
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Paciente</th>
+                                            <th>Fecha</th>
+                                            <th>Evaluador</th>
+                                            <th>Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="evolutionsTableBody">
+                                        <!-- Se cargará dinámicamente desde JavaScript -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
             <!-- Pestaña de Formulario -->
             <div class="tab-pane fade show active" id="form-tab-pane" role="tabpanel" aria-labelledby="form-tab" tabindex="0">
                 <div class="form-container">
