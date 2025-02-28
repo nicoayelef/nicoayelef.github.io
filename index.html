@@ -612,7 +612,20 @@
 
   // Inicializar Firestore
   const db = firebase.firestore();
+    console.log("Verificando conexión con Firebase...");
+db.collection("test").add({
+    test: "Prueba de conexión",
+    timestamp: new Date()
+})
+.then((docRef) => {
+    console.log("Conexión exitosa con Firebase. ID del documento:", docRef.id);
+})
+.catch((error) => {
+    console.error("Error de conexión con Firebase:", error);
+});
 </script>
+
+    
 
 <!-- Tu archivo JavaScript principal -->
 <script src="app.js"></script>
