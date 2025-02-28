@@ -414,33 +414,50 @@ function exportPatientToPDF(patientId) {
 
     // Configurar el documento
     doc.setFont('helvetica', 'bold');
-    doc.setFontSize(16);
+    doc.setFontSize(18);
+    doc.setTextColor(13, 110, 253); // Color azul primario
     doc.text('Ficha Clínica Kinesiológica', 105, 15, { align: 'center' });
     
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(12);
+    doc.setTextColor(0, 0, 0); // Color negro
+    
+    // Fecha de creación
+    const createdDate = patient.createdAt ? new Date(patient.createdAt).toLocaleDateString() : 'No disponible';
+    doc.setFontSize(10);
+    doc.setTextColor(100, 100, 100); // Color gris
+    doc.text(`Fecha de evaluación: ${createdDate}`, 195, 10, { align: 'right' });
+    doc.setTextColor(0, 0, 0); // Volver a color negro
+    doc.setFontSize(12);
     
     // Información personal
     doc.setFont('helvetica', 'bold');
-    doc.text('Información Personal', 14, 25);
+    doc.setFillColor(240, 240, 240);
+    doc.rect(14, 22, 182, 8, 'F');
+    doc.text('Información Personal', 14, 28);
     doc.setFont('helvetica', 'normal');
-    doc.text(`Nombre: ${patient.name || 'No especificado'}`, 14, 35);
-    doc.text(`RUT: ${patient.rut || 'No especificado'}`, 14, 42);
-    doc.text(`Edad: ${patient.age || 'No especificada'} años`, 14, 49);
-    doc.text(`Teléfono: ${patient.contactNumber || 'No especificado'}`, 14, 56);
-    doc.text(`Email: ${patient.patientEmail || 'No especificado'}`, 14, 63);
+    
+    doc.text(`Nombre: ${patient.name || 'No especificado'}`, 14, 38);
+    doc.text(`RUT: ${patient.rut || 'No especificado'}`, 14, 45);
+    doc.text(`Edad: ${patient.age || 'No especificada'} años`, 14, 52);
+    doc.text(`Teléfono: ${patient.contactNumber || 'No especificado'}`, 14, 59);
+    doc.text(`Email: ${patient.patientEmail || 'No especificado'}`, 14, 66);
+    
+    doc.text(`Nacionalidad: ${patient.nationality || 'No especificada'}`, 105, 38);
+    doc.text(`Estado civil: ${patient.civilStatus || 'No especificado'}`, 105, 45);
+    doc.text(`Nivel educacional: ${patient.education || 'No especificado'}`, 105, 52);
+    doc.text(`Dirección: ${patient.address || 'No especificada'}`, 105, 59);
+    doc.text(`Contacto emergencia: ${patient.emergencyContact || 'No especificado'}`, 105, 66);
     
     // Información clínica
     doc.setFont('helvetica', 'bold');
-    doc.text('Información Clínica', 14, 75);
+    doc.setFillColor(240, 240, 240);
+    doc.rect(14, 73, 182, 8, 'F');
+    doc.text('Información Clínica', 14, 79);
     doc.setFont('helvetica', 'normal');
-    doc.text(`Evaluador: ${patient.evaluator || 'No especificado'}`, 14, 85);
-    doc.text(`Motivo de consulta: ${patient.consultReason || 'No especificado'}`, 14, 92);
     
-    // Anamnesis (resumida por espacio)
-    doc.setFont('helvetica', 'bold');
-    doc.text('Anamnesis', 14, 105);
-    doc.setFont('helvetica', 'normal');
+    doc.text(`Evaluador: ${patient.evaluator || 'No especificado'}`, 14, 89);
+    doc.text(`Lateralidad: ${patient.laterality || 'No especificada'}`, 105, 89);
     
     // Función para agregar texto largo con saltos de línea
     function addWrappedText(text, x, y, maxWidth, lineHeight) {
@@ -451,27 +468,155 @@ function exportPatientToPDF(patientId) {
         return y + (lines.length * lineHeight);
     }
     
-    let yPos = 115;
-    doc.text('Anamnesis próxima:', 14, yPos);
-    yPos = addWrappedText(patient.proximateAnamnesis || 'No especificada', 14, yPos + 7, 180, 7) + 5;
+    doc.setFont('helvetica', 'bold');
+    doc.text('Motivo de consulta:', 14, 99);
+    doc.setFont('helvetica', 'normal');
+    let yPos = addWrappedText(patient.consultReason || 'No especificado', 14, 106, 180, 7);
     
-    doc.text('Anamnesis remota:', 14, yPos);
-    yPos = addWrappedText(patient.remoteAnamnesis || 'No especificada', 14, yPos + 7, 180, 7) + 5;
+    doc.setFont('helvetica', 'bold');
+    doc.text('Diagnóstico:', 14, yPos + 7);
+    doc.setFont('helvetica', 'normal');
+    yPos = addWrappedText(patient.diagnosis || 'No especificado', 14, yPos + 14, 180, 7);
+    
+    doc.setFont('helvetica', 'bold');
+    doc.text('Expectativas:', 14, yPos + 7);
+    doc.setFont('helvetica', 'normal');
+    yPos = addWrappedText(patient.expectations || 'No especificadas', 14, yPos + 14, 180, 7);
     
     // Si el contenido es demasiado largo, agregar nueva página
-    if (yPos > 270) {
+    if (yPos > 250) {
         doc.addPage();
         yPos = 20;
     }
     
-    // Evaluación física (resumida)
+    // Anamnesis
     doc.setFont('helvetica', 'bold');
-    doc.text('Evaluación Física', 14, yPos);
+    doc.setFillColor(240, 240, 240);
+    doc.rect(14, yPos + 7, 182, 8, 'F');
+    doc.text('Anamnesis', 14, yPos + 13);
     doc.setFont('helvetica', 'normal');
-    yPos += 10;
+    yPos += 20;
     
+    doc.setFont('helvetica', 'bold');
+    doc.text('Anamnesis próxima:', 14, yPos);
+    doc.setFont('helvetica', 'normal');
+    yPos = addWrappedText(patient.proximateAnamnesis || 'No especificada', 14, yPos + 7, 180, 7) + 5;
+    
+    // Si el contenido es demasiado largo, agregar nueva página
+    if (yPos > 250) {
+        doc.addPage();
+        yPos = 20;
+    }
+    
+    doc.setFont('helvetica', 'bold');
+    doc.text('Anamnesis remota:', 14, yPos);
+    doc.setFont('helvetica', 'normal');
+    yPos = addWrappedText(patient.remoteAnamnesis || 'No especificada', 14, yPos + 7, 180, 7) + 5;
+    
+    // Si el contenido es demasiado largo, agregar nueva página
+    if (yPos > 250) {
+        doc.addPage();
+        yPos = 20;
+    }
+    
+    // Hábitos y entorno
+    doc.setFont('helvetica', 'bold');
+    doc.setFillColor(240, 240, 240);
+    doc.rect(14, yPos, 182, 8, 'F');
+    doc.text('Hábitos y Entorno', 14, yPos + 6);
+    doc.setFont('helvetica', 'normal');
+    yPos += 13;
+    
+    doc.setFont('helvetica', 'bold');
+    doc.text('Hábitos y hobbies:', 14, yPos);
+    doc.setFont('helvetica', 'normal');
+    yPos = addWrappedText(patient.habitsHobbies || 'No especificados', 14, yPos + 7, 180, 7) + 5;
+    
+    // Si el contenido es demasiado largo, agregar nueva página
+    if (yPos > 250) {
+        doc.addPage();
+        yPos = 20;
+    }
+    
+    doc.setFont('helvetica', 'bold');
+    doc.text('Hogar y red de apoyo:', 14, yPos);
+    doc.setFont('helvetica', 'normal');
+    yPos = addWrappedText(patient.homeSupport || 'No especificados', 14, yPos + 7, 180, 7) + 5;
+    
+    // Si el contenido es demasiado largo, agregar nueva página
+    if (yPos > 250) {
+        doc.addPage();
+        yPos = 20;
+    }
+    
+    // Cuestionarios
+    doc.setFont('helvetica', 'bold');
+    doc.setFillColor(240, 240, 240);
+    doc.rect(14, yPos, 182, 8, 'F');
+    doc.text('Cuestionarios', 14, yPos + 6);
+    doc.setFont('helvetica', 'normal');
+    yPos += 13;
+    
+    if (patient.psfs1 && patient.psfs1.activity) {
+        doc.text(`PSFS 1: ${patient.psfs1.activity} - Valoración: ${patient.psfs1.rating}/10`, 14, yPos);
+        yPos += 7;
+    }
+    
+    if (patient.psfs2 && patient.psfs2.activity) {
+        doc.text(`PSFS 2: ${patient.psfs2.activity} - Valoración: ${patient.psfs2.rating}/10`, 14, yPos);
+        yPos += 7;
+    }
+    
+    if (patient.psfs3 && patient.psfs3.activity) {
+        doc.text(`PSFS 3: ${patient.psfs3.activity} - Valoración: ${patient.psfs3.rating}/10`, 14, yPos);
+        yPos += 7;
+    }
+    
+    if (patient.extraQuestionnaire) {
+        doc.setFont('helvetica', 'bold');
+        doc.text('Cuestionarios adicionales:', 14, yPos + 5);
+        doc.setFont('helvetica', 'normal');
+        yPos = addWrappedText(patient.extraQuestionnaire, 14, yPos + 12, 180, 7) + 5;
+    }
+    
+    // Si el contenido es demasiado largo, agregar nueva página
+    if (yPos > 250) {
+        doc.addPage();
+        yPos = 20;
+    }
+    
+    // Evaluación física
+    doc.setFont('helvetica', 'bold');
+    doc.setFillColor(240, 240, 240);
+    doc.rect(14, yPos, 182, 8, 'F');
+    doc.text('Evaluación Física', 14, yPos + 6);
+    doc.setFont('helvetica', 'normal');
+    yPos += 13;
+    
+    doc.setFont('helvetica', 'bold');
     doc.text('Signos vitales:', 14, yPos);
+    doc.setFont('helvetica', 'normal');
     yPos = addWrappedText(patient.vitalSigns || 'No especificados', 14, yPos + 7, 180, 7) + 5;
+    
+    doc.setFont('helvetica', 'bold');
+    doc.text('Antropometría:', 14, yPos);
+    doc.setFont('helvetica', 'normal');
+    yPos = addWrappedText(patient.anthropometry || 'No especificada', 14, yPos + 7, 180, 7) + 5;
+    
+    doc.setFont('helvetica', 'bold');
+    doc.text('Examen físico:', 14, yPos);
+    doc.setFont('helvetica', 'normal');
+    yPos = addWrappedText(patient.physicalExam || 'No especificado', 14, yPos + 7, 180, 7) + 5;
+    
+    // Pie de página
+    const totalPages = doc.internal.getNumberOfPages();
+    for (let i = 1; i <= totalPages; i++) {
+        doc.setPage(i);
+        doc.setFontSize(10);
+        doc.setTextColor(150, 150, 150);
+        doc.text(`Página ${i} de ${totalPages}`, 105, 290, { align: 'center' });
+        doc.text('Sistema de Fichas Clínicas Kinesiológicas', 105, 297, { align: 'center' });
+    }
     
     // Guardar el PDF
     doc.save(`Ficha_${patient.name || 'Paciente'}_${patient.rut || 'SinRUT'}.pdf`);
