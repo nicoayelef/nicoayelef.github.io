@@ -679,7 +679,6 @@ function exportPatientToPDF(patientId) {
             alert('Error al generar PDF: ' + error.message);
         });
 }
-
 // Inicializar los controles deslizantes y eventos cuando se carga la página
 document.addEventListener('DOMContentLoaded', function() {
     // Inicializar los valores de los deslizadores
