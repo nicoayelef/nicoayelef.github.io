@@ -631,22 +631,25 @@ function exportPatientToPDF(patientId) {
 } 
 // Inicializar los controles deslizantes y eventos cuando se carga la página
 document.addEventListener('DOMContentLoaded', function() {
+    console.log("DOM completamente cargado");
+    
     // Inicializar los valores de los deslizadores
     updateRatingValue('psfs1Rating', 'psfs1Value');
     updateRatingValue('psfs2Rating', 'psfs2Value');
     updateRatingValue('psfs3Rating', 'psfs3Value');
     
-    // Cargar la lista de pacientes
-    loadPatients();
-    
     // Configurar el evento de envío del formulario
-const patientForm = document.getElementById('patientForm');
-if (patientForm) {
-    patientForm.addEventListener('submit', function(e) {
-        e.preventDefault();
-        savePatient(e); // Pasando el evento como parámetro
-    });
-}
+    const patientForm = document.getElementById('patientForm');
+    console.log("Formulario encontrado:", patientForm);
+    
+    if (patientForm) {
+        patientForm.addEventListener('submit', function(e) {
+            console.log("Formulario enviado");
+            savePatient(e);
+        });
+    } else {
+        console.error("No se encontró el formulario con ID 'patientForm'");
+    }
     
     // Configurar el botón de búsqueda
     const searchButton = document.getElementById('searchButton');
