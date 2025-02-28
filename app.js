@@ -28,6 +28,7 @@ function getPatients() {
 // Función para guardar un nuevo paciente
 function savePatient(e) {
     e.preventDefault();
+    console.log("Función savePatient() ejecutada");
     
     // Obtener valores de PSFS
     const psfs1 = {
@@ -79,10 +80,13 @@ function savePatient(e) {
         createdAt: new Date().toISOString()
     };
     
+    console.log("Datos del paciente:", patient);
+    
     // Guardar en Firestore
     db.collection("patients").add(patient)
         .then((docRef) => {
-            alert('Paciente guardado correctamente');
+            console.log("Paciente guardado con ID:", docRef.id);
+            alert('Paciente guardado correctamente con ID: ' + docRef.id);
             document.getElementById('patientForm').reset();
             // Actualizar la lista de pacientes si estamos en la pestaña de registros
             if (document.getElementById('records-tab').classList.contains('active')) {
