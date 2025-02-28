@@ -241,10 +241,17 @@ function showPatientDetails(patientId) {
 // Función para eliminar un paciente
 function deletePatient(patientId) {
     if (confirm('¿Estás seguro de que deseas eliminar este paciente? Esta acción no se puede deshacer.')) {
-        const patients = getPatients();
-        const updatedPatients = patients.filter(p => p.id !== patientId);
-        localStorage.setItem('patients', JSON.stringify(updatedPatients));
-        loadPatients();
+        // Eliminar paciente de Firestore
+        db.collection("patients").doc(patientId).delete()
+            .then(() => {
+                console.log("Paciente eliminado correctamente");
+                alert('Paciente eliminado correctamente');
+                loadPatients();
+            })
+            .catch((error) => {
+                console.error("Error al eliminar paciente: ", error);
+                alert('Error al eliminar paciente: ' + error.message);
+            });
     }
 }
 
