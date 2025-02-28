@@ -639,32 +639,35 @@ document.addEventListener('DOMContentLoaded', function() {
     updateRatingValue('psfs3Rating', 'psfs3Value');
     
     // Configurar el evento de envío del formulario
+document.addEventListener('DOMContentLoaded', function() {
+    console.log("DOM cargado completamente");
+    
+    // Inicializar los valores de los deslizadores
+    updateRatingValue('psfs1Rating', 'psfs1Value');
+    updateRatingValue('psfs2Rating', 'psfs2Value');
+    updateRatingValue('psfs3Rating', 'psfs3Value');
+    
+    // Configurar el evento de envío del formulario
     const patientForm = document.getElementById('patientForm');
     console.log("Formulario encontrado:", patientForm);
     
     if (patientForm) {
         patientForm.addEventListener('submit', function(e) {
             console.log("Formulario enviado");
+            e.preventDefault(); // Evitar que el formulario se envíe de forma tradicional
             savePatient(e);
         });
     } else {
         console.error("No se encontró el formulario con ID 'patientForm'");
     }
     
+    // Cargar la lista de pacientes
+    loadPatients();
+    
     // Configurar el botón de búsqueda
     const searchButton = document.getElementById('searchButton');
     if (searchButton) {
         searchButton.addEventListener('click', searchPatients);
-    }
-    
-    // Configurar el campo de búsqueda para buscar al presionar Enter
-    const searchInput = document.getElementById('searchInput');
-    if (searchInput) {
-        searchInput.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                searchPatients();
-            }
-        });
     }
     
     // Configurar el botón de exportar todos
