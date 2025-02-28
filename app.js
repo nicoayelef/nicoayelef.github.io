@@ -159,57 +159,53 @@ function savePatient(e) {
 
 // Función para cargar pacientes en la lista
 function loadPatients() {
-    const patientsList = document.getElementById('patientsList');
-    if (!patientsList) return;
+    console.log("Cargando pacientes...");
+    const patientsTableBody = document.getElementById('patientsTableBody');
+    if (!patientsTableBody) {
+        console.error("No se encontró el elemento patientsTableBody");
+        return;
+    }
     
-    // Limpiar lista actual
-    patientsList.innerHTML = '';
-    
-    // Mostrar mensaje de carga
-    patientsList.innerHTML = '<div class="alert alert-info">Cargando pacientes...</div>';
+    // Limpiar tabla actual
+    patientsTableBody.innerHTML = '<tr><td colspan="5" class="text-center">Cargando pacientes...</td></tr>';
     
     // Obtener pacientes de Firestore
-    db.collection("patients").get()
+    db.collection("patients").orderBy("createdAt", "desc").get()
         .then((querySnapshot) => {
+            console.log("Pacientes obtenidos:", querySnapshot.size);
+            
             // Limpiar mensaje de carga
-            patientsList.innerHTML = '';
+            patientsTableBody.innerHTML = '';
             
             // Si no hay pacientes, mostrar mensaje
             if (querySnapshot.empty) {
-                patientsList.innerHTML = '<div class="alert alert-info">No hay pacientes registrados. Complete el formulario para agregar un nuevo paciente.</div>';
+                patientsTableBody.innerHTML = '<tr><td colspan="5" class="text-center">No hay pacientes registrados</td></tr>';
                 return;
             }
             
-            // Agregar cada paciente a la lista
+            // Agregar cada paciente a la tabla
             querySnapshot.forEach((doc) => {
                 const patient = doc.data();
                 patient.id = doc.id; // Guardar el ID del documento
                 
-                const patientCard = document.createElement('div');
-                patientCard.className = 'card patient-card mb-3';
-                patientCard.innerHTML = `
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-md-9">
-                                <h5 class="card-title">${patient.name || 'Sin nombre'}</h5>
-                                <p class="card-text">
-                                    <strong>RUT:</strong> ${patient.rut || 'No especificado'}<br>
-                                    <strong>Edad:</strong> ${patient.age || 'No especificada'} años<br>
-                                    <strong>Motivo de consulta:</strong> ${patient.consultReason ? (patient.consultReason.length > 50 ? patient.consultReason.substring(0, 50) + '...' : patient.consultReason) : 'No especificado'}
-                                </p>
-                            </div>
-                            <div class="col-md-3 d-flex flex-column justify-content-center">
-                                <button class="btn btn-primary btn-sm mb-2 view-details" data-patient-id="${patient.id}">
-                                    <i class="fas fa-eye"></i> Ver detalles
-                                </button>
-                                <button class="btn btn-danger btn-sm delete-patient" data-patient-id="${patient.id}">
-                                    <i class="fas fa-trash"></i> Eliminar
-                                </button>
-                            </div>
-                        </div>
-                    </div>
+                const createdDate = patient.createdAt ? new Date(patient.createdAt).toLocaleDateString() : 'No disponible';
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${patient.name || 'Sin nombre'}</td>
+                    <td>${patient.rut || 'No especificado'}</td>
+                    <td>${patient.age || 'No especificada'}</td>
+                    <td>${createdDate}</td>
+                    <td>
+                        <button class="btn btn-primary btn-sm view-details" data-patient-id="${patient.id}">
+                            <i class="fas fa-eye"></i> Ver
+                        </button>
+                        <button class="btn btn-danger btn-sm delete-patient" data-patient-id="${patient.id}">
+                            <i class="fas fa-trash"></i> Eliminar
+                        </button>
+                    </td>
                 `;
-                patientsList.appendChild(patientCard);
+                patientsTableBody.appendChild(row);
             });
             
             // Agregar event listeners a los botones
@@ -229,7 +225,7 @@ function loadPatients() {
         })
         .catch((error) => {
             console.error("Error al cargar pacientes: ", error);
-            patientsList.innerHTML = `<div class="alert alert-danger">Error al cargar pacientes: ${error.message}</div>`;
+            patientsTableBody.innerHTML = `<tr><td colspan="5" class="text-center">Error al cargar pacientes: ${error.message}</td></tr>`;
         });
 }
 // Función para mostrar detalles del paciente
