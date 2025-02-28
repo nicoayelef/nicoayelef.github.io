@@ -184,6 +184,7 @@ function loadPatients() {
 }
 
 // Función para mostrar detalles del paciente
+// Función para mostrar detalles del paciente
 function showPatientDetails(patientId) {
     const patients = getPatients();
     const patient = patients.find(p => p.id === patientId);
@@ -204,7 +205,7 @@ function showPatientDetails(patientId) {
         <div class="container">
             <div class="row mb-4">
                 <div class="col-12">
-                    <h4 class="border-bottom pb-2">Información Personal</h4>
+                    <h4 class="border-bottom pb-2 text-primary">Información Personal</h4>
                 </div>
                 <div class="col-md-6">
                     <p><strong>Nombre:</strong> ${patient.name || 'No especificado'}</p>
@@ -226,7 +227,7 @@ function showPatientDetails(patientId) {
 
             <div class="row mb-4">
                 <div class="col-12">
-                    <h4 class="border-bottom pb-2">Información Clínica</h4>
+                    <h4 class="border-bottom pb-2 text-primary">Información Clínica</h4>
                 </div>
                 <div class="col-md-6">
                     <p><strong>Evaluador:</strong> ${patient.evaluator || 'No especificado'}</p>
@@ -242,7 +243,7 @@ function showPatientDetails(patientId) {
 
             <div class="row mb-4">
                 <div class="col-12">
-                    <h4 class="border-bottom pb-2">Anamnesis</h4>
+                    <h4 class="border-bottom pb-2 text-primary">Anamnesis</h4>
                     <p><strong>Anamnesis próxima:</strong></p>
                     <p class="text-muted">${patient.proximateAnamnesis || 'No especificada'}</p>
                     <p><strong>Anamnesis remota:</strong></p>
@@ -252,7 +253,7 @@ function showPatientDetails(patientId) {
 
             <div class="row mb-4">
                 <div class="col-12">
-                    <h4 class="border-bottom pb-2">Hábitos y Entorno</h4>
+                    <h4 class="border-bottom pb-2 text-primary">Hábitos y Entorno</h4>
                     <p><strong>Hábitos y hobbies:</strong></p>
                     <p class="text-muted">${patient.habitsHobbies || 'No especificados'}</p>
                     <p><strong>Hogar y red de apoyo:</strong></p>
@@ -262,15 +263,15 @@ function showPatientDetails(patientId) {
 
             <div class="row mb-4">
                 <div class="col-12">
-                    <h4 class="border-bottom pb-2">Cuestionarios</h4>
+                    <h4 class="border-bottom pb-2 text-primary">Cuestionarios</h4>
                     <div class="mb-3">
-                        <p><strong>PSFS 1:</strong> ${patient.psfs1.activity || 'No especificada'} - Valoración: ${patient.psfs1.rating || 'N/A'}/10</p>
+                        <p><strong>PSFS 1:</strong> ${patient.psfs1?.activity || 'No especificada'} - Valoración: ${patient.psfs1?.rating || 'N/A'}/10</p>
                     </div>
                     <div class="mb-3">
-                        <p><strong>PSFS 2:</strong> ${patient.psfs2.activity || 'No especificada'} - Valoración: ${patient.psfs2.rating || 'N/A'}/10</p>
+                        <p><strong>PSFS 2:</strong> ${patient.psfs2?.activity || 'No especificada'} - Valoración: ${patient.psfs2?.rating || 'N/A'}/10</p>
                     </div>
                     <div class="mb-3">
-                        <p><strong>PSFS 3:</strong> ${patient.psfs3.activity || 'No especificada'} - Valoración: ${patient.psfs3.rating || 'N/A'}/10</p>
+                        <p><strong>PSFS 3:</strong> ${patient.psfs3?.activity || 'No especificada'} - Valoración: ${patient.psfs3?.rating || 'N/A'}/10</p>
                     </div>
                     <div class="mb-3">
                         <p><strong>Cuestionarios adicionales:</strong></p>
@@ -281,7 +282,7 @@ function showPatientDetails(patientId) {
 
             <div class="row mb-4">
                 <div class="col-12">
-                    <h4 class="border-bottom pb-2">Evaluación Física</h4>
+                    <h4 class="border-bottom pb-2 text-primary">Evaluación Física</h4>
                     <p><strong>Signos vitales:</strong></p>
                     <p class="text-muted">${patient.vitalSigns || 'No especificados'}</p>
                     <p><strong>Antropometría:</strong></p>
@@ -292,6 +293,17 @@ function showPatientDetails(patientId) {
             </div>
         </div>
     `;
+
+    // Configurar el botón de exportar PDF
+    const exportButton = document.getElementById('exportPatientButton');
+    if (exportButton) {
+        exportButton.setAttribute('data-patient-id', patientId);
+    }
+
+    // Mostrar el modal
+    const modal = new bootstrap.Modal(document.getElementById('patientDetailsModal'));
+    modal.show();
+}
 
     // Configurar el botón de exportar PDF
     const exportButton = document.getElementById('exportPatientButton');
