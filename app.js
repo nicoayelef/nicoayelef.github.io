@@ -182,8 +182,58 @@ function savePatient(e) {
         
         // Guardar en Firestore
         db.collection("patients").add(patient)
-            .then((docRef) => {
+            .then(async (docRef) => {
                 console.log("Paciente guardado con ID:", docRef.id);
+                const patientId = docRef.id;
+                
+                // Obtener archivos del input
+                const fileInput = document.getElementById('medicalExams');
+                if (fileInput && fileInput.files.length > 0) {
+                    // Mostrar mensaje de carga de archivos
+                    const alertContainer = document.createElement('div');
+                    alertContainer.className = 'alert alert-info alert-dismissible fade show mt-3';
+                    alertContainer.role = 'alert';
+                    alertContainer.innerHTML = `
+                        <strong>Información:</strong> Subiendo archivos, por favor espere...
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    `;
+                    
+                    const formContainer = document.querySelector('.form-container');
+                    if (formContainer) {
+                        formContainer.insertBefore(alertContainer, formContainer.firstChild);
+                    }
+                    
+                    try {
+                        // Subir archivos
+                        const fileUrls = await uploadFiles(patientId, fileInput.files);
+                        
+                        // Actualizar documento del paciente con las URLs de los archivos
+                        await docRef.update({
+                            complementaryExams: fileUrls
+                        });
+                        
+                        console.log("Archivos subidos correctamente:", fileUrls);
+                    } catch (error) {
+                        console.error("Error al subir archivos:", error);
+                        
+                        const errorAlert = document.createElement('div');
+                        errorAlert.className = 'alert alert-danger alert-dismissible fade show mt-3';
+                        errorAlert.role = 'alert';
+                        errorAlert.innerHTML = `
+                            <strong>Error:</strong> No se pudieron subir los archivos: ${error.message}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        `;
+                        
+                        if (formContainer) {
+                            formContainer.insertBefore(errorAlert, formContainer.firstChild);
+                        }
+                    }
+                    
+                    // Eliminar alerta de carga de archivos
+                    if (alertContainer.parentNode) {
+                        alertContainer.parentNode.removeChild(alertContainer);
+                    }
+                }
                 
                 // Restaurar botón
                 if (saveBtn) {
