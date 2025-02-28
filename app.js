@@ -368,6 +368,74 @@ function loadPatients() {
             patientsTableBody.innerHTML = `<tr><td colspan="5" class="text-center">Error al cargar pacientes: ${error.message}</td></tr>`;
         });
 }
+
+// Función para mostrar los archivos del paciente
+function displayPatientFiles(files) {
+  if (!files || files.length === 0) return '';
+  
+  let filesHTML = `
+    <div class="row mb-4">
+      <div class="col-12">
+        <h4 class="text-primary">Archivos / Exámenes Complementarios</h4>
+        <hr>
+      </div>
+      <div class="col-12">
+        <div class="table-responsive">
+          <table class="table table-striped">
+            <thead>
+              <tr>
+                <th>Nombre</th>
+                <th>Tipo</th>
+                <th>Fecha de carga</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+  `;
+  
+  files.forEach(file => {
+    // Determinar el icono según el tipo de archivo
+    let fileType = 'Documento';
+    if (file.type.includes('pdf')) {
+      fileType = 'PDF';
+    } else if (file.type.includes('image')) {
+      fileType = 'Imagen';
+    }
+    
+    // Formatear la fecha de carga
+    let uploadDate = 'Fecha desconocida';
+    if (file.uploadedAt && file.uploadedAt.toDate) {
+      uploadDate = file.uploadedAt.toDate().toLocaleDateString();
+    }
+    
+    filesHTML += `
+      <tr>
+        <td>${file.name}</td>
+        <td>${fileType}</td>
+        <td>${uploadDate}</td>
+        <td>
+          <a href="${file.url}" target="_blank" class="btn btn-sm btn-primary me-2">
+            <i class="fas fa-eye"></i> Ver
+          </a>
+          <a href="${file.url}" download="${file.name}" class="btn btn-sm btn-secondary">
+            <i class="fas fa-download"></i> Descargar
+          </a>
+        </td>
+      </tr>
+    `;
+  });
+  
+  filesHTML += `
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  `;
+  
+  return filesHTML;
+}
+
 // Función para mostrar detalles del paciente
 function showPatientDetails(patientId) {
     // Obtener paciente de Firestore
