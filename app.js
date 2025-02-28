@@ -1,3 +1,6 @@
+// Inicializar Firebase Storage
+const storage = firebase.storage();
+
 // Función para actualizar el valor mostrado de los sliders de valoración
 function updateRatingValue(sliderId, valueId) {
     const slider = document.getElementById(sliderId);
@@ -14,6 +17,96 @@ function updateRatingValue(sliderId, valueId) {
     } else {
         console.error(`Elementos no encontrados: slider=${sliderId}, value=${valueId}`);
     }
+}
+
+// Función para subir archivos a Firebase Storage
+async function uploadFiles(patientId, files) {
+  const uploadPromises = [];
+  const fileUrls = [];
+  
+  // Mostrar indicador de progreso
+  const progressContainer = document.createElement('div');
+  progressContainer.innerHTML = `
+    <div class="progress mt-2 mb-2">
+      <div class="progress-bar progress-bar-striped progress-bar-animated" 
+           role="progressbar" style="width: 0%" 
+           id="uploadProgressBar">0%</div>
+    </div>
+  `;
+  
+  const formContainer = document.querySelector('.form-container');
+  if (formContainer) {
+    formContainer.insertBefore(progressContainer, formContainer.firstChild);
+  }
+  
+  for (let i = 0; i < files.length; i++) {
+    const file = files[i];
+    // Verificar tamaño (5MB máximo)
+    if (file.size > 5 * 1024 * 1024) {
+      const alertContainer = document.createElement('div');
+      alertContainer.className = 'alert alert-warning alert-dismissible fade show mt-3';
+      alertContainer.role = 'alert';
+      alertContainer.innerHTML = `
+          <strong>Advertencia:</strong> El archivo ${file.name} excede el tamaño máximo de 5MB.
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      `;
+      
+      if (formContainer) {
+          formContainer.insertBefore(alertContainer, formContainer.firstChild);
+      }
+      continue;
+    }
+    
+    // Crear referencia única para el archivo
+    const timestamp = new Date().getTime();
+    const fileRef = storage.ref(`patients/${patientId}/exams/${timestamp}_${file.name}`);
+    
+    // Subir archivo
+    const uploadTask = fileRef.put(file);
+    
+    // Crear promesa para manejar la subida
+    const promise = new Promise((resolve, reject) => {
+      uploadTask.on('state_changed', 
+        (snapshot) => {
+          // Progreso de carga
+          const progress = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100);
+          const progressBar = document.getElementById('uploadProgressBar');
+          if (progressBar) {
+            progressBar.style.width = progress + '%';
+            progressBar.textContent = progress + '%';
+          }
+        },
+        (error) => {
+          // Error
+          console.error("Error al subir archivo:", error);
+          reject(error);
+        },
+        async () => {
+          // Completado exitosamente
+          const downloadUrl = await fileRef.getDownloadURL();
+          fileUrls.push({
+            name: file.name,
+            url: downloadUrl,
+            type: file.type,
+            uploadedAt: firebase.firestore.Timestamp.now()
+          });
+          resolve();
+        }
+      );
+    });
+    
+    uploadPromises.push(promise);
+  }
+  
+  // Esperar a que todas las cargas terminen
+  await Promise.all(uploadPromises);
+  
+  // Eliminar barra de progreso
+  if (progressContainer.parentNode) {
+    progressContainer.parentNode.removeChild(progressContainer);
+  }
+  
+  return fileUrls;
 }
 
 // Función para obtener pacientes del localStorage
