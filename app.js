@@ -30,73 +30,131 @@ function savePatient(e) {
     e.preventDefault();
     console.log("Función savePatient() ejecutada");
     
-    // Obtener valores de PSFS
-    const psfs1 = {
-        activity: document.getElementById('psfs1Activity').value,
-        rating: document.getElementById('psfs1Rating').value
-    };
-    
-    const psfs2 = {
-        activity: document.getElementById('psfs2Activity').value,
-        rating: document.getElementById('psfs2Rating').value
-    };
-    
-    const psfs3 = {
-        activity: document.getElementById('psfs3Activity').value,
-        rating: document.getElementById('psfs3Rating').value
-    };
-    
-    // Crear objeto paciente
-    const patient = {
-        evaluator: document.getElementById('evaluator').value,
-        email: document.getElementById('email').value,
-        name: document.getElementById('name').value,
-        rut: document.getElementById('rut').value,
-        contactNumber: document.getElementById('contactNumber').value,
-        patientEmail: document.getElementById('patientEmail').value,
-        nationality: document.getElementById('nationality').value,
-        age: document.getElementById('age').value,
-        birthdate: document.getElementById('birthdate').value,
-        civilStatus: document.getElementById('civilStatus').value,
-        education: document.getElementById('education').value,
-        address: document.getElementById('address').value,
-        emergencyContact: document.getElementById('emergencyContact').value,
-        occupation: document.getElementById('occupation').value,
-        laterality: document.getElementById('laterality').value,
-        consultReason: document.getElementById('consultReason').value,
-        diagnosis: document.getElementById('diagnosis').value,
-        expectations: document.getElementById('expectations').value,
-        proximateAnamnesis: document.getElementById('proximateAnamnesis').value,
-        remoteAnamnesis: document.getElementById('remoteAnamnesis').value,
-        habitsHobbies: document.getElementById('habitsHobbies').value,
-        homeSupport: document.getElementById('homeSupport').value,
-        psfs1: psfs1,
-        psfs2: psfs2,
-        psfs3: psfs3,
-        extraQuestionnaire: document.getElementById('extraQuestionnaire').value,
-        vitalSigns: document.getElementById('vitalSigns').value,
-        anthropometry: document.getElementById('anthropometry').value,
-        physicalExam: document.getElementById('physicalExam').value,
-        createdAt: new Date().toISOString()
-    };
-    
-    console.log("Datos del paciente:", patient);
-    
-    // Guardar en Firestore
-    db.collection("patients").add(patient)
-        .then((docRef) => {
-            console.log("Paciente guardado con ID:", docRef.id);
-            alert('Paciente guardado correctamente con ID: ' + docRef.id);
-            document.getElementById('patientForm').reset();
-            // Actualizar la lista de pacientes si estamos en la pestaña de registros
-            if (document.getElementById('records-tab').classList.contains('active')) {
+    try {
+        // Obtener valores de PSFS
+        const psfs1 = {
+            activity: document.getElementById('psfs1Activity').value,
+            rating: document.getElementById('psfs1Rating').value
+        };
+        
+        const psfs2 = {
+            activity: document.getElementById('psfs2Activity').value,
+            rating: document.getElementById('psfs2Rating').value
+        };
+        
+        const psfs3 = {
+            activity: document.getElementById('psfs3Activity').value,
+            rating: document.getElementById('psfs3Rating').value
+        };
+        
+        // Crear objeto paciente
+        const patient = {
+            evaluator: document.getElementById('evaluator').value,
+            email: document.getElementById('email').value,
+            name: document.getElementById('name').value,
+            rut: document.getElementById('rut').value,
+            contactNumber: document.getElementById('contactNumber').value,
+            patientEmail: document.getElementById('patientEmail').value,
+            nationality: document.getElementById('nationality').value,
+            age: document.getElementById('age').value,
+            birthdate: document.getElementById('birthdate').value,
+            civilStatus: document.getElementById('civilStatus').value,
+            education: document.getElementById('education').value,
+            address: document.getElementById('address').value,
+            emergencyContact: document.getElementById('emergencyContact').value,
+            occupation: document.getElementById('occupation').value,
+            laterality: document.getElementById('laterality').value,
+            consultReason: document.getElementById('consultReason').value,
+            diagnosis: document.getElementById('diagnosis').value,
+            expectations: document.getElementById('expectations').value,
+            proximateAnamnesis: document.getElementById('proximateAnamnesis').value,
+            remoteAnamnesis: document.getElementById('remoteAnamnesis').value,
+            habitsHobbies: document.getElementById('habitsHobbies').value,
+            homeSupport: document.getElementById('homeSupport').value,
+            psfs1: psfs1,
+            psfs2: psfs2,
+            psfs3: psfs3,
+            extraQuestionnaire: document.getElementById('extraQuestionnaire').value,
+            vitalSigns: document.getElementById('vitalSigns').value,
+            anthropometry: document.getElementById('anthropometry').value,
+            physicalExam: document.getElementById('physicalExam').value,
+            createdAt: new Date().toISOString()
+        };
+        
+        console.log("Datos del paciente a guardar:", patient);
+        
+        // Mostrar mensaje de carga
+        const saveBtn = document.getElementById('savePatientBtn');
+        if (saveBtn) {
+            saveBtn.disabled = true;
+            saveBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Guardando...';
+        }
+        
+        // Guardar en Firestore
+        db.collection("patients").add(patient)
+            .then((docRef) => {
+                console.log("Paciente guardado con ID:", docRef.id);
+                
+                // Restaurar botón
+                if (saveBtn) {
+                    saveBtn.disabled = false;
+                    saveBtn.innerHTML = 'Guardar Ficha';
+                }
+                
+                // Mostrar mensaje de éxito
+                const alertContainer = document.createElement('div');
+                alertContainer.className = 'alert alert-success alert-dismissible fade show mt-3';
+                alertContainer.role = 'alert';
+                alertContainer.innerHTML = `
+                    <strong>¡Éxito!</strong> Paciente guardado correctamente.
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                `;
+                
+                const formContainer = document.querySelector('.tab-pane.active');
+                if (formContainer) {
+                    formContainer.insertBefore(alertContainer, formContainer.firstChild);
+                }
+                
+                // Resetear formulario
+                document.getElementById('patientForm').reset();
+                
+                // Actualizar la lista de pacientes si estamos en la pestaña de registros
                 loadPatients();
-            }
-        })
-        .catch((error) => {
-            console.error("Error al guardar paciente: ", error);
-            alert('Error al guardar paciente: ' + error.message);
-        });
+                
+                // Eliminar alerta después de 5 segundos
+                setTimeout(() => {
+                    if (alertContainer.parentNode) {
+                        alertContainer.parentNode.removeChild(alertContainer);
+                    }
+                }, 5000);
+            })
+            .catch((error) => {
+                console.error("Error al guardar paciente: ", error);
+                
+                // Restaurar botón
+                if (saveBtn) {
+                    saveBtn.disabled = false;
+                    saveBtn.innerHTML = 'Guardar Ficha';
+                }
+                
+                // Mostrar mensaje de error
+                const alertContainer = document.createElement('div');
+                alertContainer.className = 'alert alert-danger alert-dismissible fade show mt-3';
+                alertContainer.role = 'alert';
+                alertContainer.innerHTML = `
+                    <strong>Error:</strong> ${error.message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                `;
+                
+                const formContainer = document.querySelector('.tab-pane.active');
+                if (formContainer) {
+                    formContainer.insertBefore(alertContainer, formContainer.firstChild);
+                }
+            });
+    } catch (error) {
+        console.error("Error en la función savePatient:", error);
+        alert("Error al procesar el formulario: " + error.message);
+    }
 }
 
 // Función para cargar pacientes en la lista
