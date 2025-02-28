@@ -145,133 +145,42 @@
 </ul>
 
         <div class="tab-content" id="myTabContent">
-    <!-- Pestaña de Formulario -->
+            <div class="tab-content" id="myTabContent">
     <div class="tab-pane fade show active" id="form-tab-pane" role="tabpanel" aria-labelledby="form-tab" tabindex="0">
-        <div class="form-container">
-            <form id="patientForm">
-                <!-- El contenido del formulario se mantiene igual -->
-                <!-- ... -->
-            </form>
-        </div>
+        <!-- Contenido del formulario de ingreso -->
     </div>
-
-    <!-- Pestaña de Registros -->
     <div class="tab-pane fade" id="records-tab-pane" role="tabpanel" aria-labelledby="records-tab" tabindex="0">
-        <div class="container mt-4">
-            <div class="row">
-                <div class="col-12">
-                    <div class="card">
-                        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-                            <h5 class="mb-0">Pacientes Registrados</h5>
-                            <div>
-                                <button class="btn btn-light btn-sm" id="exportAllPatientsBtn">
-                                    <i class="fas fa-file-export"></i> Exportar Todos
-                                </button>
-                            </div>
-                        </div>
-                        <div class="card-body">
-                            <div class="mb-3">
-                                <input type="text" class="form-control" id="searchPatient" placeholder="Buscar por nombre o RUT">
-                            </div>
-                            <div class="table-responsive">
-                                <table class="table table-striped">
-                                    <thead>
-                                        <tr>
-                                            <th>Nombre</th>
-                                            <th>RUT</th>
-                                            <th>Edad</th>
-                                            <th>Fecha de Registro</th>
-                                            <th>Acciones</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="patientsTableBody">
-                                        <!-- Se cargará dinámicamente desde JavaScript -->
-                                    </tbody>
-                                </table>
-                            </div>
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Pacientes Registrados</h5>
+                        <div>
+                            <button class="btn btn-light btn-sm" id="exportAllPatientsBtn">
+                                <i class="fas fa-file-export"></i> Exportar Todos
+                            </button>
                         </div>
                     </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Pestaña de Evoluciones -->
-    <div class="tab-pane fade" id="evolutions-tab-pane" role="tabpanel" aria-labelledby="evolutions-tab" tabindex="0">
-        <div class="container mt-4">
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="card">
-                        <div class="card-header bg-primary text-white">
-                            <h5>Registrar Nueva Evolución</h5>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <input type="text" class="form-control" id="searchPatient" placeholder="Buscar por nombre o RUT">
                         </div>
-                        <div class="card-body">
-                            <form id="evolutionForm">
-                                <div class="mb-3">
-                                    <label for="patientSelect" class="form-label">Seleccionar Paciente</label>
-                                    <select class="form-select" id="patientSelect" required>
-                                        <option value="">Seleccione un paciente</option>
-                                        <!-- Las opciones se cargarán dinámicamente desde JavaScript -->
-                                    </select>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="evolutionDate" class="form-label">Fecha de Evolución</label>
-                                    <input type="date" class="form-control" id="evolutionDate" required>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="evolutionProgress" class="form-label">Progreso del Paciente</label>
-                                    <textarea class="form-control" id="evolutionProgress" rows="3" placeholder="Describa el progreso del paciente" required></textarea>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="evolutionTreatment" class="form-label">Tratamiento Realizado</label>
-                                    <textarea class="form-control" id="evolutionTreatment" rows="3" placeholder="Describa el tratamiento realizado" required></textarea>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="evolutionPlan" class="form-label">Plan y Recomendaciones</label>
-                                    <textarea class="form-control" id="evolutionPlan" rows="3" placeholder="Describa el plan y recomendaciones" required></textarea>
-                                </div>
-                                
-                                <div class="mb-3">
-                                    <label class="form-label">Actualización de PSFS</label>
-                                    <div id="psfsUpdateContainer">
-                                        <!-- Se cargará dinámicamente desde JavaScript -->
-                                    </div>
-                                </div>
-                                
-                                <div class="mb-3">
-                                    <label for="evolutionEvaluator" class="form-label">Kinesiólogo Evaluador</label>
-                                    <input type="text" class="form-control" id="evolutionEvaluator" required>
-                                </div>
-                                
-                                <button type="submit" class="btn btn-primary">Guardar Evolución</button>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="card">
-                        <div class="card-header bg-primary text-white">
-                            <h5>Historial de Evoluciones</h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="mb-3">
-                                <input type="text" class="form-control" id="searchEvolution" placeholder="Buscar por nombre o RUT del paciente">
-                            </div>
-                            <div class="table-responsive">
-                                <table class="table table-striped">
-                                    <thead>
-                                        <tr>
-                                            <th>Paciente</th>
-                                            <th>Fecha</th>
-                                            <th>Evaluador</th>
-                                            <th>Acciones</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="evolutionsTableBody">
-                                        <!-- Se cargará dinámicamente desde JavaScript -->
-                                    </tbody>
-                                </table>
-                            </div>
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Nombre</th>
+                                        <th>RUT</th>
+                                        <th>Edad</th>
+                                        <th>Fecha de Registro</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="patientsTableBody">
+                                    <!-- Se cargará dinámicamente desde JavaScript -->
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
@@ -279,6 +188,330 @@
         </div>
     </div>
 </div>
+            <!-- Pestaña de Formulario -->
+            <div class="tab-pane fade show active" id="form-tab-pane" role="tabpanel" aria-labelledby="form-tab" tabindex="0">
+                <div class="form-container">
+                    <form id="patientForm">
+                        <!-- Información personal y de contacto -->
+                        <div class="form-section">
+                            <h4 class="section-title">Información personal y de contacto</h4>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="evaluator" class="form-label">Kinesiólogo / Interno / Estudiante evaluador *</label>
+                                    <input type="text" class="form-control" id="evaluator" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="email" class="form-label">Correo del evaluador *</label>
+                                    <input type="email" class="form-control" id="email" required>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="name" class="form-label">Nombre completo del paciente</label>
+                                    <input type="text" class="form-control" id="name">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="rut" class="form-label">RUT (sin puntos, con guión)</label>
+                                    <input type="text" class="form-control" id="rut">
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <label for="contactNumber" class="form-label">Número de contacto</label>
+                                    <input type="tel" class="form-control" id="contactNumber">
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label for="patientEmail" class="form-label">Email del paciente</label>
+                                    <input type="email" class="form-control" id="patientEmail">
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label for="nationality" class="form-label">Nacionalidad</label>
+                                    <input type="text" class="form-control" id="nationality">
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-3 mb-3">
+                                    <label for="age" class="form-label">Edad</label>
+                                    <input type="number" class="form-control" id="age">
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <label for="birthdate" class="form-label">Fecha de nacimiento</label>
+                                    <input type="date" class="form-control" id="birthdate">
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <label for="civilStatus" class="form-label">Estado civil</label>
+                                    <select class="form-select" id="civilStatus">
+                                        <option value="">Seleccionar</option>
+                                        <option value="Soltero/a">Soltero/a</option>
+                                        <option value="Casado/a">Casado/a</option>
+                                        <option value="Divorciado/a">Divorciado/a</option>
+                                        <option value="Viudo/a">Viudo/a</option>
+                                        <option value="Conviviente">Conviviente</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <label for="education" class="form-label">Nivel educacional</label>
+                                    <select class="form-select" id="education">
+                                        <option value="">Seleccionar</option>
+                                        <option value="Básica incompleta">Básica incompleta</option>
+                                        <option value="Básica completa">Básica completa</option>
+                                        <option value="Media incompleta">Media incompleta</option>
+                                        <option value="Media completa">Media completa</option>
+                                        <option value="Técnica incompleta">Técnica incompleta</option>
+                                        <option value="Técnica completa">Técnica completa</option>
+                                        <option value="Universitaria incompleta">Universitaria incompleta</option>
+                                        <option value="Universitaria completa">Universitaria completa</option>
+                                        <option value="Postgrado">Postgrado</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="address" class="form-label">Dirección</label>
+                                    <input type="text" class="form-control" id="address">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="emergencyContact" class="form-label">Número de contacto de emergencia y parentesco</label>
+                                    <input type="text" class="form-control" id="emergencyContact">
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="occupation" class="form-label">Ocupación (movimientos involucrados; tiempo activo y tiempos sedentarios)</label>
+                                    <textarea class="form-control" id="occupation" rows="3"></textarea>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="laterality" class="form-label">Lateralidad o dominancia</label>
+                                    <select class="form-select" id="laterality">
+                                        <option value="">Seleccionar</option>
+                                        <option value="Diestro">Diestro</option>
+                                        <option value="Zurdo">Zurdo</option>
+                                        <option value="Ambidiestro">Ambidiestro</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Motivo de consulta y diagnóstico -->
+                        <div class="form-section">
+                            <h4 class="section-title">Motivo de consulta y diagnóstico</h4>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="consultReason" class="form-label">Motivo de consulta</label>
+                                    <textarea class="form-control" id="consultReason" rows="3"></textarea>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="diagnosis" class="form-label">Diagnóstico principal (en caso de que exista)</label>
+                                    <textarea class="form-control" id="diagnosis" rows="3"></textarea>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-12 mb-3">
+                                    <label for="expectations" class="form-label">Expectativas y metas del usuario a corto, mediano o largo plazo</label>
+                                    <textarea class="form-control" id="expectations" rows="3"></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Anamnesis -->
+                        <div class="form-section">
+                            <h4 class="section-title">Anamnesis</h4>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="proximateAnamnesis" class="form-label">Anamnesis próxima</label>
+                                    <small class="form-text text-muted d-block mb-2">
+                                        1. Historia de como sucedió (qué? Cuándo?, Dónde?, Cómo?, etc)<br>
+                                        2. A (Antigüedad) - L (localización) - I (intensidad) - C (Carácter) - I (Irradiación) - A (atenuantes y agravantes)<br>
+                                        3. Cambios diurnos y vespertinos de la sintomatología.
+                                    </small>
+                                    <textarea class="form-control" id="proximateAnamnesis" rows="5"></textarea>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="remoteAnamnesis" class="form-label">Anamnesis remota</label>
+                                    <small class="form-text text-muted d-block mb-2">
+                                        1. Antecedentes médicos<br>
+                                        2. Antecedentes ortopédicos (lesiones, fracturas, lesiones ligamentosas)<br>
+                                        3. Antecedentes de enfermedades crónicas (HTA/DBM/DLP/OBESIDAD/EPOC/OTROS)<br>
+                                        4. Antecedentes de enfermedades familiares (madre, padre, hermanos, hijos)<br>
+                                        5. Medicamentos<br>
+                                        6. Intervenciones Qx<br>
+                                        7. Hospitalizaciones ultimo año<br>
+                                        8. Alergias<br>
+                                        9. Inmunizaciones<br>
+                                        10. Historial de caídas
+                                    </small>
+                                    <textarea class="form-control" id="remoteAnamnesis" rows="5"></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Hábitos y entorno -->
+                        <div class="form-section">
+                            <h4 class="section-title">Hábitos y entorno</h4>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="habitsHobbies" class="form-label">Hábitos y hobbies</label>
+                                    <small class="form-text text-muted d-block mb-2">
+                                        1. Tabaco (cantidad, años de fumador, etc)<br>
+                                        2. Alcohol (bebedor frecuentemente o social)<br>
+                                        3. Drogas<br>
+                                        4. Hobbies o deportes (que realiza, ha realizado o quiere realizar)<br>
+                                        5. Hábitos nutricionales<br>
+                                        6. Sueño y calidad del sueño<br>
+                                        7. Estado mental<br>
+                                        8. Dificultad para la realización de una o más tareas de la vida diaria
+                                    </small>
+                                    <textarea class="form-control" id="habitsHobbies" rows="5"></textarea>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="homeSupport" class="form-label">Hogar y red de apoyo</label>
+                                    <small class="form-text text-muted d-block mb-2">
+                                        1. Descripción del hogar<br>
+                                        2. Red de apoyo<br>
+                                        3. Factores sociales relevantes<br>
+                                        4. Participación social / restricción de participación
+                                    </small>
+                                    <textarea class="form-control" id="homeSupport" rows="5"></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Cuestionarios -->
+                        <div class="form-section">
+                            <h4 class="section-title">Cuestionarios</h4>
+                            <p class="text-muted">Contestar PSFS para enfocar una actividad significativa para la persona.</p>
+                          
+                            <div class="row mb-4">
+                                <div class="col-md-6 mb-3">
+                                    <label for="psfs1Activity" class="form-label">PSFS 1 (nombrar 1 actividad que se dificulte o sea relevante para el usuario)</label>
+                                    <input type="text" class="form-control" id="psfs1Activity">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Valoración (0-10)</label>
+                                    <div class="rating-container">
+                                        <span class="rating-label">No lo puede realizar</span>
+                                        <input type="range" class="form-range" min="0" max="10" step="1" id="psfs1Rating" value="5">
+                                        <span class="rating-label">Lo logra igual o mejor que antes</span>
+                                        <span class="rating-value" id="psfs1Value">5</span>
+                                    </div>
+                                </div>
+                            </div>
+                          
+                            <div class="row mb-4">
+                                <div class="col-md-6 mb-3">
+                                    <label for="psfs2Activity" class="form-label">PSFS 2 (nombrar 1 actividad que se dificulte o sea relevante para el usuario)</label>
+                                    <input type="text" class="form-control" id="psfs2Activity">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Valoración (0-10)</label>
+                                    <div class="rating-container">
+                                        <span class="rating-label">No lo puede realizar</span>
+                                        <input type="range" class="form-range" min="0" max="10" step="1" id="psfs2Rating" value="5">
+                                        <span class="rating-label">Lo logra igual o mejor que antes</span>
+                                        <span class="rating-value" id="psfs2Value">5</span>
+                                    </div>
+                                </div>
+                            </div>
+                          
+                            <div class="row mb-4">
+                                <div class="col-md-6 mb-3">
+                                    <label for="psfs3Activity" class="form-label">PSFS 3 (nombrar 1 actividad que se dificulte o sea relevante para el usuario)</label>
+                                    <input type="text" class="form-control" id="psfs3Activity">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Valoración (0-10)</label>
+                                    <div class="rating-container">
+                                        <span class="rating-label">No lo puede realizar</span>
+                                        <input type="range" class="form-range" min="0" max="10" step="1" id="psfs3Rating" value="5">
+                                        <span class="rating-label">Lo logra igual o mejor que antes</span>
+                                        <span class="rating-value" id="psfs3Value">5</span>
+                                    </div>
+                                </div>
+                            </div>
+                          
+                            <div class="row">
+                                <div class="col-12 mb-3">
+                                    <label for="extraQuestionnaire" class="form-label">Cuestionario u outcome measures extra</label>
+                                    <textarea class="form-control" id="extraQuestionnaire" rows="3"></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Evaluación física -->
+                        <div class="form-section">
+                            <h4 class="section-title">Evaluación física</h4>
+                          
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <label for="vitalSigns" class="form-label">Signos vitales</label>
+                                    <small class="form-text text-muted d-block mb-2">
+                                        1. Saturación<br>
+                                        2. Pulso<br>
+                                        3. Presión arterial<br>
+                                        4. Frecuencia respiratoria
+                                    </small>
+                                    <textarea class="form-control" id="vitalSigns" rows="4"></textarea>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label for="anthropometry" class="form-label">Antropometría</label>
+                                    <small class="form-text text-muted d-block mb-2">
+                                        Peso, Talla, Circunferencias (cuello, brazos, cintura, cadera, muslo, pantorrilla)
+                                    </small>
+                                    <textarea class="form-control" id="anthropometry" rows="4"></textarea>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label for="physicalExam" class="form-label">Examen físico</label>
+                                    <small class="form-text text-muted d-block mb-2">
+                                        Observación, Inspección, Palpación, Rangos de movimiento, Fuerza, Evaluación neurológica, Flexibilidad, Tests ortopédicos, Equilibrio, Tests de rendimiento
+                                    </small>
+                                    <textarea class="form-control" id="physicalExam" rows="4"></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Guardar Ficha
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Pestaña de Registros -->
+            <div class="tab-pane fade" id="records-tab-pane" role="tabpanel" aria-labelledby="records-tab" tabindex="0">
+                <div class="form-container">
+                    <!-- Barra de búsqueda -->
+                    <div class="search-container">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="input-group">
+                                    <input type="text" class="form-control" id="searchInput" placeholder="Buscar por nombre o RUT...">
+                                    <button class="btn btn-outline-secondary" type="button" id="searchButton">
+                                        <i class="fas fa-search"></i> Buscar
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="col-md-6 text-end">
+                                <button class="btn btn-success" id="exportAllButton">
+                                    <i class="fas fa-file-export"></i> Exportar Todos
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Lista de pacientes -->
+                    <div id="patientsList">
+                        <!-- Los pacientes se cargarán dinámicamente aquí -->
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <!-- Modal para ver detalles completos del paciente -->
         <div class="modal fade" id="patientDetailsModal" tabindex="-1" aria-labelledby="patientDetailsModalLabel" aria-hidden="true">
@@ -327,7 +560,7 @@
 
   // Inicializar Firebase
   firebase.initializeApp(firebaseConfig);
-  
+
   // Inicializar Firestore
   const db = firebase.firestore();
 </script>
@@ -353,6 +586,6 @@
             </div>
         </div>
     </div>
-</div>    
+</div>  
 </body>
 </html>
