@@ -258,7 +258,6 @@ function deletePatient(patientId) {
 // Función para buscar pacientes
 function searchPatients() {
     const searchInput = document.getElementById('searchInput').value.toLowerCase();
-    const patients = getPatients();
     const patientsList = document.getElementById('patientsList');
     
     if (!patientsList) return;
@@ -266,63 +265,84 @@ function searchPatients() {
     // Limpiar lista actual
     patientsList.innerHTML = '';
     
-    // Filtrar pacientes según el término de búsqueda
-    const filteredPatients = patients.filter(patient => 
-        (patient.name && patient.name.toLowerCase().includes(searchInput)) || 
-        (patient.rut && patient.rut.toLowerCase().includes(searchInput))
-    );
+    // Mostrar mensaje de carga
+    patientsList.innerHTML = '<div class="alert alert-info">Buscando pacientes...</div>';
     
-    // Si no hay resultados, mostrar mensaje
-    if (filteredPatients.length === 0) {
-        patientsList.innerHTML = '<div class="alert alert-info">No se encontraron pacientes que coincidan con la búsqueda.</div>';
-        return;
-    }
-    
-    // Mostrar pacientes filtrados
-    filteredPatients.forEach(patient => {
-        const patientCard = document.createElement('div');
-        patientCard.className = 'card patient-card mb-3';
-        patientCard.innerHTML = `
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-9">
-                        <h5 class="card-title">${patient.name || 'Sin nombre'}</h5>
-                        <p class="card-text">
-                            <strong>RUT:</strong> ${patient.rut || 'No especificado'}<br>
-                            <strong>Edad:</strong> ${patient.age || 'No especificada'} años<br>
-                            <strong>Motivo de consulta:</strong> ${patient.consultReason ? (patient.consultReason.length > 50 ? patient.consultReason.substring(0, 50) + '...' : patient.consultReason) : 'No especificado'}
-                        </p>
+    // Buscar en Firestore
+    // Nota: Firestore no permite búsquedas de texto completo, así que debemos obtener todos los documentos y filtrar en el cliente
+    db.collection("patients").get()
+        .then((querySnapshot) => {
+            // Limpiar mensaje de carga
+            patientsList.innerHTML = '';
+            
+            const filteredPatients = [];
+            
+            querySnapshot.forEach((doc) => {
+                const patient = doc.data();
+                patient.id = doc.id;
+                
+                // Filtrar por nombre o RUT
+                if ((patient.name && patient.name.toLowerCase().includes(searchInput)) || 
+                    (patient.rut && patient.rut.toLowerCase().includes(searchInput))) {
+                    filteredPatients.push(patient);
+                }
+            });
+            
+            // Si no hay resultados, mostrar mensaje
+            if (filteredPatients.length === 0) {
+                patientsList.innerHTML = '<div class="alert alert-info">No se encontraron pacientes que coincidan con la búsqueda.</div>';
+                return;
+            }
+            
+            // Mostrar pacientes filtrados
+            filteredPatients.forEach(patient => {
+                const patientCard = document.createElement('div');
+                patientCard.className = 'card patient-card mb-3';
+                patientCard.innerHTML = `
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-9">
+                                <h5 class="card-title">${patient.name || 'Sin nombre'}</h5>
+                                <p class="card-text">
+                                    <strong>RUT:</strong> ${patient.rut || 'No especificado'}<br>
+                                    <strong>Edad:</strong> ${patient.age || 'No especificada'} años<br>
+                                    <strong>Motivo de consulta:</strong> ${patient.consultReason ? (patient.consultReason.length > 50 ? patient.consultReason.substring(0, 50) + '...' : patient.consultReason) : 'No especificado'}
+                                </p>
+                            </div>
+                            <div class="col-md-3 d-flex flex-column justify-content-center">
+                                <button class="btn btn-primary btn-sm mb-2 view-details" data-patient-id="${patient.id}">
+                                    <i class="fas fa-eye"></i> Ver detalles
+                                </button>
+                                <button class="btn btn-danger btn-sm delete-patient" data-patient-id="${patient.id}">
+                                    <i class="fas fa-trash"></i> Eliminar
+                                </button>
+                            </div>
+                        </div>
                     </div>
-                    <div class="col-md-3 d-flex flex-column justify-content-center">
-                        <button class="btn btn-primary btn-sm mb-2 view-details" data-patient-id="${patient.id}">
-                            <i class="fas fa-eye"></i> Ver detalles
-                        </button>
-                        <button class="btn btn-danger btn-sm delete-patient" data-patient-id="${patient.id}">
-                            <i class="fas fa-trash"></i> Eliminar
-                        </button>
-                    </div>
-                </div>
-            </div>
-        `;
-        patientsList.appendChild(patientCard);
-    });
-    
-    // Agregar event listeners a los botones
-    document.querySelectorAll('.view-details').forEach(button => {
-        button.addEventListener('click', function() {
-            const patientId = this.getAttribute('data-patient-id');
-            showPatientDetails(patientId);
+                `;
+                patientsList.appendChild(patientCard);
+            });
+            
+            // Agregar event listeners a los botones
+            document.querySelectorAll('.view-details').forEach(button => {
+                button.addEventListener('click', function() {
+                    const patientId = this.getAttribute('data-patient-id');
+                    showPatientDetails(patientId);
+                });
+            });
+            
+            document.querySelectorAll('.delete-patient').forEach(button => {
+                button.addEventListener('click', function() {
+                    const patientId = this.getAttribute('data-patient-id');
+                    deletePatient(patientId);
+                });
+            });
+        })
+        .catch((error) => {
+            console.error("Error al buscar pacientes: ", error);
+            patientsList.innerHTML = `<div class="alert alert-danger">Error al buscar pacientes: ${error.message}</div>`;
         });
-    });
-    
-    document.querySelectorAll('.delete-patient').forEach(button => {
-        button.addEventListener('click', function() {
-            const patientId = this.getAttribute('data-patient-id');
-            deletePatient(patientId);
-        });
-    });
 }
-
 // Función para exportar un paciente a PDF
 function exportPatientToPDF(patientId) {
     const patients = getPatients();
