@@ -574,6 +574,8 @@ function showPatientDetails(patientId) {
                                 <p class="text-muted"><small>Fecha de creación: ${createdDate}</small></p>
                             </div>
                         </div>
+                        // Archivos / Exámenes Complementarios
+${patient.complementaryExams ? displayPatientFiles(patient.complementaryExams) : ''}
                     </div>
                 `;
                 
