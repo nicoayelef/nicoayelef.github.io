@@ -640,6 +640,31 @@ const storage = firebase.storage();
         .catch((error) => {
             console.error("Error de conexión con Firebase:", error);
         });
+        // Función para mostrar alertas
+function showAlert(message, type) {
+    const alertContainer = document.getElementById('alertContainer');
+    if (!alertContainer) {
+        console.error("Elemento alertContainer no encontrado");
+        return;
+    }
+    
+    const alert = document.createElement('div');
+    alert.className = `alert alert-${type} alert-dismissible fade show`;
+    alert.role = 'alert';
+    alert.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    `;
+    
+    alertContainer.appendChild(alert);
+    
+    // Auto-cerrar alertas después de 5 segundos
+    setTimeout(() => {
+        if (alert.parentNode) {
+            alert.parentNode.removeChild(alert);
+        }
+    }, 5000);
+}
     </script>
 
     <!-- Tu archivo JavaScript principal -->
