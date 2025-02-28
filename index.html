@@ -613,6 +613,25 @@
 
 <!-- Tu archivo JavaScript principal -->
 <script src="app.js"></script>
-    
+
+<!-- Modal para ver detalles de evolución -->
+<div class="modal fade" id="evolutionDetailsModal" tabindex="-1" aria-labelledby="evolutionDetailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="evolutionDetailsModalLabel">Detalles de Evolución</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="evolutionDetailsContent">
+                <!-- Se cargará dinámicamente desde JavaScript -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn btn-danger" id="deleteEvolutionBtn">Eliminar</button>
+                <button type="button" class="btn btn-primary" id="exportEvolutionBtn">Exportar a PDF</button>
+            </div>
+        </div>
+    </div>
+</div>    
 </body>
 </html>
