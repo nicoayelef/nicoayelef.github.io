@@ -168,17 +168,22 @@ function savePatient(e) {
             vitalSigns: document.getElementById('vitalSigns').value,
             anthropometry: document.getElementById('anthropometry').value,
             physicalExam: document.getElementById('physicalExam').value,
-            createdAt: new Date().toISOString()
+            createdAt: new Date().toISOString(),
+            complementaryExams: [] // Inicializar como array vacío
         };
         
         console.log("Datos del paciente a guardar:", patient);
         
         // Mostrar mensaje de carga
-        const saveBtn = document.getElementById('savePatientBtn');
+        const saveBtn = document.querySelector('button[type="submit"]');
         if (saveBtn) {
             saveBtn.disabled = true;
             saveBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Guardando...';
         }
+        
+        // Obtener archivos del input
+        const fileInput = document.getElementById('medicalExams');
+        const hasFiles = fileInput && fileInput.files && fileInput.files.length > 0;
         
         // Guardar en Firestore
         db.collection("patients").add(patient)
@@ -186,52 +191,22 @@ function savePatient(e) {
                 console.log("Paciente guardado con ID:", docRef.id);
                 const patientId = docRef.id;
                 
-                // Obtener archivos del input
-                const fileInput = document.getElementById('medicalExams');
-                if (fileInput && fileInput.files.length > 0) {
-                    // Mostrar mensaje de carga de archivos
-                    const alertContainer = document.createElement('div');
-                    alertContainer.className = 'alert alert-info alert-dismissible fade show mt-3';
-                    alertContainer.role = 'alert';
-                    alertContainer.innerHTML = `
-                        <strong>Información:</strong> Subiendo archivos, por favor espere...
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    `;
-                    
-                    const formContainer = document.querySelector('.form-container');
-                    if (formContainer) {
-                        formContainer.insertBefore(alertContainer, formContainer.firstChild);
-                    }
-                    
+                // Si hay archivos, subirlos
+                if (hasFiles) {
                     try {
                         // Subir archivos
                         const fileUrls = await uploadFiles(patientId, fileInput.files);
                         
-                        // Actualizar documento del paciente con las URLs de los archivos
-                        await docRef.update({
-                            complementaryExams: fileUrls
-                        });
-                        
-                        console.log("Archivos subidos correctamente:", fileUrls);
+                        // Actualizar documento con las URLs
+                        if (fileUrls.length > 0) {
+                            await docRef.update({
+                                complementaryExams: fileUrls
+                            });
+                            console.log("Archivos subidos y documento actualizado");
+                        }
                     } catch (error) {
                         console.error("Error al subir archivos:", error);
-                        
-                        const errorAlert = document.createElement('div');
-                        errorAlert.className = 'alert alert-danger alert-dismissible fade show mt-3';
-                        errorAlert.role = 'alert';
-                        errorAlert.innerHTML = `
-                            <strong>Error:</strong> No se pudieron subir los archivos: ${error.message}
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                        `;
-                        
-                        if (formContainer) {
-                            formContainer.insertBefore(errorAlert, formContainer.firstChild);
-                        }
-                    }
-                    
-                    // Eliminar alerta de carga de archivos
-                    if (alertContainer.parentNode) {
-                        alertContainer.parentNode.removeChild(alertContainer);
+                        showAlert("Error al subir archivos: " + error.message, "warning");
                     }
                 }
                 
@@ -242,31 +217,13 @@ function savePatient(e) {
                 }
                 
                 // Mostrar mensaje de éxito
-                const alertContainer = document.createElement('div');
-                alertContainer.className = 'alert alert-success alert-dismissible fade show mt-3';
-                alertContainer.role = 'alert';
-                alertContainer.innerHTML = `
-                    <strong>¡Éxito!</strong> Paciente guardado correctamente.
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                `;
-                
-                const formContainer = document.querySelector('.form-container');
-                if (formContainer) {
-                    formContainer.insertBefore(alertContainer, formContainer.firstChild);
-                }
+                showAlert("Paciente guardado correctamente", "success");
                 
                 // Resetear formulario
                 document.getElementById('patientForm').reset();
                 
                 // Actualizar la lista de pacientes si estamos en la pestaña de registros
                 loadPatients();
-                
-                // Eliminar alerta después de 5 segundos
-                setTimeout(() => {
-                    if (alertContainer.parentNode) {
-                        alertContainer.parentNode.removeChild(alertContainer);
-                    }
-                }, 5000);
             })
             .catch((error) => {
                 console.error("Error al guardar paciente: ", error);
@@ -278,22 +235,19 @@ function savePatient(e) {
                 }
                 
                 // Mostrar mensaje de error
-                const alertContainer = document.createElement('div');
-                alertContainer.className = 'alert alert-danger alert-dismissible fade show mt-3';
-                alertContainer.role = 'alert';
-                alertContainer.innerHTML = `
-                    <strong>Error:</strong> ${error.message}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                `;
-                
-                const formContainer = document.querySelector('.form-container');
-                if (formContainer) {
-                    formContainer.insertBefore(alertContainer, formContainer.firstChild);
-                }
+                showAlert("Error al guardar paciente: " + error.message, "danger");
             });
     } catch (error) {
         console.error("Error en la función savePatient:", error);
-        alert("Error al procesar el formulario: " + error.message);
+        
+        // Restaurar botón
+        const saveBtn = document.querySelector('button[type="submit"]');
+        if (saveBtn) {
+            saveBtn.disabled = false;
+            saveBtn.innerHTML = 'Guardar Ficha';
+        }
+        
+        showAlert("Error al procesar el formulario: " + error.message, "danger");
     }
 }
 
