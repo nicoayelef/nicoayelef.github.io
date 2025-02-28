@@ -1,4 +1,3 @@
-// Función para actualizar el valor mostrado de los controles deslizantes
 function updateRatingValue(sliderId, valueId) {
     const slider = document.getElementById(sliderId);
     const valueDisplay = document.getElementById(valueId);
@@ -7,10 +6,16 @@ function updateRatingValue(sliderId, valueId) {
         // Actualizar el valor inicial
         valueDisplay.textContent = slider.value;
         
+        // Eliminar eventos anteriores para evitar duplicados
+        const newSlider = slider.cloneNode(true);
+        slider.parentNode.replaceChild(newSlider, slider);
+        
         // Agregar evento para actualizar cuando cambia el deslizador
-        slider.addEventListener('input', function() {
-            valueDisplay.textContent = this.value;
+        newSlider.addEventListener('input', function() {
+            document.getElementById(valueId).textContent = this.value;
         });
+    } else {
+        console.error(`Elementos no encontrados: slider=${sliderId}, value=${valueId}`);
     }
 }
 
