@@ -1,74 +1,37 @@
-// Función para actualizar el valor mostrado de los sliders
+// Función para actualizar el valor mostrado de los controles deslizantes
 function updateRatingValue(sliderId, valueId) {
     const slider = document.getElementById(sliderId);
     const valueDisplay = document.getElementById(valueId);
+    
     if (slider && valueDisplay) {
+        // Actualizar el valor inicial
         valueDisplay.textContent = slider.value;
+        
+        // Agregar evento para actualizar cuando cambia el deslizador
+        slider.addEventListener('input', function() {
+            valueDisplay.textContent = this.value;
+        });
     }
 }
 
-// Inicializar los valores de los sliders y agregar event listeners cuando el DOM esté cargado
-document.addEventListener('DOMContentLoaded', function() {
-    // Inicializar valores de sliders
-    updateRatingValue('psfs1Rating', 'psfs1Value');
-    updateRatingValue('psfs2Rating', 'psfs2Value');
-    updateRatingValue('psfs3Rating', 'psfs3Value');
+// Función para obtener pacientes del localStorage
+function getPatients() {
+    const patientsJSON = localStorage.getItem('patients');
+    return patientsJSON ? JSON.parse(patientsJSON) : [];
+}
 
-    // Agregar event listeners para los sliders
-    document.getElementById('psfs1Rating')?.addEventListener('input', function() {
-        updateRatingValue('psfs1Rating', 'psfs1Value');
-    });
-    
-    document.getElementById('psfs2Rating')?.addEventListener('input', function() {
-        updateRatingValue('psfs2Rating', 'psfs2Value');
-    });
-    
-    document.getElementById('psfs3Rating')?.addEventListener('input', function() {
-        updateRatingValue('psfs3Rating', 'psfs3Value');
-    });
-
-    // Cargar pacientes guardados al iniciar
-    loadPatients();
-
-    // Manejar el envío del formulario
-    document.getElementById('patientForm')?.addEventListener('submit', function(e) {
-        e.preventDefault();
-        savePatient();
-    });
-
-    // Manejar la búsqueda
-    document.getElementById('searchButton')?.addEventListener('click', function() {
-        searchPatients();
-    });
-
-    document.getElementById('searchInput')?.addEventListener('keyup', function(e) {
-        if (e.key === 'Enter') {
-            searchPatients();
-        }
-    });
-
-    // Manejar exportación de todos los pacientes
-    document.getElementById('exportAllButton')?.addEventListener('click', function() {
-        exportAllPatients();
-    });
-
-    // Manejar exportación de un paciente específico
-    document.getElementById('exportPatientButton')?.addEventListener('click', function() {
-        const patientId = this.getAttribute('data-patient-id');
-        exportPatientToPDF(patientId);
-    });
-});
-
-// Función para guardar un paciente
+// Función para guardar un nuevo paciente
 function savePatient() {
     // Obtener valores del formulario
+    const evaluator = document.getElementById('evaluator').value;
+    const email = document.getElementById('email').value;
     const name = document.getElementById('name').value;
     const rut = document.getElementById('rut').value;
-    const age = document.getElementById('age').value;
-    const birthdate = document.getElementById('birthdate').value;
     const contactNumber = document.getElementById('contactNumber').value;
     const patientEmail = document.getElementById('patientEmail').value;
     const nationality = document.getElementById('nationality').value;
+    const age = document.getElementById('age').value;
+    const birthdate = document.getElementById('birthdate').value;
     const civilStatus = document.getElementById('civilStatus').value;
     const education = document.getElementById('education').value;
     const address = document.getElementById('address').value;
@@ -82,7 +45,6 @@ function savePatient() {
     const remoteAnamnesis = document.getElementById('remoteAnamnesis').value;
     const habitsHobbies = document.getElementById('habitsHobbies').value;
     const homeSupport = document.getElementById('homeSupport').value;
-    const evaluator = document.getElementById('evaluator').value;
     
     // Obtener valores de PSFS
     const psfs1 = {
@@ -106,21 +68,23 @@ function savePatient() {
     const physicalExam = document.getElementById('physicalExam').value;
     
     // Validar campos obligatorios
-    if (!name || !rut) {
-        alert('Por favor, completa al menos el nombre y RUT del paciente.');
+    if (!evaluator || !email) {
+        alert('Por favor, completa los campos obligatorios (Evaluador y Correo).');
         return;
     }
     
     // Crear objeto paciente
     const patient = {
         id: Date.now().toString(), // ID único basado en timestamp
+        evaluator,
+        email,
         name,
         rut,
-        age,
-        birthdate,
         contactNumber,
         patientEmail,
         nationality,
+        age,
+        birthdate,
         civilStatus,
         education,
         address,
@@ -134,7 +98,6 @@ function savePatient() {
         remoteAnamnesis,
         habitsHobbies,
         homeSupport,
-        evaluator,
         psfs1,
         psfs2,
         psfs3,
@@ -160,14 +123,13 @@ function savePatient() {
     // Limpiar formulario
     document.getElementById('patientForm').reset();
     
+    // Reiniciar valores de los deslizadores
+    document.getElementById('psfs1Value').textContent = '5';
+    document.getElementById('psfs2Value').textContent = '5';
+    document.getElementById('psfs3Value').textContent = '5';
+    
     // Recargar lista de pacientes
     loadPatients();
-}
-
-// Función para obtener pacientes del localStorage
-function getPatients() {
-    const patientsJSON = localStorage.getItem('patients');
-    return patientsJSON ? JSON.parse(patientsJSON) : [];
 }
 
 // Función para cargar pacientes en la lista
@@ -176,41 +138,45 @@ function loadPatients() {
     if (!patientsList) return;
     
     const patients = getPatients();
-
+    
     // Limpiar lista actual
     patientsList.innerHTML = '';
-
+    
     // Si no hay pacientes, mostrar mensaje
     if (patients.length === 0) {
-        patientsList.innerHTML = '<div class="alert alert-warning">No hay pacientes registrados.</div>';
+        patientsList.innerHTML = '<div class="alert alert-info">No hay pacientes registrados. Complete el formulario para agregar un nuevo paciente.</div>';
         return;
     }
-
+    
     // Agregar cada paciente a la lista
     patients.forEach(patient => {
         const patientCard = document.createElement('div');
         patientCard.className = 'card patient-card mb-3';
         patientCard.innerHTML = `
             <div class="card-body">
-                <h5 class="card-title">${patient.name || 'Sin nombre'}</h5>
-                <p class="card-text">
-                    <strong>RUT:</strong> ${patient.rut || 'No especificado'}<br>
-                    <strong>Edad:</strong> ${patient.age || 'No especificada'} años<br>
-                    <strong>Motivo de consulta:</strong> ${patient.consultReason ? (patient.consultReason.length > 50 ? patient.consultReason.substring(0, 50) + '...' : patient.consultReason) : 'No especificado'}
-                </p>
-                <div class="d-flex justify-content-between">
-                    <button class="btn btn-primary btn-sm view-details" data-patient-id="${patient.id}">
-                        Ver detalles
-                    </button>
-                    <button class="btn btn-danger btn-sm delete-patient" data-patient-id="${patient.id}">
-                        Eliminar
-                    </button>
+                <div class="row">
+                    <div class="col-md-9">
+                        <h5 class="card-title">${patient.name || 'Sin nombre'}</h5>
+                        <p class="card-text">
+                            <strong>RUT:</strong> ${patient.rut || 'No especificado'}<br>
+                            <strong>Edad:</strong> ${patient.age || 'No especificada'} años<br>
+                            <strong>Motivo de consulta:</strong> ${patient.consultReason ? (patient.consultReason.length > 50 ? patient.consultReason.substring(0, 50) + '...' : patient.consultReason) : 'No especificado'}
+                        </p>
+                    </div>
+                    <div class="col-md-3 d-flex flex-column justify-content-center">
+                        <button class="btn btn-primary btn-sm mb-2 view-details" data-patient-id="${patient.id}">
+                            <i class="fas fa-eye"></i> Ver detalles
+                        </button>
+                        <button class="btn btn-danger btn-sm delete-patient" data-patient-id="${patient.id}">
+                            <i class="fas fa-trash"></i> Eliminar
+                        </button>
+                    </div>
                 </div>
             </div>
         `;
         patientsList.appendChild(patientCard);
     });
-
+    
     // Agregar event listeners a los botones
     document.querySelectorAll('.view-details').forEach(button => {
         button.addEventListener('click', function() {
@@ -218,7 +184,7 @@ function loadPatients() {
             showPatientDetails(patientId);
         });
     });
-
+    
     document.querySelectorAll('.delete-patient').forEach(button => {
         button.addEventListener('click', function() {
             const patientId = this.getAttribute('data-patient-id');
@@ -226,200 +192,210 @@ function loadPatients() {
         });
     });
 }
-
-// Función para mostrar detalles del paciente
 // Función para mostrar detalles del paciente
 function showPatientDetails(patientId) {
     const patients = getPatients();
     const patient = patients.find(p => p.id === patientId);
-
+    
     if (!patient) {
         alert('Paciente no encontrado');
         return;
     }
-
-    const detailsContent = document.getElementById('patientDetailsContent');
-    if (!detailsContent) return;
     
-    // Formatear la fecha de creación
+    const modal = new bootstrap.Modal(document.getElementById('patientDetailsModal'));
+    const modalContent = document.getElementById('patientDetailsContent');
+    
+    // Formatear fecha de creación
     const createdDate = patient.createdAt ? new Date(patient.createdAt).toLocaleDateString() : 'No disponible';
-
-    // Construir el contenido HTML con todos los detalles del paciente
-    detailsContent.innerHTML = `
-        <div class="container">
+    
+    // Construir contenido del modal con todos los detalles del paciente
+    modalContent.innerHTML = `
+        <div class="container-fluid">
             <div class="row mb-4">
                 <div class="col-12">
-                    <h4 class="border-bottom pb-2 text-primary">Información Personal</h4>
+                    <h4 class="text-primary">Información Personal</h4>
+                    <hr>
                 </div>
                 <div class="col-md-6">
                     <p><strong>Nombre:</strong> ${patient.name || 'No especificado'}</p>
                     <p><strong>RUT:</strong> ${patient.rut || 'No especificado'}</p>
                     <p><strong>Edad:</strong> ${patient.age || 'No especificada'} años</p>
                     <p><strong>Fecha de nacimiento:</strong> ${patient.birthdate || 'No especificada'}</p>
-                    <p><strong>Estado civil:</strong> ${patient.civilStatus || 'No especificado'}</p>
-                    <p><strong>Nivel educacional:</strong> ${patient.education || 'No especificado'}</p>
-                </div>
-                <div class="col-md-6">
                     <p><strong>Teléfono:</strong> ${patient.contactNumber || 'No especificado'}</p>
                     <p><strong>Email:</strong> ${patient.patientEmail || 'No especificado'}</p>
+                </div>
+                <div class="col-md-6">
                     <p><strong>Nacionalidad:</strong> ${patient.nationality || 'No especificada'}</p>
+                    <p><strong>Estado civil:</strong> ${patient.civilStatus || 'No especificado'}</p>
+                    <p><strong>Nivel educacional:</strong> ${patient.education || 'No especificado'}</p>
                     <p><strong>Dirección:</strong> ${patient.address || 'No especificada'}</p>
-                    <p><strong>Contacto de emergencia:</strong> ${patient.emergencyContact || 'No especificado'}</p>
+                    <p><strong>Contacto emergencia:</strong> ${patient.emergencyContact || 'No especificado'}</p>
                     <p><strong>Lateralidad:</strong> ${patient.laterality || 'No especificada'}</p>
                 </div>
             </div>
 
             <div class="row mb-4">
                 <div class="col-12">
-                    <h4 class="border-bottom pb-2 text-primary">Información Clínica</h4>
+                    <h4 class="text-primary">Información Clínica</h4>
+                    <hr>
                 </div>
-                <div class="col-md-6">
+                <div class="col-md-12">
                     <p><strong>Evaluador:</strong> ${patient.evaluator || 'No especificado'}</p>
                     <p><strong>Fecha de evaluación:</strong> ${createdDate}</p>
+                    <p><strong>Ocupación:</strong> ${patient.occupation || 'No especificada'}</p>
                     <p><strong>Motivo de consulta:</strong> ${patient.consultReason || 'No especificado'}</p>
                     <p><strong>Diagnóstico:</strong> ${patient.diagnosis || 'No especificado'}</p>
-                </div>
-                <div class="col-md-6">
-                    <p><strong>Ocupación:</strong> ${patient.occupation || 'No especificada'}</p>
                     <p><strong>Expectativas:</strong> ${patient.expectations || 'No especificadas'}</p>
                 </div>
             </div>
 
             <div class="row mb-4">
                 <div class="col-12">
-                    <h4 class="border-bottom pb-2 text-primary">Anamnesis</h4>
-                    <p><strong>Anamnesis próxima:</strong></p>
-                    <p class="text-muted">${patient.proximateAnamnesis || 'No especificada'}</p>
-                    <p><strong>Anamnesis remota:</strong></p>
-                    <p class="text-muted">${patient.remoteAnamnesis || 'No especificada'}</p>
+                    <h4 class="text-primary">Anamnesis</h4>
+                    <hr>
+                </div>
+                <div class="col-md-6">
+                    <h5>Anamnesis próxima</h5>
+                    <p>${patient.proximateAnamnesis || 'No especificada'}</p>
+                </div>
+                <div class="col-md-6">
+                    <h5>Anamnesis remota</h5>
+                    <p>${patient.remoteAnamnesis || 'No especificada'}</p>
                 </div>
             </div>
 
             <div class="row mb-4">
                 <div class="col-12">
-                    <h4 class="border-bottom pb-2 text-primary">Hábitos y Entorno</h4>
-                    <p><strong>Hábitos y hobbies:</strong></p>
-                    <p class="text-muted">${patient.habitsHobbies || 'No especificados'}</p>
-                    <p><strong>Hogar y red de apoyo:</strong></p>
-                    <p class="text-muted">${patient.homeSupport || 'No especificados'}</p>
+                    <h4 class="text-primary">Hábitos y Entorno</h4>
+                    <hr>
+                </div>
+                <div class="col-md-6">
+                    <h5>Hábitos y hobbies</h5>
+                    <p>${patient.habitsHobbies || 'No especificados'}</p>
+                </div>
+                <div class="col-md-6">
+                    <h5>Hogar y red de apoyo</h5>
+                    <p>${patient.homeSupport || 'No especificados'}</p>
                 </div>
             </div>
 
             <div class="row mb-4">
                 <div class="col-12">
-                    <h4 class="border-bottom pb-2 text-primary">Cuestionarios</h4>
-                    <div class="mb-3">
-                        <p><strong>PSFS 1:</strong> ${patient.psfs1?.activity || 'No especificada'} - Valoración: ${patient.psfs1?.rating || 'N/A'}/10</p>
-                    </div>
-                    <div class="mb-3">
-                        <p><strong>PSFS 2:</strong> ${patient.psfs2?.activity || 'No especificada'} - Valoración: ${patient.psfs2?.rating || 'N/A'}/10</p>
-                    </div>
-                    <div class="mb-3">
-                        <p><strong>PSFS 3:</strong> ${patient.psfs3?.activity || 'No especificada'} - Valoración: ${patient.psfs3?.rating || 'N/A'}/10</p>
-                    </div>
-                    <div class="mb-3">
-                        <p><strong>Cuestionarios adicionales:</strong></p>
-                        <p class="text-muted">${patient.extraQuestionnaire || 'No especificados'}</p>
-                    </div>
+                    <h4 class="text-primary">Cuestionarios</h4>
+                    <hr>
+                </div>
+                <div class="col-md-12">
+                    ${patient.psfs1 && patient.psfs1.activity ? 
+                        `<p><strong>PSFS 1:</strong> ${patient.psfs1.activity} - Valoración: ${patient.psfs1.rating}/10</p>` : 
+                        '<p><strong>PSFS 1:</strong> No especificado</p>'
+                    }
+                    ${patient.psfs2 && patient.psfs2.activity ? 
+                        `<p><strong>PSFS 2:</strong> ${patient.psfs2.activity} - Valoración: ${patient.psfs2.rating}/10</p>` : 
+                        '<p><strong>PSFS 2:</strong> No especificado</p>'
+                    }
+                    ${patient.psfs3 && patient.psfs3.activity ? 
+                        `<p><strong>PSFS 3:</strong> ${patient.psfs3.activity} - Valoración: ${patient.psfs3.rating}/10</p>` : 
+                        '<p><strong>PSFS 3:</strong> No especificado</p>'
+                    }
+                    <h5>Cuestionarios adicionales</h5>
+                    <p>${patient.extraQuestionnaire || 'No especificados'}</p>
                 </div>
             </div>
 
             <div class="row mb-4">
                 <div class="col-12">
-                    <h4 class="border-bottom pb-2 text-primary">Evaluación Física</h4>
-                    <p><strong>Signos vitales:</strong></p>
-                    <p class="text-muted">${patient.vitalSigns || 'No especificados'}</p>
-                    <p><strong>Antropometría:</strong></p>
-                    <p class="text-muted">${patient.anthropometry || 'No especificada'}</p>
-                    <p><strong>Examen físico:</strong></p>
-                    <p class="text-muted">${patient.physicalExam || 'No especificado'}</p>
+                    <h4 class="text-primary">Evaluación Física</h4>
+                    <hr>
+                </div>
+                <div class="col-md-4">
+                    <h5>Signos vitales</h5>
+                    <p>${patient.vitalSigns || 'No especificados'}</p>
+                </div>
+                <div class="col-md-4">
+                    <h5>Antropometría</h5>
+                    <p>${patient.anthropometry || 'No especificada'}</p>
+                </div>
+                <div class="col-md-4">
+                    <h5>Examen físico</h5>
+                    <p>${patient.physicalExam || 'No especificado'}</p>
                 </div>
             </div>
         </div>
     `;
-
+    
     // Configurar el botón de exportar PDF
     const exportButton = document.getElementById('exportPatientButton');
     if (exportButton) {
-        exportButton.setAttribute('data-patient-id', patientId);
+        exportButton.onclick = function() {
+            exportPatientToPDF(patientId);
+        };
     }
-
-    // Mostrar el modal
-    const modal = new bootstrap.Modal(document.getElementById('patientDetailsModal'));
-    modal.show();
-}
-
-    // Configurar el botón de exportar PDF
-    const exportButton = document.getElementById('exportPatientButton');
-    if (exportButton) {
-        exportButton.setAttribute('data-patient-id', patientId);
-    }
-
-    // Mostrar el modal
-    const modal = new bootstrap.Modal(document.getElementById('patientDetailsModal'));
+    
     modal.show();
 }
 
 // Función para eliminar un paciente
 function deletePatient(patientId) {
-    if (confirm('¿Está seguro de que desea eliminar este paciente? Esta acción no se puede deshacer.')) {
-        let patients = getPatients();
-        patients = patients.filter(p => p.id !== patientId);
-        localStorage.setItem('patients', JSON.stringify(patients));
+    if (confirm('¿Estás seguro de que deseas eliminar este paciente? Esta acción no se puede deshacer.')) {
+        const patients = getPatients();
+        const updatedPatients = patients.filter(p => p.id !== patientId);
+        localStorage.setItem('patients', JSON.stringify(updatedPatients));
         loadPatients();
     }
 }
 
 // Función para buscar pacientes
 function searchPatients() {
-    const searchInput = document.getElementById('searchInput');
-    if (!searchInput) return;
-    
-    const searchTerm = searchInput.value.toLowerCase();
+    const searchInput = document.getElementById('searchInput').value.toLowerCase();
     const patients = getPatients();
     const patientsList = document.getElementById('patientsList');
+    
     if (!patientsList) return;
-
+    
     // Limpiar lista actual
     patientsList.innerHTML = '';
-
+    
     // Filtrar pacientes según el término de búsqueda
     const filteredPatients = patients.filter(patient => 
-        (patient.name && patient.name.toLowerCase().includes(searchTerm)) || 
-        (patient.rut && patient.rut.toLowerCase().includes(searchTerm))
+        (patient.name && patient.name.toLowerCase().includes(searchInput)) || 
+        (patient.rut && patient.rut.toLowerCase().includes(searchInput))
     );
-
+    
     // Si no hay resultados, mostrar mensaje
     if (filteredPatients.length === 0) {
-        patientsList.innerHTML = '<div class="alert alert-warning">No se encontraron pacientes que coincidan con la búsqueda.</div>';
+        patientsList.innerHTML = '<div class="alert alert-info">No se encontraron pacientes que coincidan con la búsqueda.</div>';
         return;
     }
-
+    
     // Mostrar pacientes filtrados
     filteredPatients.forEach(patient => {
         const patientCard = document.createElement('div');
         patientCard.className = 'card patient-card mb-3';
         patientCard.innerHTML = `
             <div class="card-body">
-                <h5 class="card-title">${patient.name || 'Sin nombre'}</h5>
-                <p class="card-text">
-                    <strong>RUT:</strong> ${patient.rut || 'No especificado'}<br>
-                    <strong>Edad:</strong> ${patient.age || 'No especificada'} años<br>
-                    <strong>Motivo de consulta:</strong> ${patient.consultReason ? (patient.consultReason.length > 50 ? patient.consultReason.substring(0, 50) + '...' : patient.consultReason) : 'No especificado'}
-                </p>
-                <div class="d-flex justify-content-between">
-                    <button class="btn btn-primary btn-sm view-details" data-patient-id="${patient.id}">
-                        Ver detalles
-                    </button>
-                    <button class="btn btn-danger btn-sm delete-patient" data-patient-id="${patient.id}">
-                        Eliminar
-                    </button>
+                <div class="row">
+                    <div class="col-md-9">
+                        <h5 class="card-title">${patient.name || 'Sin nombre'}</h5>
+                        <p class="card-text">
+                            <strong>RUT:</strong> ${patient.rut || 'No especificado'}<br>
+                            <strong>Edad:</strong> ${patient.age || 'No especificada'} años<br>
+                            <strong>Motivo de consulta:</strong> ${patient.consultReason ? (patient.consultReason.length > 50 ? patient.consultReason.substring(0, 50) + '...' : patient.consultReason) : 'No especificado'}
+                        </p>
+                    </div>
+                    <div class="col-md-3 d-flex flex-column justify-content-center">
+                        <button class="btn btn-primary btn-sm mb-2 view-details" data-patient-id="${patient.id}">
+                            <i class="fas fa-eye"></i> Ver detalles
+                        </button>
+                        <button class="btn btn-danger btn-sm delete-patient" data-patient-id="${patient.id}">
+                            <i class="fas fa-trash"></i> Eliminar
+                        </button>
+                    </div>
                 </div>
             </div>
         `;
         patientsList.appendChild(patientCard);
     });
-
+    
     // Agregar event listeners a los botones
     document.querySelectorAll('.view-details').forEach(button => {
         button.addEventListener('click', function() {
@@ -427,7 +403,7 @@ function searchPatients() {
             showPatientDetails(patientId);
         });
     });
-
+    
     document.querySelectorAll('.delete-patient').forEach(button => {
         button.addEventListener('click', function() {
             const patientId = this.getAttribute('data-patient-id');
@@ -659,103 +635,58 @@ function exportPatientToPDF(patientId) {
         doc.setFontSize(10);
         doc.setTextColor(150, 150, 150);
         doc.text(`Página ${i} de ${totalPages}`, 105, 290, { align: 'center' });
-        doc.text('Sistema de Fichas Clínicas Kinesiológicas', 105, 297, { align: 'center' });
+        doc.text('Sistema de Fichas Clínicas Kinesiológicas', 105, 280, { align: 'center' });
     }
     
     // Guardar el PDF
-    doc.save(`Ficha_${patient.name || 'Paciente'}_${patient.rut || 'SinRUT'}.pdf`);
+    doc.save(`Ficha_${patient.name || 'Paciente'}_${patient.rut || ''}.pdf`);
 }
 
-// Función para exportar todos los pacientes a PDF
-function exportAllPatients() {
-    const patients = getPatients();
-    
-    if (patients.length === 0) {
-        alert('No hay pacientes para exportar');
-        return;
-    }
-    
-    // Verificar que jsPDF esté disponible
-    if (typeof window.jspdf === 'undefined') {
-        alert('La biblioteca jsPDF no está cargada correctamente. No se puede exportar a PDF.');
-        return;
-    }
-    
-    // Inicializar jsPDF
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
-    
-    // Configurar el documento
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(16);
-    doc.text('Listado de Pacientes', 105, 15, { align: 'center' });
-    
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(12);
-    
-    let yPos = 30;
-    
-    // Agregar cada paciente al PDF
-    patients.forEach((patient, index) => {
-        // Si no hay espacio suficiente, agregar nueva página
-        if (yPos > 270) {
-            doc.addPage();
-            yPos = 20;
-        }
-        
-        doc.setFont('helvetica', 'bold');
-        doc.text(`Paciente ${index + 1}:`, 14, yPos);
-        yPos += 7;
-        
-        doc.setFont('helvetica', 'normal');
-        doc.text(`Nombre: ${patient.name || 'No especificado'}`, 14, yPos);
-        yPos += 7;
-        
-        doc.text(`RUT: ${patient.rut || 'No especificado'}`, 14, yPos);
-        yPos += 7;
-        
-        doc.text(`Edad: ${patient.age || 'No especificada'} años`, 14, yPos);
-        yPos += 7;
-        
-        doc.text(`Motivo de consulta: ${patient.consultReason || 'No especificado'}`, 14, yPos);
-        yPos += 12; // Espacio adicional entre pacientes
-    });
-    
-    // Guardar el PDF
-    doc.save('Listado_Pacientes.pdf');
-}
-// Función para actualizar el valor mostrado de los controles deslizantes
-function updateRatingValue(sliderId, valueId) {
-    const slider = document.getElementById(sliderId);
-    const valueDisplay = document.getElementById(valueId);
-    
-    // Actualizar el valor inicial al cargar la página
-    if (slider && valueDisplay) {
-        valueDisplay.textContent = slider.value;
-        
-        // Agregar evento para actualizar el valor cuando cambia el deslizador
-        slider.addEventListener('input', function() {
-            valueDisplay.textContent = this.value;
-        });
-    }
-}
-
-// Inicializar los controles deslizantes cuando se carga la página
+// Inicializar los controles deslizantes y eventos cuando se carga la página
 document.addEventListener('DOMContentLoaded', function() {
-    // Inicializar los controles deslizantes PSFS
+    // Inicializar los valores de los deslizadores
     updateRatingValue('psfs1Rating', 'psfs1Value');
     updateRatingValue('psfs2Rating', 'psfs2Value');
     updateRatingValue('psfs3Rating', 'psfs3Value');
     
-    // Configurar el evento submit del formulario
-    const form = document.getElementById('patientForm');
-    if (form) {
-        form.addEventListener('submit', function(e) {
+    // Cargar la lista de pacientes
+    loadPatients();
+    
+    // Configurar el evento de envío del formulario
+    const patientForm = document.getElementById('patientForm');
+    if (patientForm) {
+        patientForm.addEventListener('submit', function(e) {
             e.preventDefault();
             savePatient();
         });
     }
     
-    // Cargar pacientes existentes
-    loadPatients();
+    // Configurar el botón de búsqueda
+    const searchButton = document.getElementById('searchButton');
+    if (searchButton) {
+        searchButton.addEventListener('click', searchPatients);
+    }
+    
+    // Configurar el campo de búsqueda para buscar al presionar Enter
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) {
+        searchInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                searchPatients();
+            }
+        });
+    }
+    
+    // Configurar el botón de exportar todos
+    const exportAllButton = document.getElementById('exportAllButton');
+    if (exportAllButton) {
+        exportAllButton.addEventListener('click', function() {
+            const patients = getPatients();
+            if (patients.length === 0) {
+                alert('No hay pacientes para exportar.');
+                return;
+            }
+            alert('Funcionalidad de exportar todos los pacientes en desarrollo.');
+        });
+    }
 });
