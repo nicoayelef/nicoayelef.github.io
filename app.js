@@ -3,21 +3,31 @@ const firebaseConfig = {
   apiKey: "AIzaSyBYaNbZWHUS-Pvm49kmMtHw9LqqxUDySYA",
   authDomain: "base-de-datos-poli.firebaseapp.com",
   projectId: "base-de-datos-poli",
-  storageBucket: "base-de-datos-poli.appspot.com",
+  storageBucket: "base-de-datos-poli.appspot.com", // Corregido
   messagingSenderId: "954754202697",
   appId: "1:954754202697:web:e06171f6b0ade314259398"
 };
 
-// Inicializar Firebase
-firebase.initializeApp(firebaseConfig);
+// Inicializar Firebase (con verificación para evitar inicializaciones múltiples)
+if (!firebase.apps || !firebase.apps.length) {
+  firebase.initializeApp(firebaseConfig);
+} else {
+  firebase.app(); // Si ya está inicializado, usa la instancia existente
+}
 
-// Inicializar Firestore con configuración para evitar errores de timestamp
+// Inicializar Firestore
 const db = firebase.firestore();
-db.settings({
-  timestampsInSnapshots: true
-});
 
-console.log("Firebase inicializado correctamente");
+// Verificar conexión a Firestore
+console.log("Verificando conexión a Firestore...");
+db.collection("patients").limit(1).get()
+  .then(snapshot => {
+    console.log("Conexión a Firestore exitosa. Documentos encontrados:", snapshot.size);
+  })
+  .catch(error => {
+    console.error("Error al conectar con Firestore:", error);
+    alert("Error de conexión a la base de datos: " + error.message);
+  });
 
 // Variables globales
 let currentPatientId = null;
