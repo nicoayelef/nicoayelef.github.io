@@ -1,3 +1,4 @@
+// Función para actualizar el valor mostrado de los sliders de valoración
 function updateRatingValue(sliderId, valueId) {
     const slider = document.getElementById(sliderId);
     const valueDisplay = document.getElementById(valueId);
@@ -6,14 +7,10 @@ function updateRatingValue(sliderId, valueId) {
         // Actualizar el valor inicial
         valueDisplay.textContent = slider.value;
         
-        // Eliminar eventos anteriores para evitar duplicados
-        const newSlider = slider.cloneNode(true);
-        slider.parentNode.replaceChild(newSlider, slider);
-        
         // Agregar evento para actualizar cuando cambia el deslizador
-        newSlider.addEventListener('input', function() {
-            document.getElementById(valueId).textContent = this.value;
-        });
+        slider.oninput = function() {
+            valueDisplay.textContent = this.value;
+        };
     } else {
         console.error(`Elementos no encontrados: slider=${sliderId}, value=${valueId}`);
     }
@@ -110,7 +107,7 @@ function savePatient(e) {
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 `;
                 
-                const formContainer = document.querySelector('.tab-pane.active');
+                const formContainer = document.querySelector('.form-container');
                 if (formContainer) {
                     formContainer.insertBefore(alertContainer, formContainer.firstChild);
                 }
@@ -146,7 +143,7 @@ function savePatient(e) {
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 `;
                 
-                const formContainer = document.querySelector('.tab-pane.active');
+                const formContainer = document.querySelector('.form-container');
                 if (formContainer) {
                     formContainer.insertBefore(alertContainer, formContainer.firstChild);
                 }
@@ -387,6 +384,7 @@ function showPatientDetails(patientId) {
             alert('Error al obtener detalles del paciente: ' + error.message);
         });
 }
+
 // Función para eliminar un paciente
 function deletePatient(patientId) {
     if (confirm('¿Estás seguro de que deseas eliminar este paciente? Esta acción no se puede deshacer.')) {
@@ -492,250 +490,7 @@ function searchPatients() {
             patientsList.innerHTML = `<div class="alert alert-danger">Error al buscar pacientes: ${error.message}</div>`;
         });
 }
-function exportPatientToPDF(patientId) {
-    // Verificar que jsPDF esté disponible
-    if (typeof jspdf === 'undefined') {
-        alert('La biblioteca jsPDF no está cargada correctamente. No se puede exportar a PDF.');
-        return;
-    }
-    
-    // Obtener paciente de Firestore
-    db.collection("patients").doc(patientId).get()
-        .then((doc) => {
-            if (doc.exists) {
-                const patient = doc.data();
-                patient.id = doc.id;
-                
-                try {
-                    // Crear nuevo documento PDF
-                    const pdf = new jspdf.jsPDF();
-                    
-                    // Variables para controlar la posición
-                    let y = 20;
-                    const pageWidth = pdf.internal.pageSize.width;
-                    const margin = 20;
-                    const contentWidth = pageWidth - 2 * margin;
-                    
-                    // Función para agregar texto con saltos de línea automáticos
-                    function addWrappedText(text, x, y, maxWidth, lineHeight) {
-                        if (!text) return y;
-                        
-                        const lines = pdf.splitTextToSize(text, maxWidth);
-                        pdf.text(lines, x, y);
-                        return y + (lines.length * lineHeight);
-                    }
-                    
-                    // Encabezado del documento
-                    pdf.setFontSize(18);
-                    pdf.setFont(undefined, 'bold');
-                    pdf.text('FICHA CLÍNICA KINESIOLÓGICA', pageWidth / 2, y, { align: 'center' });
-                    y += 10;
-                    
-                    // Información personal
-                    pdf.setFontSize(14);
-                    pdf.text('INFORMACIÓN PERSONAL', margin, y);
-                    y += 10;
-                    
-                    pdf.setFontSize(11);
-                    pdf.setFont(undefined, 'normal');
-                    
-                    // Información personal
-                    y = addWrappedText(`Nombre: ${patient.name || 'No especificado'}`, margin, y, contentWidth, 7);
-                    y = addWrappedText(`RUT: ${patient.rut || 'No especificado'}`, margin, y, contentWidth, 7);
-                    y = addWrappedText(`Edad: ${patient.age || 'No especificada'} años`, margin, y, contentWidth, 7);
-                    y = addWrappedText(`Fecha de nacimiento: ${patient.birthdate || 'No especificada'}`, margin, y, contentWidth, 7);
-                    y = addWrappedText(`Teléfono: ${patient.contactNumber || 'No especificado'}`, margin, y, contentWidth, 7);
-                    y = addWrappedText(`Email: ${patient.patientEmail || 'No especificado'}`, margin, y, contentWidth, 7);
-                    y = addWrappedText(`Nacionalidad: ${patient.nationality || 'No especificada'}`, margin, y, contentWidth, 7);
-                    y = addWrappedText(`Estado civil: ${patient.civilStatus || 'No especificado'}`, margin, y, contentWidth, 7);
-                    y = addWrappedText(`Nivel educacional: ${patient.education || 'No especificado'}`, margin, y, contentWidth, 7);
-                    y = addWrappedText(`Dirección: ${patient.address || 'No especificada'}`, margin, y, contentWidth, 7);
-                    y = addWrappedText(`Contacto emergencia: ${patient.emergencyContact || 'No especificado'}`, margin, y, contentWidth, 7);
-                    y = addWrappedText(`Lateralidad: ${patient.laterality || 'No especificada'}`, margin, y, contentWidth, 7);
-                    y = addWrappedText(`Ocupación: ${patient.occupation || 'No especificada'}`, margin, y, contentWidth, 7);
-                    
-                    y += 10;
-                    
-                    // Verificar si necesitamos una nueva página
-                    if (y > 250) {
-                        pdf.addPage();
-                        y = 20;
-                    }
-                    
-                    // Información clínica
-                    pdf.setFontSize(14);
-                    pdf.setFont(undefined, 'bold');
-                    pdf.text('INFORMACIÓN CLÍNICA', margin, y);
-                    y += 10;
-                    
-                    pdf.setFontSize(11);
-                    pdf.setFont(undefined, 'normal');
-                    
-                    y = addWrappedText(`Motivo de consulta: ${patient.consultReason || 'No especificado'}`, margin, y, contentWidth, 7);
-                    y = addWrappedText(`Diagnóstico: ${patient.diagnosis || 'No especificado'}`, margin, y, contentWidth, 7);
-                    y = addWrappedText(`Expectativas y metas: ${patient.expectations || 'No especificadas'}`, margin, y, contentWidth, 7);
-                    
-                    y += 10;
-                    
-                    // Verificar si necesitamos una nueva página
-                    if (y > 250) {
-                        pdf.addPage();
-                        y = 20;
-                    }
-                    
-                    // Anamnesis
-                    pdf.setFontSize(14);
-                    pdf.setFont(undefined, 'bold');
-                    pdf.text('ANAMNESIS', margin, y);
-                    y += 10;
-                    
-                    pdf.setFontSize(11);
-                    pdf.setFont(undefined, 'normal');
-                    
-                    y = addWrappedText(`Anamnesis próxima: ${patient.proximateAnamnesis || 'No especificada'}`, margin, y, contentWidth, 7);
-                    y = addWrappedText(`Anamnesis remota: ${patient.remoteAnamnesis || 'No especificada'}`, margin, y, contentWidth, 7);
-                    
-                    y += 10;
-                    
-                    // Verificar si necesitamos una nueva página
-                    if (y > 250) {
-                        pdf.addPage();
-                        y = 20;
-                    }
-                    
-                    // Hábitos y entorno
-                    pdf.setFontSize(14);
-                    pdf.setFont(undefined, 'bold');
-                    pdf.text('HÁBITOS Y ENTORNO', margin, y);
-                    y += 10;
-                    
-                    pdf.setFontSize(11);
-                    pdf.setFont(undefined, 'normal');
-                    
-                    y = addWrappedText(`Hábitos y hobbies: ${patient.habitsHobbies || 'No especificados'}`, margin, y, contentWidth, 7);
-                    y = addWrappedText(`Hogar y red de apoyo: ${patient.homeSupport || 'No especificados'}`, margin, y, contentWidth, 7);
-                    
-                    y += 10;
-                    
-                    // Verificar si necesitamos una nueva página
-                    if (y > 250) {
-                        pdf.addPage();
-                        y = 20;
-                    }
-                    
-                    // Cuestionarios PSFS
-                    pdf.setFontSize(14);
-                    pdf.setFont(undefined, 'bold');
-                    pdf.text('CUESTIONARIOS PSFS', margin, y);
-                    y += 10;
-                    
-                    pdf.setFontSize(11);
-                    pdf.setFont(undefined, 'normal');
-                    
-                    if (patient.psfs1 && patient.psfs1.activity) {
-                        y = addWrappedText(`PSFS 1: ${patient.psfs1.activity} - Puntuación: ${patient.psfs1.rating || 'No especificada'}`, margin, y, contentWidth, 7);
-                    }
-                    
-                    if (patient.psfs2 && patient.psfs2.activity) {
-                        y = addWrappedText(`PSFS 2: ${patient.psfs2.activity} - Puntuación: ${patient.psfs2.rating || 'No especificada'}`, margin, y, contentWidth, 7);
-                    }
-                    
-                    if (patient.psfs3 && patient.psfs3.activity) {
-                        y = addWrappedText(`PSFS 3: ${patient.psfs3.activity} - Puntuación: ${patient.psfs3.rating || 'No especificada'}`, margin, y, contentWidth, 7);
-                    }
-                    
-                    y = addWrappedText(`Cuestionario adicional: ${patient.extraQuestionnaire || 'No especificado'}`, margin, y, contentWidth, 7);
-                    
-                    y += 10;
-                    
-                    // Verificar si necesitamos una nueva página
-                    if (y > 250) {
-                        pdf.addPage();
-                        y = 20;
-                    }
-                    
-                    // Evaluación física
-                    pdf.setFontSize(14);
-                    pdf.setFont(undefined, 'bold');
-                    pdf.text('EVALUACIÓN FÍSICA', margin, y);
-                    y += 10;
-                    
-                    pdf.setFontSize(11);
-                    pdf.setFont(undefined, 'normal');
-                    
-                    y = addWrappedText(`Signos vitales: ${patient.vitalSigns || 'No especificados'}`, margin, y, contentWidth, 7);
-                    y = addWrappedText(`Antropometría: ${patient.anthropometry || 'No especificada'}`, margin, y, contentWidth, 7);
-                    y = addWrappedText(`Examen físico: ${patient.physicalExam || 'No especificado'}`, margin, y, contentWidth, 7);
-                    
-                    // Guardar el PDF
-                    pdf.save(`Ficha_${patient.name || 'Paciente'}_${patient.rut || ''}.pdf`);
-                    
-                } catch (error) {
-                    console.error("Error al generar PDF:", error);
-                    alert("Error al generar PDF: " + error.message);
-                }
-            } else {
-                alert('Paciente no encontrado');
-            }
-        })
-        .catch((error) => {
-            console.error("Error al obtener datos del paciente: ", error);
-            alert('Error al generar PDF: ' + error.message);
-        });
-} 
-// Inicializar los controles deslizantes y eventos cuando se carga la página
-document.addEventListener('DOMContentLoaded', function() {
-    console.log("DOM completamente cargado");
-    
-    // Inicializar los valores de los deslizadores
-    updateRatingValue('psfs1Rating', 'psfs1Value');
-    updateRatingValue('psfs2Rating', 'psfs2Value');
-    updateRatingValue('psfs3Rating', 'psfs3Value');
-    
-    // Configurar el evento de envío del formulario
-document.addEventListener('DOMContentLoaded', function() {
-    console.log("DOM cargado completamente");
-    
-    // Inicializar los valores de los deslizadores
-    updateRatingValue('psfs1Rating', 'psfs1Value');
-    updateRatingValue('psfs2Rating', 'psfs2Value');
-    updateRatingValue('psfs3Rating', 'psfs3Value');
-    
-    // Configurar el evento de envío del formulario
-    const patientForm = document.getElementById('patientForm');
-    console.log("Formulario encontrado:", patientForm);
-    
-    if (patientForm) {
-        patientForm.addEventListener('submit', function(e) {
-            console.log("Formulario enviado");
-            e.preventDefault(); // Evitar que el formulario se envíe de forma tradicional
-            savePatient(e);
-        });
-    } else {
-        console.error("No se encontró el formulario con ID 'patientForm'");
-    }
-    
-    // Cargar la lista de pacientes
-    loadPatients();
-    
-    // Configurar el botón de búsqueda
-    const searchButton = document.getElementById('searchButton');
-    if (searchButton) {
-        searchButton.addEventListener('click', searchPatients);
-    }
-    
-    // Configurar el botón de exportar todos
-    const exportAllButton = document.getElementById('exportAllButton');
-    if (exportAllButton) {
-        exportAllButton.addEventListener('click', function() {
-            const patients = getPatients();
-            if (patients.length === 0) {
-                alert('No hay pacientes para exportar.');
-                return;
-            }
-            alert('Funcionalidad de exportar todos los pacientes en desarrollo.');
-        });
-    }
+
 // Funciones para manejar evoluciones
 
 // Cargar pacientes en el selector
@@ -795,10 +550,8 @@ function loadPatientPSFS() {
                     psfsUpdateContainer.innerHTML = psfsHtml;
                     // Inicializar los sliders
                     document.querySelectorAll('.psfs-update-slider').forEach(slider => {
-                        updateRatingValue(slider.id, slider.value);
-                        slider.addEventListener('input', function() {
-                            updateRatingValue(this.id, this.value);
-                        });
+                        const valueId = slider.id.replace('Slider', 'Value');
+                        updateRatingValue(slider.id, valueId);
                     });
                 } else {
                     psfsUpdateContainer.innerHTML = '<p>Este paciente no tiene actividades PSFS registradas.</p>';
@@ -899,7 +652,75 @@ function saveEvolution(event) {
         });
 }
 
-// Cargar y mostrar evoluciones
+// Inicializar los controles deslizantes y eventos cuando se carga la página
+document.addEventListener('DOMContentLoaded', function() {
+    console.log("DOM completamente cargado");
+    
+    // Inicializar los valores de los deslizadores
+    updateRatingValue('psfs1Rating', 'psfs1Value');
+    updateRatingValue('psfs2Rating', 'psfs2Value');
+    updateRatingValue('psfs3Rating', 'psfs3Value');
+    
+    // Configurar el evento de envío del formulario
+    const patientForm = document.getElementById('patientForm');
+    console.log("Formulario encontrado:", patientForm);
+    
+    if (patientForm) {
+        patientForm.addEventListener('submit', function(e) {
+            console.log("Formulario enviado");
+            e.preventDefault(); // Evitar que el formulario se envíe de forma tradicional
+            savePatient(e);
+        });
+    } else {
+        console.error("No se encontró el formulario con ID 'patientForm'");
+    }
+    
+    // Cargar la lista de pacientes
+    loadPatients();
+    
+    // Configurar el botón de búsqueda
+    const searchButton = document.getElementById('searchButton');
+    if (searchButton) {
+        searchButton.addEventListener('click', searchPatients);
+    }
+    
+    // Cargar pacientes en el selector
+    loadPatientsIntoSelect();
+    
+    // Cargar evoluciones
+    loadEvolutions();
+    
+    // Event listener para el selector de pacientes
+    const patientSelect = document.getElementById('patientSelect');
+    if (patientSelect) {
+        patientSelect.addEventListener('change', loadPatientPSFS);
+    }
+    
+    // Event listener para el formulario de evolución
+    const evolutionForm = document.getElementById('evolutionForm');
+    if (evolutionForm) {
+        evolutionForm.addEventListener('submit', saveEvolution);
+    }
+    
+    // Event listener para la búsqueda de evoluciones
+    const searchEvolutionInput = document.getElementById('searchEvolution');
+    if (searchEvolutionInput) {
+        searchEvolutionInput.addEventListener('input', function() {
+            // Debounce para evitar muchas búsquedas
+            clearTimeout(this.searchTimeout);
+            this.searchTimeout = setTimeout(searchEvolutions, 500);
+        });
+    }
+});
+
+// Función para formatear fecha
+function formatDate(dateString) {
+    const options = { year: 'numeric', month: 'long', day: 'numeric' };
+    const date = new Date(dateString);
+    return date.toLocaleDateString('es-ES', options);
+}
+
+// Función para cargar y mostrar evoluciones
 function loadEvolutions() {
     const evolutionsTableBody = document.getElementById('evolutionsTableBody');
     if (!evolutionsTableBody) return;
@@ -972,14 +793,6 @@ function loadEvolutions() {
             evolutionsTableBody.innerHTML = '<tr><td colspan="4" class="text-center">Error al cargar evoluciones</td></tr>';
         });
 }
-
-// Formatear fecha para mostrar
-function formatDate(dateString) {
-    const options = { year: 'numeric', month: 'long', day: 'numeric' };
-    const date = new Date(dateString);
-    return date.toLocaleDateString('es-ES', options);
-}
-
 // Mostrar detalles de una evolución
 function showEvolutionDetails(evolutionId) {
     const evolutionDetailsContent = document.getElementById('evolutionDetailsContent');
@@ -1353,33 +1166,195 @@ function searchEvolutions() {
         });
 }
 
-// Inicializar eventos cuando se carga la página
-document.addEventListener('DOMContentLoaded', function() {
-    // Cargar pacientes en el selector
-    loadPatientsIntoSelect();
-    
-    // Cargar evoluciones
-    loadEvolutions();
-    
-    // Event listener para el selector de pacientes
-    const patientSelect = document.getElementById('patientSelect');
-    if (patientSelect) {
-        patientSelect.addEventListener('change', loadPatientPSFS);
+// Función para exportar paciente a PDF
+function exportPatientToPDF(patientId) {
+    // Verificar que jsPDF esté disponible
+    if (typeof jspdf === 'undefined') {
+        alert('La biblioteca jsPDF no está cargada correctamente. No se puede exportar a PDF.');
+        return;
     }
     
-    // Event listener para el formulario de evolución
-    const evolutionForm = document.getElementById('evolutionForm');
-    if (evolutionForm) {
-        evolutionForm.addEventListener('submit', saveEvolution);
-    }
-    
-    // Event listener para la búsqueda de evoluciones
-    const searchEvolutionInput = document.getElementById('searchEvolution');
-    if (searchEvolutionInput) {
-        searchEvolutionInput.addEventListener('input', function() {
-            // Debounce para evitar muchas búsquedas
-            clearTimeout(this.searchTimeout);
-            this.searchTimeout = setTimeout(searchEvolutions, 500);
+    // Obtener paciente de Firestore
+    db.collection("patients").doc(patientId).get()
+        .then((doc) => {
+            if (doc.exists) {
+                const patient = doc.data();
+                patient.id = doc.id;
+                
+                try {
+                    // Crear nuevo documento PDF
+                    const pdf = new jspdf.jsPDF();
+                    
+                    // Variables para controlar la posición
+                    let y = 20;
+                    const pageWidth = pdf.internal.pageSize.width;
+                    const margin = 20;
+                    const contentWidth = pageWidth - 2 * margin;
+                    
+                    // Función para agregar texto con saltos de línea automáticos
+                    function addWrappedText(text, x, y, maxWidth, lineHeight) {
+                        if (!text) return y;
+                        
+                        const lines = pdf.splitTextToSize(text, maxWidth);
+                        pdf.text(lines, x, y);
+                        return y + (lines.length * lineHeight);
+                    }
+                    
+                    // Encabezado del documento
+                    pdf.setFontSize(18);
+                    pdf.setFont(undefined, 'bold');
+                    pdf.text('FICHA CLÍNICA KINESIOLÓGICA', pageWidth / 2, y, { align: 'center' });
+                    y += 10;
+                    
+                    // Información personal
+                    pdf.setFontSize(14);
+                    pdf.text('INFORMACIÓN PERSONAL', margin, y);
+                    y += 10;
+                    
+                    pdf.setFontSize(11);
+                    pdf.setFont(undefined, 'normal');
+                    
+                    // Información personal
+                    y = addWrappedText(`Nombre: ${patient.name || 'No especificado'}`, margin, y, contentWidth, 7);
+                    y = addWrappedText(`RUT: ${patient.rut || 'No especificado'}`, margin, y, contentWidth, 7);
+                    y = addWrappedText(`Edad: ${patient.age || 'No especificada'} años`, margin, y, contentWidth, 7);
+                    y = addWrappedText(`Fecha de nacimiento: ${patient.birthdate || 'No especificada'}`, margin, y, contentWidth, 7);
+                    y = addWrappedText(`Teléfono: ${patient.contactNumber || 'No especificado'}`, margin, y, contentWidth, 7);
+                    y = addWrappedText(`Email: ${patient.patientEmail || 'No especificado'}`, margin, y, contentWidth, 7);
+                    y = addWrappedText(`Nacionalidad: ${patient.nationality || 'No especificada'}`, margin, y, contentWidth, 7);
+                    y = addWrappedText(`Estado civil: ${patient.civilStatus || 'No especificado'}`, margin, y, contentWidth, 7);
+                    y = addWrappedText(`Nivel educacional: ${patient.education || 'No especificado'}`, margin, y, contentWidth, 7);
+                    y = addWrappedText(`Dirección: ${patient.address || 'No especificada'}`, margin, y, contentWidth, 7);
+                    y = addWrappedText(`Contacto emergencia: ${patient.emergencyContact || 'No especificado'}`, margin, y, contentWidth, 7);
+                    y = addWrappedText(`Lateralidad: ${patient.laterality || 'No especificada'}`, margin, y, contentWidth, 7);
+                    y = addWrappedText(`Ocupación: ${patient.occupation || 'No especificada'}`, margin, y, contentWidth, 7);
+                    
+                    y += 10;
+                    
+                    // Verificar si necesitamos una nueva página
+                    if (y > 250) {
+                        pdf.addPage();
+                        y = 20;
+                    }
+                    
+                    // Información clínica
+                    pdf.setFontSize(14);
+                    pdf.setFont(undefined, 'bold');
+                    pdf.text('INFORMACIÓN CLÍNICA', margin, y);
+                    y += 10;
+                    
+                    pdf.setFontSize(11);
+                    pdf.setFont(undefined, 'normal');
+                    
+                    y = addWrappedText(`Motivo de consulta: ${patient.consultReason || 'No especificado'}`, margin, y, contentWidth, 7);
+                    y = addWrappedText(`Diagnóstico: ${patient.diagnosis || 'No especificado'}`, margin, y, contentWidth, 7);
+                    y = addWrappedText(`Expectativas y metas: ${patient.expectations || 'No especificadas'}`, margin, y, contentWidth, 7);
+                    
+                    y += 10;
+                    
+                    // Verificar si necesitamos una nueva página
+                    if (y > 250) {
+                        pdf.addPage();
+                        y = 20;
+                    }
+                    
+                    // Anamnesis
+                    pdf.setFontSize(14);
+                    pdf.setFont(undefined, 'bold');
+                    pdf.text('ANAMNESIS', margin, y);
+                    y += 10;
+                    
+                    pdf.setFontSize(11);
+                    pdf.setFont(undefined, 'normal');
+                    
+                    y = addWrappedText(`Anamnesis próxima: ${patient.proximateAnamnesis || 'No especificada'}`, margin, y, contentWidth, 7);
+                    y = addWrappedText(`Anamnesis remota: ${patient.remoteAnamnesis || 'No especificada'}`, margin, y, contentWidth, 7);
+                    
+                    y += 10;
+                    
+                    // Verificar si necesitamos una nueva página
+                    if (y > 250) {
+                        pdf.addPage();
+                        y = 20;
+                    }
+                    
+                    // Hábitos y entorno
+                    pdf.setFontSize(14);
+                    pdf.setFont(undefined, 'bold');
+                    pdf.text('HÁBITOS Y ENTORNO', margin, y);
+                    y += 10;
+                    
+                    pdf.setFontSize(11);
+                    pdf.setFont(undefined, 'normal');
+                    
+                    y = addWrappedText(`Hábitos y hobbies: ${patient.habitsHobbies || 'No especificados'}`, margin, y, contentWidth, 7);
+                    y = addWrappedText(`Hogar y red de apoyo: ${patient.homeSupport || 'No especificados'}`, margin, y, contentWidth, 7);
+                    
+                    y += 10;
+                    
+                    // Verificar si necesitamos una nueva página
+                    if (y > 250) {
+                        pdf.addPage();
+                        y = 20;
+                    }
+                    
+                    // Cuestionarios PSFS
+                    pdf.setFontSize(14);
+                    pdf.setFont(undefined, 'bold');
+                    pdf.text('CUESTIONARIOS PSFS', margin, y);
+                    y += 10;
+                    
+                    pdf.setFontSize(11);
+                    pdf.setFont(undefined, 'normal');
+                    
+                    if (patient.psfs1 && patient.psfs1.activity) {
+                        y = addWrappedText(`PSFS 1: ${patient.psfs1.activity} - Puntuación: ${patient.psfs1.rating || 'No especificada'}`, margin, y, contentWidth, 7);
+                    }
+                    
+                    if (patient.psfs2 && patient.psfs2.activity) {
+                        y = addWrappedText(`PSFS 2: ${patient.psfs2.activity} - Puntuación: ${patient.psfs2.rating || 'No especificada'}`, margin, y, contentWidth, 7);
+                    }
+                    
+                    if (patient.psfs3 && patient.psfs3.activity) {
+                        y = addWrappedText(`PSFS 3: ${patient.psfs3.activity} - Puntuación: ${patient.psfs3.rating || 'No especificada'}`, margin, y, contentWidth, 7);
+                    }
+                    
+                    y = addWrappedText(`Cuestionario adicional: ${patient.extraQuestionnaire || 'No especificado'}`, margin, y, contentWidth, 7);
+                    
+                    y += 10;
+                    
+                    // Verificar si necesitamos una nueva página
+                    if (y > 250) {
+                        pdf.addPage();
+                        y = 20;
+                    }
+                    
+                    // Evaluación física
+                    pdf.setFontSize(14);
+                    pdf.setFont(undefined, 'bold');
+                    pdf.text('EVALUACIÓN FÍSICA', margin, y);
+                    y += 10;
+                    
+                    pdf.setFontSize(11);
+                    pdf.setFont(undefined, 'normal');
+                    
+                    y = addWrappedText(`Signos vitales: ${patient.vitalSigns || 'No especificados'}`, margin, y, contentWidth, 7);
+                    y = addWrappedText(`Antropometría: ${patient.anthropometry || 'No especificada'}`, margin, y, contentWidth, 7);
+                    y = addWrappedText(`Examen físico: ${patient.physicalExam || 'No especificado'}`, margin, y, contentWidth, 7);
+                    
+                    // Guardar el PDF
+                    pdf.save(`Ficha_${patient.name || 'Paciente'}_${patient.rut || ''}.pdf`);
+                    
+                } catch (error) {
+                    console.error("Error al generar PDF:", error);
+                    alert("Error al generar PDF: " + error.message);
+                }
+            } else {
+                alert('Paciente no encontrado');
+            }
+        })
+        .catch((error) => {
+            console.error("Error al obtener datos del paciente: ", error);
+            alert('Error al generar PDF: ' + error.message);
         });
-    }    
-});
+}
