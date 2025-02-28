@@ -1,5 +1,16 @@
-// Inicializar Firebase Storage
-const storage = firebase.storage();
+// Variables globales
+let currentPatientId = null;
+let currentEvolutionId = null;
+
+// Función para convertir archivos a Base64
+function fileToBase64(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = error => reject(error);
+    });
+}
 
 // Función para actualizar el valor mostrado de los sliders de valoración
 function updateRatingValue(sliderId, valueId) {
@@ -19,104 +30,103 @@ function updateRatingValue(sliderId, valueId) {
     }
 }
 
-// Función para subir archivos a Firebase Storage
-async function uploadFiles(patientId, files) {
-  const uploadPromises = [];
-  const fileUrls = [];
-  
-  // Mostrar indicador de progreso
-  const progressContainer = document.createElement('div');
-  progressContainer.innerHTML = `
-    <div class="progress mt-2 mb-2">
-      <div class="progress-bar progress-bar-striped progress-bar-animated" 
-           role="progressbar" style="width: 0%" 
-           id="uploadProgressBar">0%</div>
-    </div>
-  `;
-  
-  const formContainer = document.querySelector('.form-container');
-  if (formContainer) {
-    formContainer.insertBefore(progressContainer, formContainer.firstChild);
-  }
-  
-  for (let i = 0; i < files.length; i++) {
-    const file = files[i];
-    // Verificar tamaño (5MB máximo)
-    if (file.size > 5 * 1024 * 1024) {
-      const alertContainer = document.createElement('div');
-      alertContainer.className = 'alert alert-warning alert-dismissible fade show mt-3';
-      alertContainer.role = 'alert';
-      alertContainer.innerHTML = `
-          <strong>Advertencia:</strong> El archivo ${file.name} excede el tamaño máximo de 5MB.
-          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-      `;
-      
-      if (formContainer) {
-          formContainer.insertBefore(alertContainer, formContainer.firstChild);
-      }
-      continue;
+// Función para procesar archivos (convertir a Base64)
+async function processFiles(files) {
+    if (!files || files.length === 0) return [];
+    
+    const processedFiles = [];
+    const largeFiles = [];
+    const MAX_SIZE = 1 * 1024 * 1024; // 1MB máximo para Base64
+    
+    // Mostrar indicador de progreso
+    const progressContainer = document.createElement('div');
+    progressContainer.innerHTML = `
+        <div class="progress mt-2 mb-2">
+            <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                role="progressbar" style="width: 0%" 
+                id="uploadProgressBar">0%</div>
+        </div>
+    `;
+    
+    const formContainer = document.querySelector('.form-container');
+    if (formContainer) {
+        formContainer.insertBefore(progressContainer, formContainer.firstChild);
     }
     
-    // Crear referencia única para el archivo
-    const timestamp = new Date().getTime();
-    const fileRef = storage.ref(`patients/${patientId}/exams/${timestamp}_${file.name}`);
-    
-    // Subir archivo
-    const uploadTask = fileRef.put(file);
-    
-    // Crear promesa para manejar la subida
-    const promise = new Promise((resolve, reject) => {
-      uploadTask.on('state_changed', 
-        (snapshot) => {
-          // Progreso de carga
-          const progress = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100);
-          const progressBar = document.getElementById('uploadProgressBar');
-          if (progressBar) {
+    for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        
+        // Actualizar barra de progreso
+        const progress = Math.round(((i + 1) / files.length) * 100);
+        const progressBar = document.getElementById('uploadProgressBar');
+        if (progressBar) {
             progressBar.style.width = progress + '%';
             progressBar.textContent = progress + '%';
-          }
-        },
-        (error) => {
-          // Error
-          console.error("Error al subir archivo:", error);
-          reject(error);
-        },
-        async () => {
-          // Completado exitosamente
-          const downloadUrl = await fileRef.getDownloadURL();
-          fileUrls.push({
-            name: file.name,
-            url: downloadUrl,
-            type: file.type,
-            uploadedAt: firebase.firestore.Timestamp.now()
-          });
-          resolve();
         }
-      );
-    });
+        
+        // Verificar tamaño
+        if (file.size > MAX_SIZE) {
+            largeFiles.push(file.name);
+            continue;
+        }
+        
+        try {
+            // Convertir a Base64
+            const base64Data = await fileToBase64(file);
+            
+            processedFiles.push({
+                name: file.name,
+                type: file.type,
+                url: base64Data, // Usar el mismo nombre de propiedad para compatibilidad
+                data: base64Data,
+                uploadedAt: firebase.firestore.Timestamp.now()
+            });
+        } catch (error) {
+            console.error("Error al convertir archivo a Base64:", error);
+            showAlert(`Error al procesar el archivo ${file.name}`, "danger");
+        }
+    }
     
-    uploadPromises.push(promise);
-  }
-  
-  // Esperar a que todas las cargas terminen
-  await Promise.all(uploadPromises);
-  
-  // Eliminar barra de progreso
-  if (progressContainer.parentNode) {
-    progressContainer.parentNode.removeChild(progressContainer);
-  }
-  
-  return fileUrls;
+    // Eliminar barra de progreso
+    if (progressContainer.parentNode) {
+        progressContainer.parentNode.removeChild(progressContainer);
+    }
+    
+    // Mostrar advertencia para archivos grandes
+    if (largeFiles.length > 0) {
+        showAlert(`Los siguientes archivos son demasiado grandes (>1MB) y no se guardarán: ${largeFiles.join(", ")}. Considere comprimir las imágenes antes de subirlas.`, "warning");
+    }
+    
+    return processedFiles;
 }
 
-// Función para obtener pacientes del localStorage
-function getPatients() {
-    const patientsJSON = localStorage.getItem('patients');
-    return patientsJSON ? JSON.parse(patientsJSON) : [];
+// Función para mostrar alertas
+function showAlert(message, type) {
+    const alertContainer = document.getElementById('alertContainer');
+    if (!alertContainer) {
+        console.error("Elemento alertContainer no encontrado");
+        return;
+    }
+    
+    const alert = document.createElement('div');
+    alert.className = `alert alert-${type} alert-dismissible fade show`;
+    alert.role = 'alert';
+    alert.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    `;
+    
+    alertContainer.appendChild(alert);
+    
+    // Auto-cerrar alertas después de 5 segundos
+    setTimeout(() => {
+        if (alert.parentNode) {
+            alert.parentNode.removeChild(alert);
+        }
+    }, 5000);
 }
-
 // Función para guardar un nuevo paciente
-function savePatient(e) {
+async function savePatient(e) {
     e.preventDefault();
     console.log("Función savePatient() ejecutada");
     
@@ -168,7 +178,7 @@ function savePatient(e) {
             vitalSigns: document.getElementById('vitalSigns').value,
             anthropometry: document.getElementById('anthropometry').value,
             physicalExam: document.getElementById('physicalExam').value,
-            createdAt: new Date().toISOString(),
+            createdAt: firebase.firestore.Timestamp.now(),
             complementaryExams: [] // Inicializar como array vacío
         };
         
@@ -185,30 +195,26 @@ function savePatient(e) {
         const fileInput = document.getElementById('medicalExams');
         const hasFiles = fileInput && fileInput.files && fileInput.files.length > 0;
         
+        // Procesar archivos si existen
+        let processedFiles = [];
+        if (hasFiles) {
+            try {
+                processedFiles = await processFiles(fileInput.files);
+            } catch (error) {
+                console.error("Error al procesar archivos:", error);
+                showAlert("Error al procesar archivos: " + error.message, "warning");
+            }
+        }
+        
+        // Añadir archivos procesados al objeto paciente
+        if (processedFiles.length > 0) {
+            patient.complementaryExams = processedFiles;
+        }
+        
         // Guardar en Firestore
         db.collection("patients").add(patient)
-            .then(async (docRef) => {
+            .then((docRef) => {
                 console.log("Paciente guardado con ID:", docRef.id);
-                const patientId = docRef.id;
-                
-                // Si hay archivos, subirlos
-                if (hasFiles) {
-                    try {
-                        // Subir archivos
-                        const fileUrls = await uploadFiles(patientId, fileInput.files);
-                        
-                        // Actualizar documento con las URLs
-                        if (fileUrls.length > 0) {
-                            await docRef.update({
-                                complementaryExams: fileUrls
-                            });
-                            console.log("Archivos subidos y documento actualizado");
-                        }
-                    } catch (error) {
-                        console.error("Error al subir archivos:", error);
-                        showAlert("Error al subir archivos: " + error.message, "warning");
-                    }
-                }
                 
                 // Restaurar botón
                 if (saveBtn) {
@@ -282,7 +288,13 @@ function loadPatients() {
                 const patient = doc.data();
                 patient.id = doc.id; // Guardar el ID del documento
                 
-                const createdDate = patient.createdAt ? new Date(patient.createdAt).toLocaleDateString() : 'No disponible';
+                // Formatear fecha de creación
+                let createdDate = 'No disponible';
+                if (patient.createdAt && patient.createdAt.toDate) {
+                    createdDate = patient.createdAt.toDate().toLocaleDateString();
+                } else if (patient.createdAt) {
+                    createdDate = new Date(patient.createdAt).toLocaleDateString();
+                }
                 
                 const row = document.createElement('tr');
                 row.innerHTML = `
@@ -325,71 +337,67 @@ function loadPatients() {
 
 // Función para mostrar los archivos del paciente
 function displayPatientFiles(files) {
-  if (!files || files.length === 0) return '';
-  
-  let filesHTML = `
-    <div class="row mb-4">
-      <div class="col-12">
-        <h4 class="text-primary">Archivos / Exámenes Complementarios</h4>
-        <hr>
-      </div>
-      <div class="col-12">
-        <div class="table-responsive">
-          <table class="table table-striped">
-            <thead>
-              <tr>
-                <th>Nombre</th>
-                <th>Tipo</th>
-                <th>Fecha de carga</th>
-                <th>Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-  `;
-  
-  files.forEach(file => {
-    // Determinar el icono según el tipo de archivo
-    let fileType = 'Documento';
-    if (file.type.includes('pdf')) {
-      fileType = 'PDF';
-    } else if (file.type.includes('image')) {
-      fileType = 'Imagen';
-    }
+    if (!files || files.length === 0) return '<p>No hay archivos adjuntos.</p>';
     
-    // Formatear la fecha de carga
-    let uploadDate = 'Fecha desconocida';
-    if (file.uploadedAt && file.uploadedAt.toDate) {
-      uploadDate = file.uploadedAt.toDate().toLocaleDateString();
-    }
+    let filesHTML = `
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Tipo</th>
+                        <th>Fecha de carga</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+    `;
+    
+    files.forEach(file => {
+        // Determinar el tipo de archivo
+        let fileType = 'Documento';
+        if (file.type && file.type.includes('pdf')) {
+            fileType = 'PDF';
+        } else if (file.type && file.type.includes('image')) {
+            fileType = 'Imagen';
+        }
+        
+        // Formatear la fecha de carga
+        let uploadDate = 'Fecha desconocida';
+        if (file.uploadedAt && file.uploadedAt.toDate) {
+            uploadDate = file.uploadedAt.toDate().toLocaleDateString();
+        } else if (file.uploadedAt) {
+            uploadDate = new Date(file.uploadedAt).toLocaleDateString();
+        }
+        
+        // Usar url o data (para compatibilidad)
+        const fileUrl = file.url || file.data || '';
+        
+        filesHTML += `
+            <tr>
+                <td>${file.name || 'Archivo sin nombre'}</td>
+                <td>${fileType}</td>
+                <td>${uploadDate}</td>
+                <td>
+                    <a href="${fileUrl}" target="_blank" class="btn btn-sm btn-primary me-2">
+                        <i class="fas fa-eye"></i> Ver
+                    </a>
+                    <a href="${fileUrl}" download="${file.name}" class="btn btn-sm btn-secondary">
+                        <i class="fas fa-download"></i> Descargar
+                    </a>
+                </td>
+            </tr>
+        `;
+    });
     
     filesHTML += `
-      <tr>
-        <td>${file.name}</td>
-        <td>${fileType}</td>
-        <td>${uploadDate}</td>
-        <td>
-          <a href="${file.url}" target="_blank" class="btn btn-sm btn-primary me-2">
-            <i class="fas fa-eye"></i> Ver
-          </a>
-          <a href="${file.url}" download="${file.name}" class="btn btn-sm btn-secondary">
-            <i class="fas fa-download"></i> Descargar
-          </a>
-        </td>
-      </tr>
-    `;
-  });
-  
-  filesHTML += `
             </tbody>
-          </table>
-        </div>
-      </div>
+        </table>
     </div>
-  `;
-  
-  return filesHTML;
+    `;
+    
+    return filesHTML;
 }
-
 // Función para mostrar detalles del paciente
 function showPatientDetails(patientId) {
     // Obtener paciente de Firestore
@@ -403,7 +411,12 @@ function showPatientDetails(patientId) {
                 const modalContent = document.getElementById('patientDetailsContent');
                 
                 // Formatear fecha de creación
-                const createdDate = patient.createdAt ? new Date(patient.createdAt).toLocaleDateString() : 'No disponible';
+                let createdDate = 'No disponible';
+                if (patient.createdAt && patient.createdAt.toDate) {
+                    createdDate = patient.createdAt.toDate().toLocaleDateString();
+                } else if (patient.createdAt) {
+                    createdDate = new Date(patient.createdAt).toLocaleDateString();
+                }
                 
                 // Construir contenido del modal con todas las secciones
                 modalContent.innerHTML = `
@@ -554,12 +567,12 @@ function showPatientDetails(patientId) {
                 
                 modal.show();
             } else {
-                alert('Paciente no encontrado');
+                showAlert('Paciente no encontrado', 'warning');
             }
         })
         .catch((error) => {
             console.error("Error al obtener detalles del paciente: ", error);
-            alert('Error al obtener detalles del paciente: ' + error.message);
+            showAlert('Error al obtener detalles del paciente: ' + error.message, 'danger');
         });
 }
 
@@ -570,35 +583,35 @@ function deletePatient(patientId) {
         db.collection("patients").doc(patientId).delete()
             .then(() => {
                 console.log("Paciente eliminado correctamente");
-                alert('Paciente eliminado correctamente');
+                showAlert('Paciente eliminado correctamente', 'success');
                 loadPatients();
             })
             .catch((error) => {
                 console.error("Error al eliminar paciente: ", error);
-                alert('Error al eliminar paciente: ' + error.message);
+                showAlert('Error al eliminar paciente: ' + error.message, 'danger');
             });
     }
 }
 
 // Función para buscar pacientes
 function searchPatients() {
-    const searchInput = document.getElementById('searchInput').value.toLowerCase();
-    const patientsList = document.getElementById('patientsList');
+    const searchInput = document.getElementById('searchPatient').value.toLowerCase();
+    if (!searchInput) {
+        loadPatients();
+        return;
+    }
     
-    if (!patientsList) return;
+    const patientsTableBody = document.getElementById('patientsTableBody');
+    if (!patientsTableBody) return;
     
-    // Limpiar lista actual
-    patientsList.innerHTML = '';
-    
-    // Mostrar mensaje de carga
-    patientsList.innerHTML = '<div class="alert alert-info">Buscando pacientes...</div>';
+    // Limpiar tabla actual
+    patientsTableBody.innerHTML = '<tr><td colspan="5" class="text-center">Buscando pacientes...</td></tr>';
     
     // Buscar en Firestore
-    // Nota: Firestore no permite búsquedas de texto completo, así que debemos obtener todos los documentos y filtrar en el cliente
     db.collection("patients").get()
         .then((querySnapshot) => {
             // Limpiar mensaje de carga
-            patientsList.innerHTML = '';
+            patientsTableBody.innerHTML = '';
             
             const filteredPatients = [];
             
@@ -615,37 +628,36 @@ function searchPatients() {
             
             // Si no hay resultados, mostrar mensaje
             if (filteredPatients.length === 0) {
-                patientsList.innerHTML = '<div class="alert alert-info">No se encontraron pacientes que coincidan con la búsqueda.</div>';
+                patientsTableBody.innerHTML = '<tr><td colspan="5" class="text-center">No se encontraron pacientes que coincidan con la búsqueda.</td></tr>';
                 return;
             }
             
             // Mostrar pacientes filtrados
             filteredPatients.forEach(patient => {
-                const patientCard = document.createElement('div');
-                patientCard.className = 'card patient-card mb-3';
-                patientCard.innerHTML = `
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-md-9">
-                                <h5 class="card-title">${patient.name || 'Sin nombre'}</h5>
-                                <p class="card-text">
-                                    <strong>RUT:</strong> ${patient.rut || 'No especificado'}<br>
-                                    <strong>Edad:</strong> ${patient.age || 'No especificada'} años<br>
-                                    <strong>Motivo de consulta:</strong> ${patient.consultReason ? (patient.consultReason.length > 50 ? patient.consultReason.substring(0, 50) + '...' : patient.consultReason) : 'No especificado'}
-                                </p>
-                            </div>
-                            <div class="col-md-3 d-flex flex-column justify-content-center">
-                                <button class="btn btn-primary btn-sm mb-2 view-details" data-patient-id="${patient.id}">
-                                    <i class="fas fa-eye"></i> Ver detalles
-                                </button>
-                                <button class="btn btn-danger btn-sm delete-patient" data-patient-id="${patient.id}">
-                                    <i class="fas fa-trash"></i> Eliminar
-                                </button>
-                            </div>
-                        </div>
-                    </div>
+                // Formatear fecha de creación
+                let createdDate = 'No disponible';
+                if (patient.createdAt && patient.createdAt.toDate) {
+                    createdDate = patient.createdAt.toDate().toLocaleDateString();
+                } else if (patient.createdAt) {
+                    createdDate = new Date(patient.createdAt).toLocaleDateString();
+                }
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${patient.name || 'Sin nombre'}</td>
+                    <td>${patient.rut || 'No especificado'}</td>
+                    <td>${patient.age || 'No especificada'}</td>
+                    <td>${createdDate}</td>
+                    <td>
+                        <button class="btn btn-primary btn-sm view-details" data-patient-id="${patient.id}">
+                            <i class="fas fa-eye"></i> Ver
+                        </button>
+                        <button class="btn btn-danger btn-sm delete-patient" data-patient-id="${patient.id}">
+                            <i class="fas fa-trash"></i> Eliminar
+                        </button>
+                    </td>
                 `;
-                patientsList.appendChild(patientCard);
+                patientsTableBody.appendChild(row);
             });
             
             // Agregar event listeners a los botones
@@ -665,7 +677,7 @@ function searchPatients() {
         })
         .catch((error) => {
             console.error("Error al buscar pacientes: ", error);
-            patientsList.innerHTML = `<div class="alert alert-danger">Error al buscar pacientes: ${error.message}</div>`;
+            patientsTableBody.innerHTML = `<tr><td colspan="5" class="text-center">Error al buscar pacientes: ${error.message}</td></tr>`;
         });
 }
 
@@ -680,19 +692,19 @@ function loadPatientsIntoSelect() {
     patientSelect.innerHTML = '<option value="">Seleccione un paciente</option>';
     
     // Obtener pacientes de Firestore
-    db.collection("patients").get()
+    db.collection("patients").orderBy("name").get()
         .then((querySnapshot) => {
             querySnapshot.forEach((doc) => {
                 const patient = doc.data();
                 const option = document.createElement('option');
                 option.value = doc.id;
-                option.textContent = `${patient.name} (${patient.rut})`;
+                option.textContent = `${patient.name || 'Sin nombre'} ${patient.rut ? `(${patient.rut})` : ''}`;
                 patientSelect.appendChild(option);
             });
         })
         .catch((error) => {
             console.error("Error cargando pacientes: ", error);
-            alert("Error al cargar la lista de pacientes");
+            showAlert("Error al cargar la lista de pacientes", "danger");
         });
 }
 
@@ -760,7 +772,6 @@ function createPSFSUpdateHtml(psfsId, activity, currentRating) {
         </div>
     `;
 }
-
 // Guardar una nueva evolución
 function saveEvolution(event) {
     event.preventDefault();
@@ -773,7 +784,7 @@ function saveEvolution(event) {
     const evaluator = document.getElementById('evolutionEvaluator').value;
     
     if (!patientId || !date || !progress || !treatment || !plan || !evaluator) {
-        alert('Por favor complete todos los campos requeridos');
+        showAlert('Por favor complete todos los campos requeridos', 'warning');
         return;
     }
     
@@ -785,7 +796,7 @@ function saveEvolution(event) {
         treatment: treatment,
         plan: plan,
         evaluator: evaluator,
-        createdAt: new Date().toISOString()
+        createdAt: firebase.firestore.Timestamp.now()
     };
     
     // Añadir actualizaciones de PSFS si existen
@@ -819,77 +830,16 @@ function saveEvolution(event) {
     // Guardar en Firestore
     db.collection("evolutions").add(evolution)
         .then((docRef) => {
-            alert('Evolución guardada correctamente');
+            showAlert('Evolución guardada correctamente', 'success');
             document.getElementById('evolutionForm').reset();
             document.getElementById('psfsUpdateContainer').innerHTML = '';
             loadEvolutions();
         })
         .catch((error) => {
             console.error("Error al guardar evolución: ", error);
-            alert('Error al guardar la evolución');
+            showAlert('Error al guardar la evolución: ' + error.message, 'danger');
         });
 }
-
-// Inicializar los controles deslizantes y eventos cuando se carga la página
-document.addEventListener('DOMContentLoaded', function() {
-    console.log("DOM completamente cargado");
-    
-    // Inicializar los valores de los deslizadores
-    updateRatingValue('psfs1Rating', 'psfs1Value');
-    updateRatingValue('psfs2Rating', 'psfs2Value');
-    updateRatingValue('psfs3Rating', 'psfs3Value');
-    
-    // Configurar el evento de envío del formulario
-    const patientForm = document.getElementById('patientForm');
-    console.log("Formulario encontrado:", patientForm);
-    
-    if (patientForm) {
-        patientForm.addEventListener('submit', function(e) {
-            console.log("Formulario enviado");
-            e.preventDefault(); // Evitar que el formulario se envíe de forma tradicional
-            savePatient(e);
-        });
-    } else {
-        console.error("No se encontró el formulario con ID 'patientForm'");
-    }
-    
-    // Cargar la lista de pacientes
-    loadPatients();
-    
-    // Configurar el botón de búsqueda
-    const searchButton = document.getElementById('searchButton');
-    if (searchButton) {
-        searchButton.addEventListener('click', searchPatients);
-    }
-    
-    // Cargar pacientes en el selector
-    loadPatientsIntoSelect();
-    
-    // Cargar evoluciones
-    loadEvolutions();
-    
-    // Event listener para el selector de pacientes
-    const patientSelect = document.getElementById('patientSelect');
-    if (patientSelect) {
-        patientSelect.addEventListener('change', loadPatientPSFS);
-    }
-    
-    // Event listener para el formulario de evolución
-    const evolutionForm = document.getElementById('evolutionForm');
-    if (evolutionForm) {
-        evolutionForm.addEventListener('submit', saveEvolution);
-    }
-    
-    // Event listener para la búsqueda de evoluciones
-    const searchEvolutionInput = document.getElementById('searchEvolution');
-    if (searchEvolutionInput) {
-        searchEvolutionInput.addEventListener('input', function() {
-            // Debounce para evitar muchas búsquedas
-            clearTimeout(this.searchTimeout);
-            this.searchTimeout = setTimeout(searchEvolutions, 500);
-        });
-    }
-});
 
 // Función para formatear fecha
 function formatDate(dateString) {
@@ -971,6 +921,7 @@ function loadEvolutions() {
             evolutionsTableBody.innerHTML = '<tr><td colspan="4" class="text-center">Error al cargar evoluciones</td></tr>';
         });
 }
+
 // Mostrar detalles de una evolución
 function showEvolutionDetails(evolutionId) {
     const evolutionDetailsContent = document.getElementById('evolutionDetailsContent');
@@ -1104,7 +1055,7 @@ function createPSFSDetailHtml(psfsUpdate) {
 function deleteEvolution(evolutionId) {
     db.collection("evolutions").doc(evolutionId).delete()
         .then(() => {
-            alert('Evolución eliminada correctamente');
+            showAlert('Evolución eliminada correctamente', 'success');
             // Cerrar modal
             const evolutionDetailsModal = bootstrap.Modal.getInstance(document.getElementById('evolutionDetailsModal'));
             evolutionDetailsModal.hide();
@@ -1113,7 +1064,7 @@ function deleteEvolution(evolutionId) {
         })
         .catch((error) => {
             console.error("Error eliminando evolución: ", error);
-            alert('Error al eliminar la evolución');
+            showAlert('Error al eliminar la evolución: ' + error.message, 'danger');
         });
 }
 
@@ -1121,7 +1072,7 @@ function deleteEvolution(evolutionId) {
 function exportEvolutionToPDF(evolutionId) {
     // Verificar si jsPDF está disponible
     if (typeof jspdf === 'undefined') {
-        alert('Error: La biblioteca jsPDF no está disponible');
+        showAlert('Error: La biblioteca jsPDF no está disponible', 'danger');
         return;
     }
     
@@ -1234,121 +1185,23 @@ function exportEvolutionToPDF(evolutionId) {
                     })
                     .catch((error) => {
                         console.error("Error obteniendo datos del paciente: ", error);
-                        alert('Error al exportar a PDF: No se pudieron obtener los datos del paciente');
+                        showAlert('Error al exportar a PDF: No se pudieron obtener los datos del paciente', 'danger');
                     });
             } else {
-                alert('Error al exportar a PDF: No se encontró la evolución');
+                showAlert('Error al exportar a PDF: No se encontró la evolución', 'warning');
             }
         })
         .catch((error) => {
             console.error("Error obteniendo evolución: ", error);
-            alert('Error al exportar a PDF');
+            showAlert('Error al exportar a PDF: ' + error.message, 'danger');
         });
 }
 
-// Buscar evoluciones
-function searchEvolutions() {
-    const searchTerm = document.getElementById('searchEvolution').value.toLowerCase();
-    
-    if (!searchTerm) {
-        loadEvolutions();
-        return;
-    }
-    
-    const evolutionsTableBody = document.getElementById('evolutionsTableBody');
-    evolutionsTableBody.innerHTML = '<tr><td colspan="4" class="text-center">Buscando...</td></tr>';
-    
-    // Primero buscar pacientes que coincidan con el término de búsqueda
-    db.collection("patients").get()
-        .then((patientsSnapshot) => {
-            const matchingPatientIds = [];
-            
-            patientsSnapshot.forEach((doc) => {
-                const patient = doc.data();
-                if (
-                    (patient.name && patient.name.toLowerCase().includes(searchTerm)) ||
-                    (patient.rut && patient.rut.toLowerCase().includes(searchTerm))
-                ) {
-                    matchingPatientIds.push(doc.id);
-                }
-            });
-            
-            // Si no hay pacientes coincidentes y el término no parece ser un nombre o RUT
-            if (matchingPatientIds.length === 0) {
-                evolutionsTableBody.innerHTML = '<tr><td colspan="4" class="text-center">No se encontraron resultados</td></tr>';
-                return;
-            }
-            
-            // Buscar evoluciones para los pacientes coincidentes
-            db.collection("evolutions").get()
-                .then((evolutionsSnapshot) => {
-                    const matchingEvolutions = [];
-                    
-                    evolutionsSnapshot.forEach((doc) => {
-                        const evolution = doc.data();
-                        if (matchingPatientIds.includes(evolution.patientId)) {
-                            matchingEvolutions.push({ doc, evolution });
-                        }
-                    });
-                    
-                    if (matchingEvolutions.length === 0) {
-                        evolutionsTableBody.innerHTML = '<tr><td colspan="4" class="text-center">No se encontraron evoluciones para los pacientes buscados</td></tr>';
-                        return;
-                    }
-                    
-                    // Mostrar evoluciones coincidentes
-                    evolutionsTableBody.innerHTML = '';
-                    
-                    // Crear un mapa de pacientes para evitar múltiples consultas
-                    const patientMap = {};
-                    patientsSnapshot.forEach(doc => {
-                        patientMap[doc.id] = doc.data();
-                    });
-                    
-                    matchingEvolutions.forEach((item) => {
-                        const evolution = item.evolution;
-                        const doc = item.doc;
-                        const patient = patientMap[evolution.patientId] || {};
-                        
-                        const row = document.createElement('tr');
-                        row.innerHTML = `
-                            <td>${patient.name || 'Paciente desconocido'} ${patient.rut ? `(${patient.rut})` : ''}</td>
-                            <td>${formatDate(evolution.date)}</td>
-                            <td>${evolution.evaluator}</td>
-                            <td>
-                                <button class="btn btn-sm btn-primary view-evolution" data-id="${doc.id}">
-                                    <i class="fas fa-eye"></i> Ver
-                                </button>
-                            </td>
-                        `;
-                        
-                        evolutionsTableBody.appendChild(row);
-                    });
-                    
-                    // Añadir event listeners a los botones de ver
-                    document.querySelectorAll('.view-evolution').forEach(button => {
-                        button.addEventListener('click', function() {
-                            const evolutionId = this.getAttribute('data-id');
-                            showEvolutionDetails(evolutionId);
-                        });
-                    });
-                })
-                .catch((error) => {
-                    console.error("Error buscando evoluciones: ", error);
-                    evolutionsTableBody.innerHTML = '<tr><td colspan="4" class="text-center">Error al buscar evoluciones</td></tr>';
-                });
-        })
-        .catch((error) => {
-            console.error("Error buscando pacientes: ", error);
-            evolutionsTableBody.innerHTML = '<tr><td colspan="4" class="text-center">Error al buscar pacientes</td></tr>';
-        });
-}
-
-// Función para exportar paciente a PDF
+// Exportar paciente a PDF
 function exportPatientToPDF(patientId) {
     // Verificar que jsPDF esté disponible
     if (typeof jspdf === 'undefined') {
-        alert('La biblioteca jsPDF no está cargada correctamente. No se puede exportar a PDF.');
+        showAlert('La biblioteca jsPDF no está cargada correctamente. No se puede exportar a PDF.', 'danger');
         return;
     }
     
@@ -1519,46 +1372,81 @@ function exportPatientToPDF(patientId) {
                     y = addWrappedText(`Signos vitales: ${patient.vitalSigns || 'No especificados'}`, margin, y, contentWidth, 7);
                     y = addWrappedText(`Antropometría: ${patient.anthropometry || 'No especificada'}`, margin, y, contentWidth, 7);
                     y = addWrappedText(`Examen físico: ${patient.physicalExam || 'No especificado'}`, margin, y, contentWidth, 7);
-
                     
-                    // Verificar si necesitamos una nueva página
-if (y > 250) {
-    pdf.addPage();
-    y = 20;
-}
-
-// Archivos complementarios
-if (patient.complementaryExams && patient.complementaryExams.length > 0) {
-    pdf.setFontSize(14);
-    pdf.setFont(undefined, 'bold');
-    pdf.text('ARCHIVOS / EXÁMENES COMPLEMENTARIOS', margin, y);
-    y += 10;
-    
-    pdf.setFontSize(11);
-    pdf.setFont(undefined, 'normal');
-    
-    patient.complementaryExams.forEach(file => {
-        let uploadDate = 'Fecha desconocida';
-        if (file.uploadedAt && file.uploadedAt.toDate) {
-            uploadDate = file.uploadedAt.toDate().toLocaleDateString();
-        }
-        
-        y = addWrappedText(`Archivo: ${file.name} (Subido el: ${uploadDate})`, margin, y, contentWidth, 7);
-    });
-}
                     // Guardar el PDF
                     pdf.save(`Ficha_${patient.name || 'Paciente'}_${patient.rut || ''}.pdf`);
                     
                 } catch (error) {
                     console.error("Error al generar PDF:", error);
-                    alert("Error al generar PDF: " + error.message);
+                    showAlert("Error al generar PDF: " + error.message, "danger");
                 }
             } else {
-                alert('Paciente no encontrado');
+                showAlert('Paciente no encontrado', 'warning');
             }
         })
         .catch((error) => {
             console.error("Error al obtener datos del paciente: ", error);
-            alert('Error al generar PDF: ' + error.message);
+            showAlert('Error al generar PDF: ' + error.message, 'danger');
         });
 }
+
+// Inicializar los controles deslizantes y eventos cuando se carga la página
+document.addEventListener('DOMContentLoaded', function() {
+    console.log("DOM completamente cargado");
+    
+    // Inicializar los valores de los deslizadores
+    updateRatingValue('psfs1Rating', 'psfs1Value');
+    updateRatingValue('psfs2Rating', 'psfs2Value');
+    updateRatingValue('psfs3Rating', 'psfs3Value');
+    
+    // Configurar el evento de envío del formulario
+    const patientForm = document.getElementById('patientForm');
+    console.log("Formulario encontrado:", patientForm);
+    
+    if (patientForm) {
+        patientForm.addEventListener('submit', function(e) {
+            console.log("Formulario enviado");
+            e.preventDefault(); // Evitar que el formulario se envíe de forma tradicional
+            savePatient(e);
+        });
+    } else {
+        console.error("No se encontró el formulario con ID 'patientForm'");
+    }
+    
+    // Cargar la lista de pacientes
+    loadPatients();
+    
+    // Configurar el botón de búsqueda
+    const searchButton = document.getElementById('searchButton');
+    if (searchButton) {
+        searchButton.addEventListener('click', searchPatients);
+    }
+    
+    // Cargar pacientes en el selector
+    loadPatientsIntoSelect();
+    
+    // Cargar evoluciones
+    loadEvolutions();
+    
+    // Event listener para el selector de pacientes
+    const patientSelect = document.getElementById('patientSelect');
+    if (patientSelect) {
+        patientSelect.addEventListener('change', loadPatientPSFS);
+    }
+    
+    // Event listener para el formulario de evolución
+    const evolutionForm = document.getElementById('evolutionForm');
+    if (evolutionForm) {
+        evolutionForm.addEventListener('submit', saveEvolution);
+    }
+    
+    // Event listener para la búsqueda de evoluciones
+    const searchEvolutionInput = document.getElementById('searchEvolution');
+    if (searchEvolutionInput) {
+        searchEvolutionInput.addEventListener('input', function() {
+            // Debounce para evitar muchas búsquedas
+            clearTimeout(this.searchTimeout);
+            this.searchTimeout = setTimeout(searchEvolutions, 500);
+        });
+    }
+});
