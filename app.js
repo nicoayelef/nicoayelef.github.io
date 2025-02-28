@@ -528,8 +528,19 @@ function showPatientDetails(patientId) {
                                 <p class="text-muted"><small>Fecha de creación: ${createdDate}</small></p>
                             </div>
                         </div>
-                        // Archivos / Exámenes Complementarios
-${patient.complementaryExams ? displayPatientFiles(patient.complementaryExams) : ''}
+                        
+                        <!-- Archivos / Exámenes Complementarios -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h4 class="text-primary">Archivos / Exámenes Complementarios</h4>
+                                <hr>
+                            </div>
+                            <div class="col-12">
+                                ${patient.complementaryExams && patient.complementaryExams.length > 0 ? 
+                                    displayPatientFiles(patient.complementaryExams) : 
+                                    '<p>No hay archivos adjuntos.</p>'}
+                            </div>
+                        </div>
                     </div>
                 `;
                 
