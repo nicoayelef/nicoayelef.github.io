@@ -21,26 +21,31 @@ function getPatients() {
 }
 
 // Función para guardar un nuevo paciente
-function savePatient() {
-    // Obtener valores del formulario (mantén tu código existente para obtener los valores)
-    const evaluator = document.getElementById('evaluator').value;
-    const email = document.getElementById('email').value;
-    const name = document.getElementById('name').value;
-    const rut = document.getElementById('rut').value;
-    // ... (resto de campos)
+function savePatient(e) {
+    e.preventDefault();
     
-    // Validar campos obligatorios
-    if (!evaluator || !email) {
-        alert('Por favor, completa los campos obligatorios (Evaluador y Correo).');
-        return;
-    }
+    // Obtener valores de PSFS
+    const psfs1 = {
+        activity: document.getElementById('psfs1Activity').value,
+        rating: document.getElementById('psfs1Rating').value
+    };
+    
+    const psfs2 = {
+        activity: document.getElementById('psfs2Activity').value,
+        rating: document.getElementById('psfs2Rating').value
+    };
+    
+    const psfs3 = {
+        activity: document.getElementById('psfs3Activity').value,
+        rating: document.getElementById('psfs3Rating').value
+    };
     
     // Crear objeto paciente
     const patient = {
-        evaluator,
-        email,
-        name,
-        rut,
+        evaluator: document.getElementById('evaluator').value,
+        email: document.getElementById('email').value,
+        name: document.getElementById('name').value,
+        rut: document.getElementById('rut').value,
         contactNumber: document.getElementById('contactNumber').value,
         patientEmail: document.getElementById('patientEmail').value,
         nationality: document.getElementById('nationality').value,
@@ -59,18 +64,9 @@ function savePatient() {
         remoteAnamnesis: document.getElementById('remoteAnamnesis').value,
         habitsHobbies: document.getElementById('habitsHobbies').value,
         homeSupport: document.getElementById('homeSupport').value,
-        psfs1: {
-            activity: document.getElementById('psfs1Activity').value,
-            rating: document.getElementById('psfs1Rating').value
-        },
-        psfs2: {
-            activity: document.getElementById('psfs2Activity').value,
-            rating: document.getElementById('psfs2Rating').value
-        },
-        psfs3: {
-            activity: document.getElementById('psfs3Activity').value,
-            rating: document.getElementById('psfs3Rating').value
-        },
+        psfs1: psfs1,
+        psfs2: psfs2,
+        psfs3: psfs3,
         extraQuestionnaire: document.getElementById('extraQuestionnaire').value,
         vitalSigns: document.getElementById('vitalSigns').value,
         anthropometry: document.getElementById('anthropometry').value,
@@ -81,21 +77,16 @@ function savePatient() {
     // Guardar en Firestore
     db.collection("patients").add(patient)
         .then((docRef) => {
-            console.log("Paciente guardado con ID: ", docRef.id);
             alert('Paciente guardado correctamente');
             document.getElementById('patientForm').reset();
-            
-            // Reiniciar valores de los deslizadores
-            document.getElementById('psfs1Value').textContent = '5';
-            document.getElementById('psfs2Value').textContent = '5';
-            document.getElementById('psfs3Value').textContent = '5';
-            
-            // Recargar lista de pacientes
-            loadPatients();
+            // Actualizar la lista de pacientes si estamos en la pestaña de registros
+            if (document.getElementById('records-tab').classList.contains('active')) {
+                loadPatients();
+            }
         })
         .catch((error) => {
-            console.error("Error al guardar el paciente: ", error);
-            alert('Error al guardar el paciente: ' + error.message);
+            console.error("Error al guardar paciente: ", error);
+            alert('Error al guardar paciente: ' + error.message);
         });
 }
 
