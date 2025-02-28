@@ -1554,7 +1554,33 @@ function exportPatientToPDF(patientId) {
                     y = addWrappedText(`Signos vitales: ${patient.vitalSigns || 'No especificados'}`, margin, y, contentWidth, 7);
                     y = addWrappedText(`Antropometría: ${patient.anthropometry || 'No especificada'}`, margin, y, contentWidth, 7);
                     y = addWrappedText(`Examen físico: ${patient.physicalExam || 'No especificado'}`, margin, y, contentWidth, 7);
+
                     
+                    // Verificar si necesitamos una nueva página
+if (y > 250) {
+    pdf.addPage();
+    y = 20;
+}
+
+// Archivos complementarios
+if (patient.complementaryExams && patient.complementaryExams.length > 0) {
+    pdf.setFontSize(14);
+    pdf.setFont(undefined, 'bold');
+    pdf.text('ARCHIVOS / EXÁMENES COMPLEMENTARIOS', margin, y);
+    y += 10;
+    
+    pdf.setFontSize(11);
+    pdf.setFont(undefined, 'normal');
+    
+    patient.complementaryExams.forEach(file => {
+        let uploadDate = 'Fecha desconocida';
+        if (file.uploadedAt && file.uploadedAt.toDate) {
+            uploadDate = file.uploadedAt.toDate().toLocaleDateString();
+        }
+        
+        y = addWrappedText(`Archivo: ${file.name} (Subido el: ${uploadDate})`, margin, y, contentWidth, 7);
+    });
+}
                     // Guardar el PDF
                     pdf.save(`Ficha_${patient.name || 'Paciente'}_${patient.rut || ''}.pdf`);
                     
