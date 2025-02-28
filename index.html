@@ -602,69 +602,48 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     
     <!-- Firebase App (la base) -->
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
-    <!-- Firestore -->
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
-    <!-- Firebase Storage -->
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-storage-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<!-- Firestore -->
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+<!-- Firebase Storage (opcional, solo si realmente lo necesitas) -->
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
 
-    <!-- Inicialización de Firebase -->
-    <script>
-        // Tu configuración de Firebase
-        const firebaseConfig = {
-            apiKey: "AIzaSyBYaNbZWHUS-Pvm49kmMtHw9LqqxUDySYA",
-            authDomain: "base-de-datos-poli.firebaseapp.com",
-            projectId: "base-de-datos-poli",
-           storageBucket: "base-de-datos-poli.appspot.com", // Manteniendo el formato original
-            messagingSenderId: "954754202697",
-            appId: "1:954754202697:web:e06171f6b0ade314259398"
-        };
+<!-- Inicialización de Firebase -->
+<script>
+    // Tu configuración de Firebase
+    const firebaseConfig = {
+        apiKey: "AIzaSyBYaNbZWHUS-Pvm49kmMtHw9LqqxUDySYA",
+        authDomain: "base-de-datos-poli.firebaseapp.com",
+        projectId: "base-de-datos-poli",
+        storageBucket: "base-de-datos-poli.appspot.com",
+        messagingSenderId: "954754202697",
+        appId: "1:954754202697:web:e06171f6b0ade314259398"
+    };
 
-        // Inicializar Firebase
-        firebase.initializeApp(firebaseConfig);
+    // Inicializar Firebase
+    firebase.initializeApp(firebaseConfig);
 
-        // Inicializar Firestore
-        const db = firebase.firestore();
+    // Inicializar Firestore
+    const db = firebase.firestore();
+    
+    // Configuración para evitar errores de timestamp
+    db.settings({
+        timestampsInSnapshots: true
+    });
 
-        // Inicializar Firebase Storage
-const storage = firebase.storage();
-        
-        console.log("Verificando conexión con Firebase...");
-        db.collection("test").add({
-            test: "Prueba de conexión",
-            timestamp: new Date()
-        })
-        .then((docRef) => {
-            console.log("Conexión exitosa con Firebase. ID del documento:", docRef.id);
+    // Inicializar Firebase Storage (opcional)
+    const storage = firebase.storage();
+    
+    console.log("Verificando conexión con Firebase...");
+    db.collection("patients").limit(1).get()
+        .then((snapshot) => {
+            console.log("Conexión exitosa con Firebase. Documentos encontrados:", snapshot.size);
         })
         .catch((error) => {
             console.error("Error de conexión con Firebase:", error);
+            alert("Error de conexión a la base de datos: " + error.message);
         });
-        // Función para mostrar alertas
-function showAlert(message, type) {
-    const alertContainer = document.getElementById('alertContainer');
-    if (!alertContainer) {
-        console.error("Elemento alertContainer no encontrado");
-        return;
-    }
-    
-    const alert = document.createElement('div');
-    alert.className = `alert alert-${type} alert-dismissible fade show`;
-    alert.role = 'alert';
-    alert.innerHTML = `
-        ${message}
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    `;
-    
-    alertContainer.appendChild(alert);
-    
-    // Auto-cerrar alertas después de 5 segundos
-    setTimeout(() => {
-        if (alert.parentNode) {
-            alert.parentNode.removeChild(alert);
-        }
-    }, 5000);
-}
+</script>
     </script>
 
     <!-- Tu archivo JavaScript principal -->
