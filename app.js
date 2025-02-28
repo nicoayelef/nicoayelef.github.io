@@ -724,3 +724,38 @@ function exportAllPatients() {
     // Guardar el PDF
     doc.save('Listado_Pacientes.pdf');
 }
+// Función para actualizar el valor mostrado de los controles deslizantes
+function updateRatingValue(sliderId, valueId) {
+    const slider = document.getElementById(sliderId);
+    const valueDisplay = document.getElementById(valueId);
+    
+    // Actualizar el valor inicial al cargar la página
+    if (slider && valueDisplay) {
+        valueDisplay.textContent = slider.value;
+        
+        // Agregar evento para actualizar el valor cuando cambia el deslizador
+        slider.addEventListener('input', function() {
+            valueDisplay.textContent = this.value;
+        });
+    }
+}
+
+// Inicializar los controles deslizantes cuando se carga la página
+document.addEventListener('DOMContentLoaded', function() {
+    // Inicializar los controles deslizantes PSFS
+    updateRatingValue('psfs1Rating', 'psfs1Value');
+    updateRatingValue('psfs2Rating', 'psfs2Value');
+    updateRatingValue('psfs3Rating', 'psfs3Value');
+    
+    // Configurar el evento submit del formulario
+    const form = document.getElementById('patientForm');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            savePatient();
+        });
+    }
+    
+    // Cargar pacientes existentes
+    loadPatients();
+});
