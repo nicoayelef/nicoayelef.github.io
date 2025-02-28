@@ -496,5 +496,33 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <!-- Tu archivo JavaScript -->
     <script src="app.js"></script>
+<!-- Firebase App (la base) -->
+<script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+
+<!-- Firestore -->
+<script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+
+<!-- Inicialización de Firebase -->
+<script>
+  // Tu configuración de Firebase
+  const firebaseConfig = {
+    apiKey: "AIzaSyBYaNbZWHUS-Pvm49kmMtHw9LqqxUDySYA",
+    authDomain: "base-de-datos-poli.firebaseapp.com",
+    projectId: "base-de-datos-poli",
+    storageBucket: "base-de-datos-poli.firebasestorage.app",
+    messagingSenderId: "954754202697",
+    appId: "1:954754202697:web:e06171f6b0ade314259398"
+  };
+
+  // Inicializar Firebase
+  firebase.initializeApp(firebaseConfig);
+  
+  // Inicializar Firestore
+  const db = firebase.firestore();
+</script>
+
+<!-- Tu archivo JavaScript principal -->
+<script src="app.js"></script>
+    
 </body>
 </html>
