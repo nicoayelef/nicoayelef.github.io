@@ -438,22 +438,19 @@ function searchPatients() {
             patientsList.innerHTML = `<div class="alert alert-danger">Error al buscar pacientes: ${error.message}</div>`;
         });
 }
-// Función para exportar un paciente a PDF
 function exportPatientToPDF(patientId) {
+    // Verificar que jsPDF esté disponible
+    if (typeof jspdf === 'undefined') {
+        alert('La biblioteca jsPDF no está cargada correctamente. No se puede exportar a PDF.');
+        return;
+    }
+    
     // Obtener paciente de Firestore
     db.collection("patients").doc(patientId).get()
         .then((doc) => {
             if (doc.exists) {
                 const patient = doc.data();
                 patient.id = doc.id;
-                
-                // Verificar que jsPDF esté disponible
-                if (typeof jspdf === 'undefined') {
-                    alert('La biblioteca jsPDF no está cargada correctamente. No se puede exportar a PDF.');
-                    return;
-                }
-                // Crear instancia de PDF (sintaxis correcta para jsPDF 2.x)
-    const pdf = new jspdf.jsPDF();
                 
                 try {
                     // Crear nuevo documento PDF
@@ -474,72 +471,34 @@ function exportPatientToPDF(patientId) {
                         return y + (lines.length * lineHeight);
                     }
                     
-                    // Función para agregar una sección con título
-                    function addSection(title, content, x, y, maxWidth, lineHeight) {
-                        // Título de la sección
-                        pdf.setFont(undefined, 'bold');
-                        pdf.setTextColor(44, 62, 80);
-                        pdf.text(title, x, y);
-                        y += 7;
-                        
-                        // Contenido de la sección
-                        pdf.setFont(undefined, 'normal');
-                        pdf.setTextColor(0, 0, 0);
-                        if (typeof content === 'string') {
-                            y = addWrappedText(content, x, y, maxWidth, lineHeight);
-                        } else if (Array.isArray(content)) {
-                            content.forEach(item => {
-                                if (y > 270) {
-                                    pdf.addPage();
-                                    y = 20;
-                                }
-                                y = addWrappedText(item, x, y, maxWidth, lineHeight);
-                                y += 5;
-                            });
-                        }
-                        
-                        return y + 10;
-                    }
-                    
                     // Encabezado del documento
                     pdf.setFontSize(18);
                     pdf.setFont(undefined, 'bold');
-                    pdf.setTextColor(41, 128, 185);
                     pdf.text('FICHA CLÍNICA KINESIOLÓGICA', pageWidth / 2, y, { align: 'center' });
                     y += 10;
                     
-                    // Fecha de creación
-                    const createdDate = patient.createdAt ? new Date(patient.createdAt).toLocaleDateString() : 'No disponible';
-                    pdf.setFontSize(10);
-                    pdf.setTextColor(100, 100, 100);
-                    pdf.text(`Fecha de creación: ${createdDate}`, pageWidth - margin, y, { align: 'right' });
-                    y += 15;
-                    
                     // Información personal
                     pdf.setFontSize(14);
-                    pdf.setTextColor(41, 128, 185);
                     pdf.text('INFORMACIÓN PERSONAL', margin, y);
                     y += 10;
                     
                     pdf.setFontSize(11);
-                    pdf.setTextColor(0, 0, 0);
+                    pdf.setFont(undefined, 'normal');
                     
-                    // Tabla de información personal
-                    const infoPersonal = [
-                        [`Nombre: ${patient.name || 'No especificado'}`, `RUT: ${patient.rut || 'No especificado'}`],
-                        [`Edad: ${patient.age || 'No especificada'} años`, `Fecha de nacimiento: ${patient.birthdate || 'No especificada'}`],
-                        [`Teléfono: ${patient.contactNumber || 'No especificado'}`, `Email: ${patient.patientEmail || 'No especificado'}`],
-                        [`Nacionalidad: ${patient.nationality || 'No especificada'}`, `Estado civil: ${patient.civilStatus || 'No especificado'}`],
-                        [`Nivel educacional: ${patient.education || 'No especificado'}`, `Dirección: ${patient.address || 'No especificada'}`],
-                        [`Contacto emergencia: ${patient.emergencyContact || 'No especificado'}`, `Lateralidad: ${patient.laterality || 'No especificada'}`],
-                        [`Ocupación: ${patient.occupation || 'No especificada'}`, '']
-                    ];
-                    
-                    infoPersonal.forEach(row => {
-                        pdf.text(row[0], margin, y);
-                        pdf.text(row[1], margin + contentWidth / 2, y);
-                        y += 8;
-                    });
+                    // Información personal
+                    y = addWrappedText(`Nombre: ${patient.name || 'No especificado'}`, margin, y, contentWidth, 7);
+                    y = addWrappedText(`RUT: ${patient.rut || 'No especificado'}`, margin, y, contentWidth, 7);
+                    y = addWrappedText(`Edad: ${patient.age || 'No especificada'} años`, margin, y, contentWidth, 7);
+                    y = addWrappedText(`Fecha de nacimiento: ${patient.birthdate || 'No especificada'}`, margin, y, contentWidth, 7);
+                    y = addWrappedText(`Teléfono: ${patient.contactNumber || 'No especificado'}`, margin, y, contentWidth, 7);
+                    y = addWrappedText(`Email: ${patient.patientEmail || 'No especificado'}`, margin, y, contentWidth, 7);
+                    y = addWrappedText(`Nacionalidad: ${patient.nationality || 'No especificada'}`, margin, y, contentWidth, 7);
+                    y = addWrappedText(`Estado civil: ${patient.civilStatus || 'No especificado'}`, margin, y, contentWidth, 7);
+                    y = addWrappedText(`Nivel educacional: ${patient.education || 'No especificado'}`, margin, y, contentWidth, 7);
+                    y = addWrappedText(`Dirección: ${patient.address || 'No especificada'}`, margin, y, contentWidth, 7);
+                    y = addWrappedText(`Contacto emergencia: ${patient.emergencyContact || 'No especificado'}`, margin, y, contentWidth, 7);
+                    y = addWrappedText(`Lateralidad: ${patient.laterality || 'No especificada'}`, margin, y, contentWidth, 7);
+                    y = addWrappedText(`Ocupación: ${patient.occupation || 'No especificada'}`, margin, y, contentWidth, 7);
                     
                     y += 10;
                     
@@ -551,123 +510,112 @@ function exportPatientToPDF(patientId) {
                     
                     // Información clínica
                     pdf.setFontSize(14);
-                    pdf.setTextColor(41, 128, 185);
+                    pdf.setFont(undefined, 'bold');
                     pdf.text('INFORMACIÓN CLÍNICA', margin, y);
                     y += 10;
                     
                     pdf.setFontSize(11);
-                    pdf.setTextColor(0, 0, 0);
+                    pdf.setFont(undefined, 'normal');
                     
-                    y = addSection('Motivo de consulta:', patient.consultReason, margin, y, contentWidth, 7);
-                    y = addSection('Diagnóstico:', patient.diagnosis, margin, y, contentWidth, 7);
-                    y = addSection('Expectativas y metas:', patient.expectations, margin, y, contentWidth, 7);
+                    y = addWrappedText(`Motivo de consulta: ${patient.consultReason || 'No especificado'}`, margin, y, contentWidth, 7);
+                    y = addWrappedText(`Diagnóstico: ${patient.diagnosis || 'No especificado'}`, margin, y, contentWidth, 7);
+                    y = addWrappedText(`Expectativas y metas: ${patient.expectations || 'No especificadas'}`, margin, y, contentWidth, 7);
+                    
+                    y += 10;
                     
                     // Verificar si necesitamos una nueva página
-                    if (y > 220) {
+                    if (y > 250) {
                         pdf.addPage();
                         y = 20;
                     }
                     
                     // Anamnesis
                     pdf.setFontSize(14);
-                    pdf.setTextColor(41, 128, 185);
+                    pdf.setFont(undefined, 'bold');
                     pdf.text('ANAMNESIS', margin, y);
                     y += 10;
                     
                     pdf.setFontSize(11);
-                    pdf.setTextColor(0, 0, 0);
+                    pdf.setFont(undefined, 'normal');
                     
-                    y = addSection('Anamnesis próxima:', patient.proximateAnamnesis, margin, y, contentWidth, 7);
-                    y = addSection('Anamnesis remota:', patient.remoteAnamnesis, margin, y, contentWidth, 7);
+                    y = addWrappedText(`Anamnesis próxima: ${patient.proximateAnamnesis || 'No especificada'}`, margin, y, contentWidth, 7);
+                    y = addWrappedText(`Anamnesis remota: ${patient.remoteAnamnesis || 'No especificada'}`, margin, y, contentWidth, 7);
+                    
+                    y += 10;
                     
                     // Verificar si necesitamos una nueva página
-                    if (y > 220) {
+                    if (y > 250) {
                         pdf.addPage();
                         y = 20;
                     }
                     
                     // Hábitos y entorno
                     pdf.setFontSize(14);
-                    pdf.setTextColor(41, 128, 185);
+                    pdf.setFont(undefined, 'bold');
                     pdf.text('HÁBITOS Y ENTORNO', margin, y);
                     y += 10;
                     
                     pdf.setFontSize(11);
-                    pdf.setTextColor(0, 0, 0);
+                    pdf.setFont(undefined, 'normal');
                     
-                    y = addSection('Hábitos y hobbies:', patient.habitsHobbies, margin, y, contentWidth, 7);
-                    y = addSection('Hogar y red de apoyo:', patient.homeSupport, margin, y, contentWidth, 7);
+                    y = addWrappedText(`Hábitos y hobbies: ${patient.habitsHobbies || 'No especificados'}`, margin, y, contentWidth, 7);
+                    y = addWrappedText(`Hogar y red de apoyo: ${patient.homeSupport || 'No especificados'}`, margin, y, contentWidth, 7);
+                    
+                    y += 10;
                     
                     // Verificar si necesitamos una nueva página
-                    if (y > 220) {
+                    if (y > 250) {
                         pdf.addPage();
                         y = 20;
                     }
                     
                     // Cuestionarios PSFS
                     pdf.setFontSize(14);
-                    pdf.setTextColor(41, 128, 185);
-                    pdf.text('CUESTIONARIOS', margin, y);
+                    pdf.setFont(undefined, 'bold');
+                    pdf.text('CUESTIONARIOS PSFS', margin, y);
                     y += 10;
                     
                     pdf.setFontSize(11);
-                    pdf.setTextColor(0, 0, 0);
+                    pdf.setFont(undefined, 'normal');
                     
-                    // PSFS 1
                     if (patient.psfs1 && patient.psfs1.activity) {
-                        pdf.text(`PSFS 1: ${patient.psfs1.activity} - Puntuación: ${patient.psfs1.rating || 'No especificada'}`, margin, y);
-                        y += 8;
+                        y = addWrappedText(`PSFS 1: ${patient.psfs1.activity} - Puntuación: ${patient.psfs1.rating || 'No especificada'}`, margin, y, contentWidth, 7);
                     }
                     
-                    // PSFS 2
                     if (patient.psfs2 && patient.psfs2.activity) {
-                        pdf.text(`PSFS 2: ${patient.psfs2.activity} - Puntuación: ${patient.psfs2.rating || 'No especificada'}`, margin, y);
-                        y += 8;
+                        y = addWrappedText(`PSFS 2: ${patient.psfs2.activity} - Puntuación: ${patient.psfs2.rating || 'No especificada'}`, margin, y, contentWidth, 7);
                     }
                     
-                    // PSFS 3
                     if (patient.psfs3 && patient.psfs3.activity) {
-                        pdf.text(`PSFS 3: ${patient.psfs3.activity} - Puntuación: ${patient.psfs3.rating || 'No especificada'}`, margin, y);
-                        y += 8;
+                        y = addWrappedText(`PSFS 3: ${patient.psfs3.activity} - Puntuación: ${patient.psfs3.rating || 'No especificada'}`, margin, y, contentWidth, 7);
                     }
                     
-                    // Cuestionario extra
-                    if (patient.extraQuestionnaire) {
-                        y = addSection('Cuestionario adicional:', patient.extraQuestionnaire, margin, y, contentWidth, 7);
-                    }
+                    y = addWrappedText(`Cuestionario adicional: ${patient.extraQuestionnaire || 'No especificado'}`, margin, y, contentWidth, 7);
+                    
+                    y += 10;
                     
                     // Verificar si necesitamos una nueva página
-                    if (y > 220) {
+                    if (y > 250) {
                         pdf.addPage();
                         y = 20;
                     }
                     
                     // Evaluación física
                     pdf.setFontSize(14);
-                    pdf.setTextColor(41, 128, 185);
+                    pdf.setFont(undefined, 'bold');
                     pdf.text('EVALUACIÓN FÍSICA', margin, y);
                     y += 10;
                     
                     pdf.setFontSize(11);
-                    pdf.setTextColor(0, 0, 0);
+                    pdf.setFont(undefined, 'normal');
                     
-                    y = addSection('Signos vitales:', patient.vitalSigns, margin, y, contentWidth, 7);
-                    y = addSection('Antropometría:', patient.anthropometry, margin, y, contentWidth, 7);
-                    y = addSection('Examen físico:', patient.physicalExam, margin, y, contentWidth, 7);
-                    
-                    // Agregar pie de página con numeración
-                    const totalPages = pdf.internal.getNumberOfPages();
-                    for (let i = 1; i <= totalPages; i++) {
-                        pdf.setPage(i);
-                        pdf.setFontSize(10);
-                        pdf.setTextColor(150, 150, 150);
-                        pdf.text(`Página ${i} de ${totalPages}`, pageWidth / 2, 290, { align: 'center' });
-                        pdf.text('Sistema de Fichas Clínicas Kinesiológicas', margin, 290);
-                        pdf.text(`Evaluador: ${patient.evaluator || 'No especificado'}`, pageWidth - margin, 290, { align: 'right' });
-                    }
+                    y = addWrappedText(`Signos vitales: ${patient.vitalSigns || 'No especificados'}`, margin, y, contentWidth, 7);
+                    y = addWrappedText(`Antropometría: ${patient.anthropometry || 'No especificada'}`, margin, y, contentWidth, 7);
+                    y = addWrappedText(`Examen físico: ${patient.physicalExam || 'No especificado'}`, margin, y, contentWidth, 7);
                     
                     // Guardar el PDF
                     pdf.save(`Ficha_${patient.name || 'Paciente'}_${patient.rut || ''}.pdf`);
+                    
                 } catch (error) {
                     console.error("Error al generar PDF:", error);
                     alert("Error al generar PDF: " + error.message);
@@ -677,7 +625,7 @@ function exportPatientToPDF(patientId) {
             }
         })
         .catch((error) => {
-            console.error("Error al obtener datos del paciente para PDF: ", error);
+            console.error("Error al obtener datos del paciente: ", error);
             alert('Error al generar PDF: ' + error.message);
         });
 }
