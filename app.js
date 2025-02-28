@@ -176,146 +176,68 @@ function loadPatients() {
 }
 // Función para mostrar detalles del paciente
 function showPatientDetails(patientId) {
-    const patients = getPatients();
-    const patient = patients.find(p => p.id === patientId);
-    
-    if (!patient) {
-        alert('Paciente no encontrado');
-        return;
-    }
-    
-    const modal = new bootstrap.Modal(document.getElementById('patientDetailsModal'));
-    const modalContent = document.getElementById('patientDetailsContent');
-    
-    // Formatear fecha de creación
-    const createdDate = patient.createdAt ? new Date(patient.createdAt).toLocaleDateString() : 'No disponible';
-    
-    // Construir contenido del modal con todos los detalles del paciente
-    modalContent.innerHTML = `
-        <div class="container-fluid">
-            <div class="row mb-4">
-                <div class="col-12">
-                    <h4 class="text-primary">Información Personal</h4>
-                    <hr>
-                </div>
-                <div class="col-md-6">
-                    <p><strong>Nombre:</strong> ${patient.name || 'No especificado'}</p>
-                    <p><strong>RUT:</strong> ${patient.rut || 'No especificado'}</p>
-                    <p><strong>Edad:</strong> ${patient.age || 'No especificada'} años</p>
-                    <p><strong>Fecha de nacimiento:</strong> ${patient.birthdate || 'No especificada'}</p>
-                    <p><strong>Teléfono:</strong> ${patient.contactNumber || 'No especificado'}</p>
-                    <p><strong>Email:</strong> ${patient.patientEmail || 'No especificado'}</p>
-                </div>
-                <div class="col-md-6">
-                    <p><strong>Nacionalidad:</strong> ${patient.nationality || 'No especificada'}</p>
-                    <p><strong>Estado civil:</strong> ${patient.civilStatus || 'No especificado'}</p>
-                    <p><strong>Nivel educacional:</strong> ${patient.education || 'No especificado'}</p>
-                    <p><strong>Dirección:</strong> ${patient.address || 'No especificada'}</p>
-                    <p><strong>Contacto emergencia:</strong> ${patient.emergencyContact || 'No especificado'}</p>
-                    <p><strong>Lateralidad:</strong> ${patient.laterality || 'No especificada'}</p>
-                </div>
-            </div>
-
-            <div class="row mb-4">
-                <div class="col-12">
-                    <h4 class="text-primary">Información Clínica</h4>
-                    <hr>
-                </div>
-                <div class="col-md-12">
-                    <p><strong>Evaluador:</strong> ${patient.evaluator || 'No especificado'}</p>
-                    <p><strong>Fecha de evaluación:</strong> ${createdDate}</p>
-                    <p><strong>Ocupación:</strong> ${patient.occupation || 'No especificada'}</p>
-                    <p><strong>Motivo de consulta:</strong> ${patient.consultReason || 'No especificado'}</p>
-                    <p><strong>Diagnóstico:</strong> ${patient.diagnosis || 'No especificado'}</p>
-                    <p><strong>Expectativas:</strong> ${patient.expectations || 'No especificadas'}</p>
-                </div>
-            </div>
-
-            <div class="row mb-4">
-                <div class="col-12">
-                    <h4 class="text-primary">Anamnesis</h4>
-                    <hr>
-                </div>
-                <div class="col-md-6">
-                    <h5>Anamnesis próxima</h5>
-                    <p>${patient.proximateAnamnesis || 'No especificada'}</p>
-                </div>
-                <div class="col-md-6">
-                    <h5>Anamnesis remota</h5>
-                    <p>${patient.remoteAnamnesis || 'No especificada'}</p>
-                </div>
-            </div>
-
-            <div class="row mb-4">
-                <div class="col-12">
-                    <h4 class="text-primary">Hábitos y Entorno</h4>
-                    <hr>
-                </div>
-                <div class="col-md-6">
-                    <h5>Hábitos y hobbies</h5>
-                    <p>${patient.habitsHobbies || 'No especificados'}</p>
-                </div>
-                <div class="col-md-6">
-                    <h5>Hogar y red de apoyo</h5>
-                    <p>${patient.homeSupport || 'No especificados'}</p>
-                </div>
-            </div>
-
-            <div class="row mb-4">
-                <div class="col-12">
-                    <h4 class="text-primary">Cuestionarios</h4>
-                    <hr>
-                </div>
-                <div class="col-md-12">
-                    ${patient.psfs1 && patient.psfs1.activity ? 
-                        `<p><strong>PSFS 1:</strong> ${patient.psfs1.activity} - Valoración: ${patient.psfs1.rating}/10</p>` : 
-                        '<p><strong>PSFS 1:</strong> No especificado</p>'
-                    }
-                    ${patient.psfs2 && patient.psfs2.activity ? 
-                        `<p><strong>PSFS 2:</strong> ${patient.psfs2.activity} - Valoración: ${patient.psfs2.rating}/10</p>` : 
-                        '<p><strong>PSFS 2:</strong> No especificado</p>'
-                    }
-                    ${patient.psfs3 && patient.psfs3.activity ? 
-                        `<p><strong>PSFS 3:</strong> ${patient.psfs3.activity} - Valoración: ${patient.psfs3.rating}/10</p>` : 
-                        '<p><strong>PSFS 3:</strong> No especificado</p>'
-                    }
-                    <h5>Cuestionarios adicionales</h5>
-                    <p>${patient.extraQuestionnaire || 'No especificados'}</p>
-                </div>
-            </div>
-
-            <div class="row mb-4">
-                <div class="col-12">
-                    <h4 class="text-primary">Evaluación Física</h4>
-                    <hr>
-                </div>
-                <div class="col-md-4">
-                    <h5>Signos vitales</h5>
-                    <p>${patient.vitalSigns || 'No especificados'}</p>
-                </div>
-                <div class="col-md-4">
-                    <h5>Antropometría</h5>
-                    <p>${patient.anthropometry || 'No especificada'}</p>
-                </div>
-                <div class="col-md-4">
-                    <h5>Examen físico</h5>
-                    <p>${patient.physicalExam || 'No especificado'}</p>
-                </div>
-            </div>
-        </div>
-    `;
-    
-    // Configurar el botón de exportar PDF
-    const exportButton = document.getElementById('exportPatientButton');
-    if (exportButton) {
-        exportButton.onclick = function() {
-            exportPatientToPDF(patientId);
-        };
-    }
-    
-    modal.show();
+    // Obtener paciente de Firestore
+    db.collection("patients").doc(patientId).get()
+        .then((doc) => {
+            if (doc.exists) {
+                const patient = doc.data();
+                patient.id = doc.id;
+                
+                const modal = new bootstrap.Modal(document.getElementById('patientDetailsModal'));
+                const modalContent = document.getElementById('patientDetailsContent');
+                
+                // Formatear fecha de creación
+                const createdDate = patient.createdAt ? new Date(patient.createdAt).toLocaleDateString() : 'No disponible';
+                
+                // Construir contenido del modal (mantén tu código existente para construir el HTML)
+                modalContent.innerHTML = `
+                    <div class="container-fluid">
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h4 class="text-primary">Información Personal</h4>
+                                <hr>
+                            </div>
+                            <div class="col-md-6">
+                                <p><strong>Nombre:</strong> ${patient.name || 'No especificado'}</p>
+                                <p><strong>RUT:</strong> ${patient.rut || 'No especificado'}</p>
+                                <p><strong>Edad:</strong> ${patient.age || 'No especificada'} años</p>
+                                <p><strong>Fecha de nacimiento:</strong> ${patient.birthdate || 'No especificada'}</p>
+                                <p><strong>Teléfono:</strong> ${patient.contactNumber || 'No especificado'}</p>
+                                <p><strong>Email:</strong> ${patient.patientEmail || 'No especificado'}</p>
+                            </div>
+                            <div class="col-md-6">
+                                <p><strong>Nacionalidad:</strong> ${patient.nationality || 'No especificada'}</p>
+                                <p><strong>Estado civil:</strong> ${patient.civilStatus || 'No especificado'}</p>
+                                <p><strong>Nivel educacional:</strong> ${patient.education || 'No especificado'}</p>
+                                <p><strong>Dirección:</strong> ${patient.address || 'No especificada'}</p>
+                                <p><strong>Contacto emergencia:</strong> ${patient.emergencyContact || 'No especificado'}</p>
+                                <p><strong>Lateralidad:</strong> ${patient.laterality || 'No especificada'}</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Resto de secciones del modal -->
+                        <!-- ... -->
+                    </div>
+                `;
+                
+                // Configurar el botón de exportar PDF
+                const exportButton = document.getElementById('exportPatientButton');
+                if (exportButton) {
+                    exportButton.onclick = function() {
+                        exportPatientToPDF(patientId);
+                    };
+                }
+                
+                modal.show();
+            } else {
+                alert('Paciente no encontrado');
+            }
+        })
+        .catch((error) => {
+            console.error("Error al obtener detalles del paciente: ", error);
+            alert('Error al obtener detalles del paciente: ' + error.message);
+        });
 }
-
 // Función para eliminar un paciente
 function deletePatient(patientId) {
     if (confirm('¿Estás seguro de que deseas eliminar este paciente? Esta acción no se puede deshacer.')) {
