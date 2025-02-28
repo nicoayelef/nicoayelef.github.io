@@ -636,13 +636,13 @@ document.addEventListener('DOMContentLoaded', function() {
     loadPatients();
     
     // Configurar el evento de envío del formulario
-    const patientForm = document.getElementById('patientForm');
-    if (patientForm) {
-        patientForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            savePatient();
-        });
-    }
+const patientForm = document.getElementById('patientForm');
+if (patientForm) {
+    patientForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        savePatient(e); // Pasando el evento como parámetro
+    });
+}
     
     // Configurar el botón de búsqueda
     const searchButton = document.getElementById('searchButton');
