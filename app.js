@@ -452,6 +452,8 @@ function exportPatientToPDF(patientId) {
                     alert('La biblioteca jsPDF no está cargada correctamente. No se puede exportar a PDF.');
                     return;
                 }
+                // Crear instancia de PDF (sintaxis correcta para jsPDF 2.x)
+    const pdf = new jspdf.jsPDF();
                 
                 try {
                     // Crear nuevo documento PDF
