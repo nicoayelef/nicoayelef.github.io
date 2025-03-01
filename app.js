@@ -1576,10 +1576,31 @@ document.addEventListener('DOMContentLoaded', function() {
     loadPatients();
     
     // Configurar el botón de búsqueda
-    const searchButton = document.getElementById('searchButton');
-    if (searchButton) {
-      searchButton.addEventListener('click', searchPatients);
-    }
+const searchButton = document.getElementById('searchButton');
+if (searchButton) {
+    searchButton.addEventListener('click', searchPatients);
+}
+
+// Agregar event listener para búsqueda en tiempo real
+const searchInput = document.getElementById('searchPatient');
+if (searchInput) {
+    // Usar el evento 'input' para detectar cambios en tiempo real
+    searchInput.addEventListener('input', function() {
+        // Esperar un poco antes de buscar para evitar muchas búsquedas mientras se escribe
+        clearTimeout(this.searchTimeout);
+        this.searchTimeout = setTimeout(() => {
+            searchPatients();
+        }, 300); // 300ms de retraso
+    });
+    
+    // También buscar al presionar Enter
+    searchInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            searchPatients();
+        }
+    });
+}
     
     // Cargar pacientes en el selector
     loadPatientsIntoSelect();
