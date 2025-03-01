@@ -15,6 +15,8 @@ if (!firebase.apps || !firebase.apps.length) {
   firebase.app(); // Si ya está inicializado, usa la instancia existente
 }
 
+console.log("Firebase inicializado correctamente");
+
 // Inicializar Firestore
 const db = firebase.firestore();
 
