@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -429,17 +428,17 @@
                                 </div>
                             </div>
                         </div>
-<!-- Sección de Archivos y Exámenes Complementarios -->
-<div class="form-section">
-    <h4 class="section-title">Archivos / Exámenes Complementarios / Imágenes de otros test</h4>
-    <div class="row">
-        <div class="col-md-12 mb-3">
-            <label for="medicalExams" class="form-label">Adjuntar archivos</label>
-            <input type="file" class="form-control" id="medicalExams" multiple accept=".pdf,.jpg,.jpeg,.png">
-            <div class="form-text">Formatos aceptados: PDF, JPG, PNG. Tamaño máximo: 5MB por archivo.</div>
-        </div>
-    </div>
-</div>                        
+                        <!-- Sección de Archivos y Exámenes Complementarios -->
+                        <div class="form-section">
+                            <h4 class="section-title">Archivos / Exámenes Complementarios / Imágenes de otros test</h4>
+                            <div class="row">
+                                <div class="col-md-12 mb-3">
+                                    <label for="medicalExams" class="form-label">Adjuntar archivos</label>
+                                    <input type="file" class="form-control" id="medicalExams" multiple accept=".pdf,.jpg,.jpeg,.png">
+                                    <div class="form-text">Formatos aceptados: PDF, JPG, PNG. Tamaño máximo: 5MB por archivo.</div>
+                                </div>
+                            </div>
+                        </div>                        
 
                         <div class="d-grid gap-2 d-md-flex justify-content-md-end">
                             <button type="submit" class="btn btn-primary" id="savePatientBtn">Guardar Ficha</button>
@@ -465,11 +464,11 @@
                                 <div class="card-body">
                                     <div class="mb-3">
                                        <div class="mb-3 input-group">
-    <input type="text" class="form-control" id="searchPatient" placeholder="Buscar por nombre o RUT">
-    <button class="btn btn-primary" id="searchButton" type="button">
-        <i class="fas fa-search"></i> Buscar
-    </button>
-</div>
+                                        <input type="text" class="form-control" id="searchPatient" placeholder="Buscar por nombre o RUT">
+                                        <button class="btn btn-primary" id="searchButton" type="button">
+                                            <i class="fas fa-search"></i> Buscar
+                                        </button>
+                                      </div>
                                     </div>
                                     <div class="table-responsive">
                                         <table class="table table-striped">
@@ -607,33 +606,15 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     
-<!-- Firebase App (la base) -->
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <!-- Firebase App (la base) -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
 
-<!-- Añade los productos que usas -->
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
+    <!-- Añade los productos que usas -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
 
-<!-- Tu script -->
-<script src="app.js"></script>
-
-<script>
-  // Configuración de Firebase
-  const firebaseConfig = {
-    apiKey: "AIzaSyBYaNbZWHUS-Pvm49kmMtHw9LqqxUDySYA",
-    authDomain: "base-de-datos-poli.firebaseapp.com",
-    projectId: "base-de-datos-poli",
-    storageBucket: "base-de-datos-poli.appspot.com", // Corregido
-    messagingSenderId: "954754202697",
-    appId: "1:954754202697:web:e06171f6b0ade314259398"
-  };
-
-  // Inicializar Firebase
-  firebase.initializeApp(firebaseConfig);
-</script>
-
-    <!-- Tu archivo JavaScript principal -->
-<script src="app.js"></script>
+    <!-- Tu script (Solo una vez) -->
+    <script src="app.js"></script>
     
     <!-- Modal para ver detalles de evolución -->
     <div class="modal fade" id="evolutionDetailsModal" tabindex="-1" aria-labelledby="evolutionDetailsModalLabel" aria-hidden="true">
@@ -655,41 +636,18 @@
         </div>
     </div>
 
-    <!-- Script para manejar los sliders PSFS -->
-    <script>
-        // Función para actualizar los valores de los sliders PSFS
-        document.addEventListener('DOMContentLoaded', function() {
-            // Manejar los sliders PSFS
-            const psfsSliders = ['psfs1Rating', 'psfs2Rating', 'psfs3Rating'];
-            
-            psfsSliders.forEach(sliderId => {
-                const slider = document.getElementById(sliderId);
-                const valueDisplay = document.getElementById(sliderId.replace('Rating', 'Value'));
-                
-                if (slider && valueDisplay) {
-                    // Establecer valor inicial
-                    valueDisplay.textContent = slider.value;
-                    
-                    // Actualizar valor cuando cambie el slider
-                    slider.addEventListener('input', function() {
-                        valueDisplay.textContent = this.value;
-                    });
-                }
-            });
-        });
-    </script>
-<!-- Modal de carga -->
-<div class="modal fade" id="loadingModal" tabindex="-1" aria-labelledby="loadingModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-body text-center">
-        <div class="spinner-border text-primary" role="status">
-          <span class="visually-hidden">Cargando...</span>
+    <!-- Modal de carga -->
+    <div class="modal fade" id="loadingModal" tabindex="-1" aria-labelledby="loadingModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-body text-center">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Cargando...</span>
+            </div>
+            <p class="mt-3">Procesando, por favor espere...</p>
+          </div>
         </div>
-        <p class="mt-3">Procesando, por favor espere...</p>
       </div>
     </div>
-  </div>
-</div> 
 </body>
 </html>
