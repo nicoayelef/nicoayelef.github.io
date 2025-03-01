@@ -140,11 +140,11 @@ async function savePatient(event) {
 
 
         // 2. Procesar archivos (si hay)
-        const fileInput = document.getElementById('medicalExams');
-        if (fileInput.files.length > 0) {
-            const processedFiles = await processFiles(fileInput.files);  // Usar la función processFiles
-            patientData.complementaryExams = processedFiles;  // Añadir al objeto patientData
-        }
+const fileInput = document.getElementById('medicalExams');
+if (fileInput.files.length > 0) {
+    const processedFiles = await processFiles(fileInput.files);  // Usar la función processFiles
+    patientData.complementaryExams = processedFiles;  // Añadir al objeto patientData
+}
 
 
         // 3. Guardar en Firestore
