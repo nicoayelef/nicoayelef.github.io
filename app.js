@@ -697,7 +697,7 @@ function showEvolutionDetails(evolutionId) {
             }
 
             // --- Rellenar el modal de detalles de evolución ---
-            const modalBody = document.getElementById('evolutionDetailsModalBody');
+            const modalBody = document.getElementById('evolutionDetailsContent');
             if (!modalBody) {
                 console.error("Elemento evolutionDetailsModalBody no encontrado.");
                  loadingModal.hide(); // Ocultar modal de carga
