@@ -1,12 +1,13 @@
 // Configuración de Firebase (¡Tus credenciales!)
 const firebaseConfig = {
-    apiKey: "AIzaSyBYaNbZWHUS-Pvm49kmMtHw9LqqxUDySYA",
+   apiKey: "AIzaSyBYaNbZWHUS-Pvm49kmMtHw9LqqxUDySYA",
     authDomain: "base-de-datos-poli.firebaseapp.com",
     projectId: "base-de-datos-poli",
-    storageBucket: "base-de-datos-poli.appspot.com",
+    storageBucket: "base-de-datos-poli.firebasestorage.app",
     messagingSenderId: "954754202697",
     appId: "1:954754202697:web:e06171f6b0ade314259398"
-};
+  };
+
 
 // Inicializar Firebase (con verificación)
 if (typeof firebase !== 'undefined') {
