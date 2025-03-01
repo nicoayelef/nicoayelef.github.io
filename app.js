@@ -633,7 +633,7 @@ function loadEvolutions() {
                 row.innerHTML = `
                     <td>${patientNames[evolution.patientId] || 'Paciente Desconocido'}</td>
                     <td>${evolution.date || 'No especificada'}</td>
-                    <td>${evolution.subjective ? (evolution.subjective.length > 50 ? evolution.subjective.substring(0, 50) + '...' : evolution.subjective) : 'No especificado'}</td>
+                   <td>${evolution.subjective ? (evolution.subjective.length > 50 ? evolution.subjective.substring(0, 50) + '...' : evolution.subjective) : 'No especificado'}</td>
                     <td>
                         <button class="btn btn-primary btn-sm view-evolution" data-evolution-id="${evolution.id}">Ver</button>
                         <button class="btn btn-danger btn-sm delete-evolution" data-evolution-id="${evolution.id}">Eliminar</button>
