@@ -289,14 +289,17 @@ function loadPatients() {
 function showPatientDetails(patientId) {
   console.log("Mostrando detalles del paciente:", patientId);
 
-  // Mostrar modal de carga
-  const loadingModal = new bootstrap.Modal(document.getElementById('loadingModal'));
-  loadingModal.show();
+  // Usar la nueva función de carga
+window.showLoadingModal();
 
   db.collection("patients").doc(patientId).get()
+     })
+      .finally(() => {
+        // Siempre ocultar el modal de carga al final
+        window.hideLoadingModal();
+      });
     .then((doc) => {
-      // Ocultar el modal de carga ANTES de hacer cualquier otra cosa
-      loadingModal.hide();
+     // No necesitamos ocultar el modal aquí - lo haremos en el finally
       
       if (!doc.exists) {
         console.log("Paciente no encontrado:", patientId);
@@ -404,7 +407,7 @@ function showPatientDetails(patientId) {
     .catch((error) => {
       console.error("Error al obtener detalles del paciente:", error);
       showAlert("Error al cargar los detalles del paciente: " + error.message, "danger");
-      loadingModal.hide(); // Asegurarse de ocultar el modal de carga en caso de error
+      window.hideLoadingModal(); // Asegurarse de ocultar el modal en caso de error
     });
 }
 
@@ -473,14 +476,14 @@ function loadPatientPSFS() {
         return;
     }
 
-    // Mostrar modal de carga
-    const loadingModal = new bootstrap.Modal(document.getElementById('loadingModal'));
-    loadingModal.show();
+   // Usar la nueva función de carga
+window.showLoadingModal();
 
     db.collection("patients").doc(patientId).get()
         .then(doc => {
-            // IMPORTANTE: Ocultar el modal de carga al inicio del procesamiento de datos
-            loadingModal.hide();
+            // No necesitamos ocultar el modal aquí - lo haremos en el finally
+
+
             
             if (doc.exists) {
                 const patient = doc.data();
