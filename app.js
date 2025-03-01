@@ -1446,14 +1446,12 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log("Formulario encontrado:", patientForm);
     
     if (patientForm) {
-      patientForm.addEventListener('submit', function(e) {
-        console.log("Formulario enviado");
-        e.preventDefault(); // Evitar que el formulario se envíe de forma tradicional
-        savePatient(e);
-      });
+        patientForm.addEventListener('submit', savePatient);
+        console.log("Event listener para el formulario configurado");
     } else {
-      console.error("No se encontró el formulario con ID 'patientForm'");
+        console.error("No se encontró el formulario con ID 'patientForm'");
     }
+}  
     
     // Cargar la lista de pacientes
     loadPatients();
