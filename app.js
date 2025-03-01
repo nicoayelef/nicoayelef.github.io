@@ -852,34 +852,45 @@ function deleteEvolution(evolutionId) {
 
 // Función para procesar archivos
 async function processFiles(files) {
-  const processedFiles = [];
-  const storage = firebase.storage();
-  
-  for (let i = 0; i < files.length; i++) {
-    const file = files[i];
-    try {
-      // Crear una referencia única para el archivo
-      const storageRef = storage.ref(`medical_exams/${Date.now()}_${file.name}`);
-      
-      // Subir el archivo
-      const snapshot = await storageRef.put(file);
-      
-      // Obtener la URL de descarga
-      const url = await snapshot.ref.getDownloadURL();
-      
-      processedFiles.push({
-        name: file.name,
-        type: file.type,
-        url: url,
-        uploadedAt: firebase.firestore.Timestamp.now()
-      });
-    } catch (error) {
-      console.error("Error al procesar archivo:", error);
-      showAlert(`Error al procesar el archivo ${file.name}: ${error.message}`, "danger");
+    console.log("Procesando archivos:", files);
+    const processedFiles = [];
+    const storage = firebase.storage();
+    
+    for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        try {
+            console.log(`Procesando archivo ${i+1}/${files.length}: ${file.name}`);
+            
+            // Verificar tamaño del archivo (máximo 5MB)
+            if (file.size > 5 * 1024 * 1024) {
+                throw new Error(`El archivo ${file.name} excede el tamaño máximo de 5MB`);
+            }
+            
+            // Crear una referencia única para el archivo
+            const storageRef = storage.ref(`medical_exams/${Date.now()}_${file.name}`);
+            
+            // Subir el archivo
+            const snapshot = await storageRef.put(file);
+            console.log(`Archivo ${file.name} subido correctamente`);
+            
+            // Obtener la URL de descarga
+            const url = await snapshot.ref.getDownloadURL();
+            console.log(`URL obtenida para ${file.name}: ${url}`);
+            
+            processedFiles.push({
+                name: file.name,
+                type: file.type,
+                url: url,
+                uploadedAt: firebase.firestore.Timestamp.now()
+            });
+        } catch (error) {
+            console.error(`Error al procesar archivo ${file.name}:`, error);
+            showAlert(`Error al procesar el archivo ${file.name}: ${error.message}`, "danger");
+        }
     }
-  }
-  
-  return processedFiles;
+    
+    console.log("Todos los archivos procesados:", processedFiles);
+    return processedFiles;
 }
 
 // Función para formatear fecha
