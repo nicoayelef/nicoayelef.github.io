@@ -938,63 +938,6 @@ function updateRatingValue(sliderId, valueId) {
   });
 }
 
-// --- Event Listeners (al final del script) ---
-
-// Event listener para el formulario de pacientes
-const patientForm = document.getElementById('patientForm');
-if (patientForm) {
-    console.log("Formulario de paciente encontrado, añadiendo event listener");
-    patientForm.addEventListener('submit', savePatient);
-} else {
-    console.error("Formulario de paciente no encontrado");
-}
-
-// Event listener para el selector de pacientes (en la pestaña de evoluciones)
-document.getElementById('patientSelect')?.addEventListener('change', () => {
-    loadPatientPSFS(); // Cargar PSFS y mostrar formulario
-    //loadEvolutionsForPatient(currentPatientId); //No cargar evoluciones al inicio.
-});
-
-//Event listener para cargar los datos iniciales de los sliders PSFS
-document.addEventListener('DOMContentLoaded', function() {
-    console.log("DOM cargado completamente");
-    
-    // Inicializar sliders PSFS
-    updateRatingValue('psfs1Rating', 'psfs1Value');
-    updateRatingValue('psfs2Rating', 'psfs2Value');
-    updateRatingValue('psfs3Rating', 'psfs3Value');
-    
-    // Cargar datos iniciales
-    loadPatients();    // Cargar la lista de pacientes al inicio
-    loadEvolutions(); // Cargar todas las evoluciones al inicio
-    loadPatientsIntoSelect(); // Cargar pacientes en el selector
-    
-    // Configurar event listeners
-    const patientForm = document.getElementById('patientForm');
-    if (patientForm) {
-        console.log("Configurando event listener para el formulario de pacientes");
-        patientForm.addEventListener('submit', savePatient);
-    } else {
-        console.error("Formulario de pacientes no encontrado");
-    }
-    
-    const patientSelect = document.getElementById('patientSelect');
-    if (patientSelect) {
-        console.log("Configurando event listener para el selector de pacientes");
-        patientSelect.addEventListener('change', () => {
-            loadPatientPSFS();
-        });
-    }
-    
-    const evolutionForm = document.getElementById('evolutionForm');
-    if (evolutionForm) {
-        console.log("Configurando event listener para el formulario de evoluciones");
-        evolutionForm.addEventListener('submit', saveEvolution);
-    }
-    
-    console.log("Todos los event listeners configurados");
-});
-
 // Event listener para el formulario de evolución
 document.getElementById('evolutionForm')?.addEventListener('submit', saveEvolution);
 
