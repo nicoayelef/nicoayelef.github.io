@@ -191,6 +191,10 @@ async function savePatient(event) {
 
         // 3. Guardar en Firestore
         console.log("Guardando en Firestore...");
+        if (!db) {
+            throw new Error("La base de datos no está inicializada correctamente");
+        }
+        
         const docRef = await db.collection("patients").add(patientData);
         console.log("Paciente guardado con ID:", docRef.id);
         showAlert("Paciente guardado exitosamente!", "success");
