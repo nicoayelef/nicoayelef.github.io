@@ -765,6 +765,83 @@ function deleteEvolution(evolutionId) {
         });
 }
 
+// Función para procesar archivos
+async function processFiles(files) {
+  const processedFiles = [];
+  const storage = firebase.storage();
+  
+  for (let i = 0; i < files.length; i++) {
+    const file = files[i];
+    try {
+      // Crear una referencia única para el archivo
+      const storageRef = storage.ref(`medical_exams/${Date.now()}_${file.name}`);
+      
+      // Subir el archivo
+      const snapshot = await storageRef.put(file);
+      
+      // Obtener la URL de descarga
+      const url = await snapshot.ref.getDownloadURL();
+      
+      processedFiles.push({
+        name: file.name,
+        type: file.type,
+        url: url,
+        uploadedAt: firebase.firestore.Timestamp.now()
+      });
+    } catch (error) {
+      console.error("Error al procesar archivo:", error);
+      showAlert(`Error al procesar el archivo ${file.name}: ${error.message}`, "danger");
+    }
+  }
+  
+  return processedFiles;
+}
+
+// Función para formatear fecha
+function formatDate(timestamp) {
+  if (!timestamp) return 'Fecha no disponible';
+  
+  try {
+    const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+    return date.toLocaleDateString();
+  } catch (e) {
+    console.error("Error al formatear fecha:", e);
+    return 'Fecha inválida';
+  }
+}
+
+// Función para formatear hora
+function formatTime(timestamp) {
+  if (!timestamp) return '';
+  
+  try {
+    const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+    return date.toLocaleTimeString();
+  } catch (e) {
+    console.error("Error al formatear hora:", e);
+    return '';
+  }
+}
+
+// Función para actualizar el valor de los sliders
+function updateRatingValue(sliderId, valueId) {
+  const slider = document.getElementById(sliderId);
+  const valueDisplay = document.getElementById(valueId);
+  
+  if (!slider || !valueDisplay) {
+    console.error(`Elementos no encontrados: ${sliderId} o ${valueId}`);
+    return;
+  }
+  
+  // Establecer valor inicial
+  valueDisplay.textContent = slider.value;
+  
+  // Actualizar valor cuando cambie el slider
+  slider.addEventListener('input', function() {
+    valueDisplay.textContent = this.value;
+  });
+}
+
 // --- Event Listeners (al final del script) ---
 
 // Event listener para el formulario de pacientes
