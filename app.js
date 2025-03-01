@@ -103,20 +103,28 @@ function clearForm(formId) {
 async function savePatient(event) {
     event.preventDefault(); // Evitar el envío normal del formulario
     console.log("Función savePatient ejecutada");
+    
     const saveBtn = document.getElementById('savePatientBtn');
 
-    //Deshabilito el botón mientras se guarda.
+    // Deshabilitar el botón mientras se guarda
     if (saveBtn) {
         saveBtn.disabled = true;
         saveBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Guardando...';
     }
 
-
     try {
-        // 1. Recopilar los datos del formulario (¡Usando los IDs correctos de tu HTML!)
+        // Verificar campos obligatorios
+        const evaluator = document.getElementById('evaluator').value;
+        const email = document.getElementById('email').value;
+        
+        if (!evaluator || !email) {
+            throw new Error("Los campos de Evaluador y Correo son obligatorios");
+        }
+        
+        // 1. Recopilar los datos del formulario
         const patientData = {
-            evaluator: document.getElementById('evaluator').value,
-            email: document.getElementById('email').value,
+            evaluator: evaluator,
+            email: email,
             name: document.getElementById('name').value,
             rut: document.getElementById('rut').value,
             contactNumber: document.getElementById('contactNumber').value,
@@ -137,7 +145,7 @@ async function savePatient(event) {
             remoteAnamnesis: document.getElementById('remoteAnamnesis').value,
             habitsHobbies: document.getElementById('habitsHobbies').value,
             homeSupport: document.getElementById('homeSupport').value,
-            //Datos de los sliders PSFS
+            // Datos de los sliders PSFS
             psfs1: {
                 activity: document.getElementById('psfs1Activity').value,
                 rating: document.getElementById('psfs1Rating').value
@@ -154,9 +162,58 @@ async function savePatient(event) {
             vitalSigns: document.getElementById('vitalSigns').value,
             anthropometry: document.getElementById('anthropometry').value,
             physicalExam: document.getElementById('physicalExam').value,
-            createdAt: firebase.firestore.Timestamp.now(),  // Usar el timestamp del servidor
+            createdAt: firebase.firestore.Timestamp.now(),
             complementaryExams: [] // Inicializar el array para los archivos
         };
+
+        console.log("Datos del paciente recopilados:", patientData);
+
+        // 2. Procesar archivos (si hay)
+        const fileInput = document.getElementById('medicalExams');
+        if (fileInput && fileInput.files && fileInput.files.length > 0) {
+            try {
+                console.log("Procesando archivos...");
+                const processedFiles = await processFiles(fileInput.files);
+                patientData.complementaryExams = processedFiles;
+                console.log("Archivos procesados correctamente:", processedFiles);
+            } catch (error) {
+                console.error("Error al procesar archivos:", error);
+                showAlert("Error al procesar los archivos adjuntos. La ficha se guardará sin archivos.", "warning");
+                patientData.complementaryExams = [];
+            }
+        } else {
+            console.log("No hay archivos para procesar");
+            patientData.complementaryExams = [];
+        }
+
+        // 3. Guardar en Firestore
+        console.log("Guardando en Firestore...");
+        const docRef = await db.collection("patients").add(patientData);
+        console.log("Paciente guardado con ID:", docRef.id);
+        showAlert("Paciente guardado exitosamente!", "success");
+
+        // 4. Limpiar el formulario
+        document.getElementById("patientForm").reset();
+        
+        // Recargar los sliders
+        updateRatingValue('psfs1Rating', 'psfs1Value');
+        updateRatingValue('psfs2Rating', 'psfs2Value');
+        updateRatingValue('psfs3Rating', 'psfs3Value');
+        
+        // 5. Recargar la lista de pacientes
+        loadPatients();
+
+    } catch (error) {
+        console.error("Error al guardar el paciente:", error);
+        showAlert("Error al guardar el paciente: " + error.message, "danger");
+    } finally {
+        // Restaurar botón (independientemente de si hubo éxito o error)
+        if (saveBtn) {
+            saveBtn.disabled = false;
+            saveBtn.innerHTML = 'Guardar Ficha';
+        }
+    }
+}
 
 // 2. Procesar archivos (si hay)
 const fileInput = document.getElementById('medicalExams');
