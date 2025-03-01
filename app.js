@@ -759,13 +759,6 @@ function deletePatient(patientId) {
     }
 }
 
-// Función para buscar pacientes
-function searchPatients() {
-    const searchInput = document.getElementById('searchPatient').value.toLowerCase();
-    if (!searchInput) {
-        loadPatients();
-        return;
-    }
     
     const patientsTableBody = document.getElementById('patientsTableBody');
     if (!patientsTableBody) return;
