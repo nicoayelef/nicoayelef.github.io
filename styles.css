@@ -1,155 +1,432 @@
-/* Estilos generales */
+/* Estilos CSS inspirados en Spotify con tema morado */
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap');
+
+:root {
+    --primary-color: #9c27b0; /* Morado principal */
+    --primary-dark: #7b1fa2;  /* Morado oscuro */
+    --primary-light: #d05ce3; /* Morado claro */
+    --accent-color: #ce93d8;  /* Acento morado */
+    --text-color: #121212;    /* Color de texto en modo claro */
+    --text-secondary: #6c757d; /* Color de texto secundario */
+    --bg-color: #f8f9fa;      /* Fondo claro */
+    --bg-card: #ffffff;       /* Fondos de tarjetas en claro */
+    --border-color: #e0e0e0;  /* Bordes en claro */
+    --success-color: #1db954; /* Verde de éxito (como Spotify) */
+    --danger-color: #ff5252;  /* Rojo de peligro */
+    --warning-color: #ffb142; /* Amarillo advertencia */
+    
+    /* Configuración de transiciones */
+    --transition-speed: 0.3s;
+    --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Modo oscuro */
+body.dark-mode {
+    --text-color: #e0e0e0;
+    --text-secondary: #b3b3b3;
+    --bg-color: #121212;
+    --bg-card: #212121;
+    --border-color: #333333;
+    --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+/* Estilos base */
 body {
-    font-family: 'Arial', sans-serif;
-    background-color: #f8f9fa;
-    padding-top: 20px;
-    padding-bottom: 40px;
+    font-family: 'Montserrat', sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    transition: background-color var(--transition-speed), color var(--transition-speed);
+    margin: 0;
+    padding: 0;
 }
 
 .container {
     max-width: 1200px;
     margin: 0 auto;
+    padding: 0 15px;
 }
 
+/* Encabezado y título */
 h1 {
+    font-weight: 700;
     text-align: center;
     margin-bottom: 30px;
-    color: #333;
+    color: var(--primary-color);
+    letter-spacing: -0.5px;
 }
 
-/* Estilos para las pestañas */
+/* Selector de tema */
+.theme-toggle {
+    position: fixed;
+    top: 15px;
+    right: 15px;
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 50px;
+    padding: 8px 16px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color var(--transition-speed);
+    z-index: 1000;
+    box-shadow: var(--box-shadow);
+}
+
+.theme-toggle:hover {
+    background-color: var(--primary-dark);
+}
+
+/* Pestañas */
 .nav-tabs {
+    border-bottom: none;
     margin-bottom: 20px;
+    display: flex;
+    justify-content: center;
 }
 
 .nav-tabs .nav-link {
-    color: #495057;
+    border: none;
+    color: var(--text-secondary);
     font-weight: 500;
+    padding: 12px 24px;
+    font-size: 16px;
+    transition: all var(--transition-speed);
+    margin: 0 8px;
+    border-radius: 25px;
+}
+
+.nav-tabs .nav-link:hover {
+    color: var(--primary-color);
+    background-color: rgba(156, 39, 176, 0.1);
 }
 
 .nav-tabs .nav-link.active {
-    color: #007bff;
-    font-weight: 600;
+    color: white;
+    background-color: var(--primary-color);
+    box-shadow: var(--box-shadow);
 }
 
-/* Estilos para el formulario */
-.form-container {
-    background-color: white;
-    padding: 25px;
-    border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+/* Contenedores de tarjetas */
+.form-container, .card {
+    background-color: var(--bg-card);
+    border-radius: 12px;
+    box-shadow: var(--box-shadow);
     margin-bottom: 30px;
+    padding: 25px;
+    transition: all var(--transition-speed);
+    border: none;
 }
 
+.card-header {
+    background-color: var(--primary-color);
+    color: white;
+    font-weight: 600;
+    border-top-left-radius: 12px !important;
+    border-top-right-radius: 12px !important;
+    padding: 15px 20px;
+}
+
+.card-header h5 {
+    margin-bottom: 0;
+}
+
+/* Formularios */
 .form-label {
     font-weight: 600;
-    color: #495057;
+    color: var(--text-color);
+    margin-bottom: 8px;
+    font-size: 15px;
 }
 
-.form-text {
-    color: #6c757d;
-    font-size: 0.85rem;
+.form-control, .form-select {
+    border-radius: 8px;
+    padding: 10px 15px;
+    border: 1px solid var(--border-color);
+    background-color: var(--bg-card);
+    color: var(--text-color);
+    transition: all var(--transition-speed);
 }
 
+.form-control:focus, .form-select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(156, 39, 176, 0.25);
+}
+
+/* Textarea estilo Spotify */
+textarea.form-control {
+    min-height: 100px;
+    resize: vertical;
+}
+
+/* Botones */
+.btn {
+    font-weight: 600;
+    border-radius: 25px;
+    padding: 8px 20px;
+    transition: all var(--transition-speed);
+    text-transform: uppercase;
+    font-size: 14px;
+    letter-spacing: 0.5px;
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.btn-primary:hover, .btn-primary:focus {
+    background-color: var(--primary-dark);
+    border-color: var(--primary-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.btn-danger {
+    background-color: var(--danger-color);
+    border-color: var(--danger-color);
+}
+
+.btn-danger:hover, .btn-danger:focus {
+    background-color: #ff3838;
+    border-color: #ff3838;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.btn-secondary {
+    background-color: #6c757d;
+    border-color: #6c757d;
+}
+
+.btn-success {
+    background-color: var(--success-color);
+    border-color: var(--success-color);
+}
+
+.btn-sm {
+    padding: 4px 12px;
+    font-size: 12px;
+}
+
+/* Alertas personalizadas */
+.alert {
+    border-radius: 8px;
+    border: none;
+    padding: 15px 20px;
+    margin-top: 20px;
+    box-shadow: var(--box-shadow);
+}
+
+.alert-success {
+    background-color: var(--success-color);
+    color: white;
+}
+
+.alert-danger {
+    background-color: var(--danger-color);
+    color: white;
+}
+
+.alert-warning {
+    background-color: var(--warning-color);
+    color: white;
+}
+
+/* Tablas */
+.table {
+    color: var(--text-color);
+    margin-bottom: 0;
+}
+
+.table th {
+    font-weight: 600;
+    padding: 12px 15px;
+    border-top: none;
+    border-bottom: 2px solid var(--primary-color);
+    color: var(--text-color);
+}
+
+.table td {
+    padding: 12px 15px;
+    border-top: 1px solid var(--border-color);
+    vertical-align: middle;
+}
+
+.table-striped tbody tr:nth-of-type(odd) {
+    background-color: rgba(156, 39, 176, 0.05);
+}
+
+.table-hover tbody tr:hover {
+    background-color: rgba(156, 39, 176, 0.1);
+}
+
+/* Modales */
+.modal-content {
+    background-color: var(--bg-card);
+    border-radius: 12px;
+    border: none;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    color: var(--text-color);
+}
+
+.modal-header {
+    background-color: var(--primary-color);
+    color: white;
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+    padding: 15px 20px;
+    border-bottom: none;
+}
+
+.modal-footer {
+    border-top: 1px solid var(--border-color);
+    padding: 15px 20px;
+}
+
+.modal-body {
+    padding: 20px;
+}
+
+.modal-title {
+    font-weight: 600;
+}
+
+.btn-close {
+    filter: brightness(0) invert(1);
+}
+
+/* Sliders */
+.form-range {
+    height: 8px;
+}
+
+.form-range::-webkit-slider-thumb {
+    background: var(--primary-color);
+    width: 18px;
+    height: 18px;
+}
+
+.form-range::-moz-range-thumb {
+    background: var(--primary-color);
+    width: 18px;
+    height: 18px;
+}
+
+.form-range::-webkit-slider-runnable-track {
+    background: #e0e0e0;
+    height: 8px;
+    border-radius: 4px;
+}
+
+.form-range::-moz-range-track {
+    background: #e0e0e0;
+    height: 8px;
+    border-radius: 4px;
+}
+
+.rating-container {
+    margin-top: 10px;
+    position: relative;
+}
+
+.rating-value {
+    background-color: var(--primary-color);
+    color: white;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 15px;
+    display: inline-block;
+}
+
+/* Secciones de formulario */
 .form-section {
-    margin-bottom: 20px;
+    margin-bottom: 30px;
     padding-bottom: 15px;
-    border-bottom: 1px solid #eee;
+    border-bottom: 1px solid var(--border-color);
 }
 
 .form-section:last-child {
     border-bottom: none;
+    margin-bottom: 0;
 }
 
 .section-title {
-    border-bottom: 2px solid #007bff;
-    padding-bottom: 5px;
-    margin-bottom: 15px;
-    color: #007bff;
-}
-
-/* Estilos para los sliders de valoración */
-.rating-container {
-    display: flex;
-    align-items: center;
-    margin-top: 5px;
-}
-
-.rating-label {
-    margin: 0 10px;
-    font-size: 0.8rem;
-    color: #6c757d;
-}
-
-.rating-value {
-    font-weight: bold;
-    margin-left: 10px;
-    color: #007bff;
-}
-
-/* Estilos para la lista de pacientes */
-.patient-card {
-    margin-bottom: 15px;
-    border-left: 4px solid #007bff;
-    transition: transform 0.2s;
-}
-
-.patient-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-}
-
-.search-container {
+    color: var(--primary-color);
+    font-size: 18px;
+    font-weight: 600;
     margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--primary-color);
 }
 
-.btn-export {
-    margin-left: 10px;
+/* Texto de ayuda */
+.text-muted {
+    color: var(--text-secondary) !important;
+    background-color: rgba(0, 0, 0, 0.05);
+    padding: 10px;
+    border-radius: 8px;
+    font-size: 13px;
+    margin-bottom: 10px;
 }
 
-/* Estilos para el modal de detalles */
-.modal-xl {
-    max-width: 90%;
+body.dark-mode .text-muted {
+    background-color: rgba(255, 255, 255, 0.05);
 }
 
-.modal-body h4 {
-    color: #007bff;
-    margin-top: 15px;
+/* Spinner y animaciones */
+.spinner-border {
+    border-width: 3px;
 }
 
-/* Estilos para los mensajes de alerta */
-.alert {
-    margin-top: 20px;
-}
-
-/* Estilos para los botones */
-.btn-primary {
-    background-color: #007bff;
-    border-color: #007bff;
-}
-
-.btn-primary:hover {
-    background-color: #0069d9;
-    border-color: #0062cc;
-}
-
-.btn-danger {
-    background-color: #dc3545;
-    border-color: #dc3545;
-}
-
-.btn-danger:hover {
-    background-color: #c82333;
-    border-color: #bd2130;
-}
-
-/* Estilos para dispositivos móviles */
+/* Ajustes responsive */
 @media (max-width: 768px) {
-    .form-container {
+    .container {
+        padding: 0 10px;
+    }
+    
+    .form-container, .card {
         padding: 15px;
     }
     
-    .modal-xl {
-        max-width: 100%;
+    .nav-tabs .nav-link {
+        padding: 8px 16px;
+        font-size: 14px;
     }
+    
+    h1 {
+        font-size: 24px;
+    }
+    
+    .modal-dialog {
+        margin: 10px;
+    }
+}
+
+/* Animaciones */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.fade-in {
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+/* Personalización de scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg-color);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--primary-color);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--primary-dark);
 }
