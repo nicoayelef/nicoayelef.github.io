@@ -319,69 +319,76 @@ function loadPatients() {
     patientsTableBody.innerHTML = '<tr><td colspan="5" class="text-center">Cargando pacientes...</td></tr>';
     
     // Obtener pacientes de Firestore
-    db.collection("patients").orderBy("createdAt", "desc").get()
-        .then((querySnapshot) => {
-            console.log("Pacientes obtenidos:", querySnapshot.size);
+    db.collection("patients")
+      .orderBy("createdAt", "desc") // Esto ordena por timestamp completo (fecha y hora)
+      .get()
+      .then((querySnapshot) => {
+        console.log("Pacientes obtenidos:", querySnapshot.size);
+        
+        // Limpiar mensaje de carga
+        patientsTableBody.innerHTML = '';
+        
+        // Si no hay pacientes, mostrar mensaje
+        if (querySnapshot.empty) {
+            patientsTableBody.innerHTML = '<tr><td colspan="5" class="text-center">No hay pacientes registrados</td></tr>';
+            return;
+        }
+        
+        // Agregar cada paciente a la tabla
+        querySnapshot.forEach((doc) => {
+            const patient = doc.data();
+            patient.id = doc.id; // Guardar el ID del documento
             
-            // Limpiar mensaje de carga
-            patientsTableBody.innerHTML = '';
-            
-            // Si no hay pacientes, mostrar mensaje
-            if (querySnapshot.empty) {
-                patientsTableBody.innerHTML = '<tr><td colspan="5" class="text-center">No hay pacientes registrados</td></tr>';
-                return;
+            // Formatear fecha y hora de creación
+            let createdDate = 'No disponible';
+            let createdTime = '';
+            if (patient.createdAt && patient.createdAt.toDate) {
+                const date = patient.createdAt.toDate();
+                createdDate = date.toLocaleDateString();
+                createdTime = date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            } else if (patient.createdAt) {
+                const date = new Date(patient.createdAt);
+                createdDate = date.toLocaleDateString();
+                createdTime = date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
             }
             
-            // Agregar cada paciente a la tabla
-            querySnapshot.forEach((doc) => {
-                const patient = doc.data();
-                patient.id = doc.id; // Guardar el ID del documento
-                
-                // Formatear fecha de creación
-                let createdDate = 'No disponible';
-                if (patient.createdAt && patient.createdAt.toDate) {
-                    createdDate = patient.createdAt.toDate().toLocaleDateString();
-                } else if (patient.createdAt) {
-                    createdDate = new Date(patient.createdAt).toLocaleDateString();
-                }
-                
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${patient.name || 'Sin nombre'}</td>
-                    <td>${patient.rut || 'No especificado'}</td>
-                    <td>${patient.age || 'No especificada'}</td>
-                    <td>${createdDate}</td>
-                    <td>
-                        <button class="btn btn-primary btn-sm view-details" data-patient-id="${patient.id}">
-                            <i class="fas fa-eye"></i> Ver
-                        </button>
-                        <button class="btn btn-danger btn-sm delete-patient" data-patient-id="${patient.id}">
-                            <i class="fas fa-trash"></i> Eliminar
-                        </button>
-                    </td>
-                `;
-                patientsTableBody.appendChild(row);
-            });
-            
-            // Agregar event listeners a los botones
-            document.querySelectorAll('.view-details').forEach(button => {
-                button.addEventListener('click', function() {
-                    const patientId = this.getAttribute('data-patient-id');
-                    showPatientDetails(patientId);
-                });
-            });
-            
-            document.querySelectorAll('.delete-patient').forEach(button => {
-                button.addEventListener('click', function() {
-                    const patientId = this.getAttribute('data-patient-id');
-                    deletePatient(patientId);
-                });
-            });
-        })
-        .catch((error) => {
-            console.error("Error al cargar pacientes: ", error);
-            patientsTableBody.innerHTML = `<tr><td colspan="5" class="text-center">Error al cargar pacientes: ${error.message}</td></tr>`;
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${patient.name || 'Sin nombre'}</td>
+                <td>${patient.rut || 'No especificado'}</td>
+                <td>${patient.age || 'No especificada'}</td>
+                <td>${createdDate} <small class="text-muted">${createdTime}</small></td>
+                <td>
+                    <button class="btn btn-primary btn-sm view-details" data-patient-id="${patient.id}">
+                        <i class="fas fa-eye"></i> Ver
+                    </button>
+                    <button class="btn btn-danger btn-sm delete-patient" data-patient-id="${patient.id}">
+                        <i class="fas fa-trash"></i> Eliminar
+                    </button>
+                </td>
+            `;
+            patientsTableBody.appendChild(row);
         });
+        
+        // Agregar event listeners a los botones
+        document.querySelectorAll('.view-details').forEach(button => {
+            button.addEventListener('click', function() {
+                const patientId = this.getAttribute('data-patient-id');
+                showPatientDetails(patientId);
+            });
+        });
+        
+        document.querySelectorAll('.delete-patient').forEach(button => {
+            button.addEventListener('click', function() {
+                const patientId = this.getAttribute('data-patient-id');
+                deletePatient(patientId);
+            });
+        });
+    })
+    .catch((error) => {
+        console.error("Error al cargar pacientes: ", error);
+        patientsTableBody.innerHTML = `<tr><td colspan="5" class="text-center">Error al cargar pacientes: ${error.message}</td></tr>`;
+    });
 }
 
 // Función para mostrar los archivos del paciente
