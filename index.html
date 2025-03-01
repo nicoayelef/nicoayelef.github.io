@@ -608,44 +608,6 @@
 <!-- Firebase Storage (opcional, solo si realmente lo necesitas) -->
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
 
-<!-- Inicialización de Firebase -->
-<script>
-    // Tu configuración de Firebase
-    const firebaseConfig = {
-        apiKey: "AIzaSyBYaNbZWHUS-Pvm49kmMtHw9LqqxUDySYA",
-        authDomain: "base-de-datos-poli.firebaseapp.com",
-        projectId: "base-de-datos-poli",
-        storageBucket: "base-de-datos-poli.appspot.com",
-        messagingSenderId: "954754202697",
-        appId: "1:954754202697:web:e06171f6b0ade314259398"
-    };
-
-    // Inicializar Firebase
-    firebase.initializeApp(firebaseConfig);
-
-    // Inicializar Firestore
-    const db = firebase.firestore();
-    
-    // Configuración para evitar errores de timestamp
-    db.settings({
-        timestampsInSnapshots: true
-    });
-
-    // Inicializar Firebase Storage (opcional)
-    const storage = firebase.storage();
-    
-    console.log("Verificando conexión con Firebase...");
-    db.collection("patients").limit(1).get()
-        .then((snapshot) => {
-            console.log("Conexión exitosa con Firebase. Documentos encontrados:", snapshot.size);
-        })
-        .catch((error) => {
-            console.error("Error de conexión con Firebase:", error);
-            alert("Error de conexión a la base de datos: " + error.message);
-        });
-</script>
-    </script>
-
     <!-- Tu archivo JavaScript principal -->
 <script src="app.js"></script>
     
