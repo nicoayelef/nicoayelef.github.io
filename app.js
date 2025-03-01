@@ -945,4 +945,598 @@ document.addEventListener('DOMContentLoaded', function() {
     if (evolutionForm) {
         evolutionForm.addEventListener('submit', saveEvolution);
     }
+
+  // Función para exportar datos del paciente a PDF
+function exportPatientToPDF(patientId) {
+    // Obtener paciente de Firestore
+    db.collection("patients").doc(patientId).get()
+    .then((doc) => {
+        if (doc.exists) {
+            const patient = doc.data();
+            
+            // Crear un nuevo objeto jsPDF
+            const pdf = new jspdf.jsPDF();
+            
+            // Configurar título
+            pdf.setFontSize(18);
+            pdf.text('Ficha Clínica Kinesiológica', 105, 15, { align: 'center' });
+            
+            // Configurar fuente para el contenido
+            pdf.setFontSize(10);
+            
+            // Información personal
+            pdf.setFontSize(14);
+            pdf.text('Información Personal', 14, 25);
+            pdf.setFontSize(10);
+            pdf.text(`Nombre: ${patient.name || 'No especificado'}`, 14, 35);
+            pdf.text(`RUT: ${patient.rut || 'No especificado'}`, 14, 40);
+            pdf.text(`Edad: ${patient.age || 'No especificada'} años`, 14, 45);
+            pdf.text(`Fecha de nacimiento: ${patient.birthdate || 'No especificada'}`, 14, 50);
+            pdf.text(`Teléfono: ${patient.contactNumber || 'No especificado'}`, 14, 55);
+            pdf.text(`Email: ${patient.patientEmail || 'No especificado'}`, 14, 60);
+            
+            pdf.text(`Nacionalidad: ${patient.nationality || 'No especificada'}`, 105, 35);
+            pdf.text(`Estado civil: ${patient.civilStatus || 'No especificado'}`, 105, 40);
+            pdf.text(`Nivel educacional: ${patient.education || 'No especificado'}`, 105, 45);
+            pdf.text(`Dirección: ${patient.address || 'No especificada'}`, 105, 50);
+            pdf.text(`Contacto emergencia: ${patient.emergencyContact || 'No especificado'}`, 105, 55);
+            pdf.text(`Ocupación: ${patient.occupation || 'No especificada'}`, 105, 60);
+            
+            // Información clínica
+            pdf.setFontSize(14);
+            pdf.text('Información Clínica', 14, 70);
+            pdf.setFontSize(10);
+            
+            // Función para agregar texto largo con saltos de línea
+            function addWrappedText(text, x, y, maxWidth, lineHeight) {
+                const textLines = pdf.splitTextToSize(text, maxWidth);
+                pdf.text(textLines, x, y);
+                return y + (textLines.length * lineHeight);
+            }
+            
+            let yPos = 80;
+            yPos = addWrappedText(`Motivo de consulta: ${patient.consultReason || 'No especificado'}`, 14, yPos, 180, 5);
+            yPos += 5;
+            yPos = addWrappedText(`Diagnóstico: ${patient.diagnosis || 'No especificado'}`, 14, yPos, 180, 5);
+            yPos += 5;
+            yPos = addWrappedText(`Expectativas y metas: ${patient.expectations || 'No especificadas'}`, 14, yPos, 180, 5);
+            
+            // Anamnesis
+            yPos += 10;
+            pdf.setFontSize(14);
+            pdf.text('Anamnesis', 14, yPos);
+            pdf.setFontSize(10);
+            yPos += 10;
+            
+            yPos = addWrappedText(`Anamnesis próxima: ${patient.proximateAnamnesis || 'No especificada'}`, 14, yPos, 180, 5);
+            yPos += 10;
+            yPos = addWrappedText(`Anamnesis remota: ${patient.remoteAnamnesis || 'No especificada'}`, 14, yPos, 180, 5);
+            
+            // Si llegamos al final de la página, añadir una nueva
+            if (yPos > 250) {
+                pdf.addPage();
+                yPos = 20;
+            } else {
+                yPos += 10;
+            }
+            
+            // Hábitos y entorno
+            pdf.setFontSize(14);
+            pdf.text('Hábitos y Entorno', 14, yPos);
+            pdf.setFontSize(10);
+            yPos += 10;
+            
+            yPos = addWrappedText(`Hábitos y hobbies: ${patient.habitsHobbies || 'No especificados'}`, 14, yPos, 180, 5);
+            yPos += 10;
+            yPos = addWrappedText(`Hogar y red de apoyo: ${patient.homeSupport || 'No especificados'}`, 14, yPos, 180, 5);
+            
+            // Si llegamos al final de la página, añadir una nueva
+            if (yPos > 250) {
+                pdf.addPage();
+                yPos = 20;
+            } else {
+                yPos += 10;
+            }
+            
+            // Cuestionarios PSFS
+            pdf.setFontSize(14);
+            pdf.text('Cuestionarios PSFS', 14, yPos);
+            pdf.setFontSize(10);
+            yPos += 10;
+            
+            if (patient.psfs1 && patient.psfs1.activity) {
+                pdf.text(`PSFS 1: ${patient.psfs1.activity} - Puntuación: ${patient.psfs1.rating || 'No especificada'}`, 14, yPos);
+                yPos += 5;
+            }
+            
+            if (patient.psfs2 && patient.psfs2.activity) {
+                pdf.text(`PSFS 2: ${patient.psfs2.activity} - Puntuación: ${patient.psfs2.rating || 'No especificada'}`, 14, yPos);
+                yPos += 5;
+            }
+            
+            if (patient.psfs3 && patient.psfs3.activity) {
+                pdf.text(`PSFS 3: ${patient.psfs3.activity} - Puntuación: ${patient.psfs3.rating || 'No especificada'}`, 14, yPos);
+                yPos += 5;
+            }
+            
+            yPos = addWrappedText(`Cuestionario adicional: ${patient.extraQuestionnaire || 'No especificado'}`, 14, yPos, 180, 5);
+            
+            // Si llegamos al final de la página, añadir una nueva
+            if (yPos > 250) {
+                pdf.addPage();
+                yPos = 20;
+            } else {
+                yPos += 10;
+            }
+            
+            // Evaluación física
+            pdf.setFontSize(14);
+            pdf.text('Evaluación Física', 14, yPos);
+            pdf.setFontSize(10);
+            yPos += 10;
+            
+            yPos = addWrappedText(`Signos vitales: ${patient.vitalSigns || 'No especificados'}`, 14, yPos, 180, 5);
+            yPos += 10;
+            yPos = addWrappedText(`Antropometría: ${patient.anthropometry || 'No especificada'}`, 14, yPos, 180, 5);
+            yPos += 10;
+            yPos = addWrappedText(`Examen físico: ${patient.physicalExam || 'No especificado'}`, 14, yPos, 180, 5);
+            
+            // Si llegamos al final de la página, añadir una nueva
+            if (yPos > 250) {
+                pdf.addPage();
+                yPos = 20;
+            } else {
+                yPos += 10;
+            }
+            
+            // Información del evaluador
+            pdf.setFontSize(14);
+            pdf.text('Información del Evaluador', 14, yPos);
+            pdf.setFontSize(10);
+            yPos += 10;
+            
+            pdf.text(`Evaluador: ${patient.evaluator || 'No especificado'}`, 14, yPos);
+            yPos += 5;
+            pdf.text(`Email del evaluador: ${patient.email || 'No especificado'}`, 14, yPos);
+            
+            // Fecha de creación
+            let createdDate = 'No disponible';
+            if (patient.createdAt && patient.createdAt.toDate) {
+                createdDate = patient.createdAt.toDate().toLocaleDateString();
+            } else if (patient.createdAt) {
+                createdDate = new Date(patient.createdAt).toLocaleDateString();
+            }
+            
+            pdf.setFontSize(8);
+            pdf.text(`Fecha de creación: ${createdDate}`, 14, 285);
+            
+            // Guardar PDF
+            pdf.save(`Ficha_${patient.name || 'Paciente'}_${patient.rut || ''}.pdf`);
+            
+            showAlert('PDF generado correctamente', 'success');
+        } else {
+            showAlert('Paciente no encontrado', 'warning');
+        }
+    })
+    .catch((error) => {
+        console.error("Error al generar PDF: ", error);
+        showAlert('Error al generar PDF: ' + error.message, 'danger');
+    });
+}
+
+// Función para cargar pacientes en el selector
+function loadPatientsIntoSelect() {
+    const patientSelect = document.getElementById('patientSelect');
+    if (!patientSelect) return;
+    
+    // Limpiar opciones actuales
+    patientSelect.innerHTML = '<option value="">Seleccione un paciente</option>';
+    
+    // Obtener pacientes de Firestore
+    db.collection("patients")
+    .get()
+    .then((querySnapshot) => {
+        // Convertir querySnapshot a array para ordenar
+        const patients = [];
+        querySnapshot.forEach(doc => {
+            const data = doc.data();
+            data.id = doc.id;
+            patients.push(data);
+        });
+        
+        // Ordenar por nombre
+        patients.sort((a, b) => {
+            const nameA = (a.name || '').toLowerCase();
+            const nameB = (b.name || '').toLowerCase();
+            return nameA.localeCompare(nameB);
+        });
+        
+        // Agregar cada paciente al selector
+        patients.forEach(patient => {
+            const option = document.createElement('option');
+            option.value = patient.id;
+            option.textContent = `${patient.name || 'Sin nombre'} (${patient.rut || 'Sin RUT'})`;
+            patientSelect.appendChild(option);
+        });
+    })
+    .catch(error => {
+        console.error("Error al cargar pacientes en el selector:", error);
+        showAlert("Error al cargar pacientes: " + error.message, "danger");
+    });
+}
+
+// Función para cargar los datos PSFS del paciente seleccionado
+function loadPatientPSFS() {
+    const patientId = document.getElementById('patientSelect').value;
+    if (!patientId) return;
+    
+    // Obtener paciente de Firestore
+    db.collection("patients").doc(patientId).get()
+    .then(doc => {
+        if (doc.exists) {
+            const patient = doc.data();
+            currentPatientId = patientId;
+            
+            // Mostrar actividades PSFS
+            const psfsContainer = document.getElementById('psfsActivities');
+            if (psfsContainer) {
+                let psfsHTML = '';
+                
+                if (patient.psfs1 && patient.psfs1.activity) {
+                    psfsHTML += `
+                    <div class="mb-3">
+                        <label class="form-label">${patient.psfs1.activity}</label>
+                        <input type="range" class="form-range" min="0" max="10" step="1" id="evolutionPsfs1Rating" value="${patient.psfs1.rating || 0}">
+                        <div class="d-flex justify-content-between">
+                            <span>0</span>
+                            <span id="evolutionPsfs1Value">${patient.psfs1.rating || 0}</span>
+                            <span>10</span>
+                        </div>
+                    </div>`;
+                }
+                
+                if (patient.psfs2 && patient.psfs2.activity) {
+                    psfsHTML += `
+                    <div class="mb-3">
+                        <label class="form-label">${patient.psfs2.activity}</label>
+                        <input type="range" class="form-range" min="0" max="10" step="1" id="evolutionPsfs2Rating" value="${patient.psfs2.rating || 0}">
+                        <div class="d-flex justify-content-between">
+                            <span>0</span>
+                            <span id="evolutionPsfs2Value">${patient.psfs2.rating || 0}</span>
+                            <span>10</span>
+                        </div>
+                    </div>`;
+                }
+                
+                if (patient.psfs3 && patient.psfs3.activity) {
+                    psfsHTML += `
+                    <div class="mb-3">
+                        <label class="form-label">${patient.psfs3.activity}</label>
+                        <input type="range" class="form-range" min="0" max="10" step="1" id="evolutionPsfs3Rating" value="${patient.psfs3.rating || 0}">
+                        <div class="d-flex justify-content-between">
+                            <span>0</span>
+                            <span id="evolutionPsfs3Value">${patient.psfs3.rating || 0}</span>
+                            <span>10</span>
+                        </div>
+                    </div>`;
+                }
+                
+                if (psfsHTML === '') {
+                    psfsHTML = '<p>Este paciente no tiene actividades PSFS registradas.</p>';
+                }
+                
+                psfsContainer.innerHTML = psfsHTML;
+                
+                // Inicializar los valores de los deslizadores
+                if (patient.psfs1 && patient.psfs1.activity) {
+                    updateRatingValue('evolutionPsfs1Rating', 'evolutionPsfs1Value');
+                }
+                if (patient.psfs2 && patient.psfs2.activity) {
+                    updateRatingValue('evolutionPsfs2Rating', 'evolutionPsfs2Value');
+                }
+                if (patient.psfs3 && patient.psfs3.activity) {
+                    updateRatingValue('evolutionPsfs3Rating', 'evolutionPsfs3Value');
+                }
+            }
+        } else {
+            showAlert("Paciente no encontrado", "warning");
+        }
+    })
+    .catch(error => {
+        console.error("Error al cargar datos PSFS:", error);
+        showAlert("Error al cargar datos PSFS: " + error.message, "danger");
+    });
+}
+
+// Función para guardar una evolución
+function saveEvolution(e) {
+    e.preventDefault();
+    
+    if (!currentPatientId) {
+        showAlert("Por favor seleccione un paciente", "warning");
+        return;
+    }
+    
+    // Obtener valores de PSFS
+    const psfsValues = {};
+    
+    const psfs1Rating = document.getElementById('evolutionPsfs1Rating');
+    if (psfs1Rating) {
+        psfsValues.psfs1 = psfs1Rating.value;
+    }
+    
+    const psfs2Rating = document.getElementById('evolutionPsfs2Rating');
+    if (psfs2Rating) {
+        psfsValues.psfs2 = psfs2Rating.value;
+    }
+    
+    const psfs3Rating = document.getElementById('evolutionPsfs3Rating');
+    if (psfs3Rating) {
+        psfsValues.psfs3 = psfs3Rating.value;
+    }
+    
+    // Crear objeto evolución
+    const evolution = {
+        patientId: currentPatientId,
+        date: document.getElementById('evolutionDate').value,
+        subjective: document.getElementById('evolutionSubjective').value,
+        objective: document.getElementById('evolutionObjective').value,
+        assessment: document.getElementById('evolutionAssessment').value,
+        plan: document.getElementById('evolutionPlan').value,
+        psfsValues: psfsValues,
+        createdAt: firebase.firestore.Timestamp.now()
+    };
+    
+    // Mostrar mensaje de carga
+    const saveBtn = document.getElementById('saveEvolutionBtn');
+    if (saveBtn) {
+        saveBtn.disabled = true;
+        saveBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Guardando...';
+    }
+    
+    // Guardar en Firestore
+    db.collection("evolutions").add(evolution)
+    .then((docRef) => {
+        console.log("Evolución guardada con ID:", docRef.id);
+        
+        // Restaurar botón
+        if (saveBtn) {
+            saveBtn.disabled = false;
+            saveBtn.innerHTML = 'Guardar Evolución';
+        }
+        
+        // Mostrar mensaje de éxito
+        showAlert("Evolución guardada correctamente", "success");
+        
+        // Resetear formulario
+        document.getElementById('evolutionForm').reset();
+        
+        // Actualizar la lista de evoluciones
+        loadEvolutions();
+    })
+    .catch((error) => {
+        console.error("Error al guardar evolución:", error);
+        
+        // Restaurar botón
+        if (saveBtn) {
+            saveBtn.disabled = false;
+            saveBtn.innerHTML = 'Guardar Evolución';
+        }
+        
+        // Mostrar mensaje de error
+        showAlert("Error al guardar evolución: " + error.message, "danger");
+    });
+}
+
+// Función para cargar evoluciones
+function loadEvolutions() {
+    const evolutionsTableBody = document.getElementById('evolutionsTableBody');
+    if (!evolutionsTableBody) return;
+    
+    // Limpiar tabla actual
+    evolutionsTableBody.innerHTML = '<tr><td colspan="5" class="text-center">Cargando evoluciones...</td></tr>';
+    
+    // Obtener evoluciones de Firestore
+    db.collection("evolutions")
+    .get()
+    .then((querySnapshot) => {
+        // Convertir querySnapshot a array para ordenar
+        const evolutions = [];
+        querySnapshot.forEach(doc => {
+            const data = doc.data();
+            data.id = doc.id;
+            evolutions.push(data);
+        });
+        
+        // Ordenar por fecha de creación (más reciente primero)
+        evolutions.sort((a, b) => {
+            const dateA = a.createdAt && a.createdAt.toDate ? a.createdAt.toDate() : new Date(a.createdAt || 0);
+            const dateB = b.createdAt && b.createdAt.toDate ? b.createdAt.toDate() : new Date(b.createdAt || 0);
+            
+            return dateB - dateA;
+        });
+        
+        // Limpiar mensaje de carga
+        evolutionsTableBody.innerHTML = '';
+        
+        // Si no hay evoluciones, mostrar mensaje
+        if (evolutions.length === 0) {
+            evolutionsTableBody.innerHTML = '<tr><td colspan="5" class="text-center">No hay evoluciones registradas</td></tr>';
+            return;
+        }
+        
+        // Crear un mapa para almacenar los nombres de los pacientes
+        const patientIds = [...new Set(evolutions.map(evolution => evolution.patientId))];
+        const patientNames = {};
+        
+        // Función para obtener los nombres de los pacientes
+        const getPatientNames = async () => {
+            for (const patientId of patientIds) {
+                try {
+                    const doc = await db.collection("patients").doc(patientId).get();
+                    if (doc.exists) {
+                        const patient = doc.data();
+                        patientNames[patientId] = patient.name || 'Paciente sin nombre';
+                    } else {
+                        patientNames[patientId] = 'Paciente no encontrado';
+                    }
+                } catch (error) {
+                    console.error(`Error al obtener paciente ${patientId}:`, error);
+                    patientNames[patientId] = 'Error al cargar nombre';
+                }
+            }
+            
+            // Una vez que tenemos todos los nombres, mostrar las evoluciones
+            displayEvolutions(evolutions, patientNames);
+        };
+        
+        // Función para mostrar las evoluciones en la tabla
+        const displayEvolutions = (evolutions, patientNames) => {
+            evolutions.forEach((evolution) => {
+                // Formatear fecha
+                const formattedDate = evolution.date || 'No especificada';
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                <td>${patientNames[evolution.patientId] || 'Paciente desconocido'}</td>
+                <td>${formattedDate}</td>
+                <td>${evolution.subjective ? (evolution.subjective.length > 50 ? evolution.subjective.substring(0, 50) + '...' : evolution.subjective) : 'No especificado'}</td>
+                <td>
+                <button class="btn btn-primary btn-sm view-evolution" data-evolution-id="${evolution.id}">
+                <i class="fas fa-eye"></i> Ver
+                </button>
+                <button class="btn btn-danger btn-sm delete-evolution" data-evolution-id="${evolution.id}">
+                <i class="fas fa-trash"></i> Eliminar
+                </button>
+                </td>
+                `;
+                evolutionsTableBody.appendChild(row);
+            });
+            
+            // Agregar event listeners a los botones
+            document.querySelectorAll('.view-evolution').forEach(button => {
+                button.addEventListener('click', function() {
+                    const evolutionId = this.getAttribute('data-evolution-id');
+                    showEvolutionDetails(evolutionId);
+                });
+            });
+            
+            document.querySelectorAll('.delete-evolution').forEach(button => {
+                button.addEventListener('click', function() {
+                    const evolutionId = this.getAttribute('data-evolution-id');
+                    deleteEvolution(evolutionId);
+                });
+            });
+        };
+        
+        // Iniciar el proceso de obtención de nombres
+        getPatientNames();
+    })
+    .catch((error) => {
+        console.error("Error al cargar evoluciones: ", error);
+        evolutionsTableBody.innerHTML = `<tr><td colspan="5" class="text-center">Error al cargar evoluciones: ${error.message}</td></tr>`;
+    });
+}
+
+// Función para mostrar detalles de una evolución
+function showEvolutionDetails(evolutionId) {
+    // Obtener evolución de Firestore
+    db.collection("evolutions").doc(evolutionId).get()
+    .then(async (doc) => {
+        if (doc.exists) {
+            const evolution = doc.data();
+            evolution.id = doc.id;
+            
+            // Obtener nombre del paciente
+            let patientName = 'Paciente desconocido';
+            try {
+                const patientDoc = await db.collection("patients").doc(evolution.patientId).get();
+                if (patientDoc.exists) {
+                    patientName = patientDoc.data().name || 'Paciente sin nombre';
+                }
+            } catch (error) {
+                console.error("Error al obtener nombre del paciente:", error);
+            }
+            
+            const modal = new bootstrap.Modal(document.getElementById('evolutionDetailsModal'));
+            const modalContent = document.getElementById('evolutionDetailsContent');
+            
+            // Construir contenido del modal
+            modalContent.innerHTML = `
+            <div class="container-fluid">
+                <div class="row mb-3">
+                    <div class="col-12">
+                        <h4 class="text-primary">Evolución - ${patientName}</h4>
+                        <p><strong>Fecha:</strong> ${evolution.date || 'No especificada'}</p>
+                    </div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-12">
+                        <h5>Subjetivo</h5>
+                        <p>${evolution.subjective || 'No especificado'}</p>
+                    </div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-12">
+                        <h5>Objetivo</h5>
+                        <p>${evolution.objective || 'No especificado'}</p>
+                    </div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-12">
+                        <h5>Evaluación</h5>
+                        <p>${evolution.assessment || 'No especificada'}</p>
+                    </div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-12">
+                        <h5>Plan</h5>
+                        <p>${evolution.plan || 'No especificado'}</p>
+                    </div>
+                </div>
+                
+                ${evolution.psfsValues && Object.keys(evolution.psfsValues).length > 0 ? `
+                <div class="row mb-3">
+                    <div class="col-12">
+                        <h5>Valores PSFS</h5>
+                        ${evolution.psfsValues.psfs1 ? `<p><strong>PSFS 1:</strong> ${evolution.psfsValues.psfs1}</p>` : ''}
+                        ${evolution.psfsValues.psfs2 ? `<p><strong>PSFS 2:</strong> ${evolution.psfsValues.psfs2}</p>` : ''}
+                        ${evolution.psfsValues.psfs3 ? `<p><strong>PSFS 3:</strong> ${evolution.psfsValues.psfs3}</p>` : ''}
+                    </div>
+                </div>
+                ` : ''}
+            </div>
+            `;
+            
+            modal.show();
+        } else {
+            showAlert('Evolución no encontrada', 'warning');
+        }
+    })
+    .catch((error) => {
+        console.error("Error al obtener detalles de la evolución: ", error);
+        showAlert('Error al obtener detalles de la evolución: ' + error.message, 'danger');
+    });
+}
+
+// Función para eliminar una evolución
+function deleteEvolution(evolutionId) {
+    if (confirm('¿Estás seguro de que deseas eliminar esta evolución? Esta acción no se puede deshacer.')) {
+        // Eliminar evolución de Firestore
+        db.collection("evolutions").doc(evolutionId).delete()
+        .then(() => {
+            console.log("Evolución eliminada correctamente");
+            showAlert('Evolución eliminada correctamente', 'success');
+            loadEvolutions();
+        })
+        .catch((error) => {
+            console.error("Error al eliminar evolución: ", error);
+            showAlert('Error al eliminar evolución: ' + error.message, 'danger');
+        });
+    }
+}
 });
