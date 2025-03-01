@@ -3,34 +3,37 @@ const firebaseConfig = {
     apiKey: "AIzaSyBYaNbZWHUS-Pvm49kmMtHw9LqqxUDySYA",
     authDomain: "base-de-datos-poli.firebaseapp.com",
     projectId: "base-de-datos-poli",
-    storageBucket: "base-de-datos-poli.appspot.com", // Cambia a .appspot.com
+    storageBucket: "base-de-datos-poli.appspot.com",
     messagingSenderId: "954754202697",
     appId: "1:954754202697:web:e06171f6b0ade314259398"
 };
 
 // Inicializar Firebase (con verificación)
-if (!firebase.apps.length) {
-    firebase.initializeApp(firebaseConfig);
-    console.log("Firebase inicializado correctamente");
-} else {
-    console.log("Firebase ya estaba inicializado.");
-}
-
-const db = firebase.firestore();
+if (typeof firebase !== 'undefined') {
+    if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+        console.log("Firebase inicializado correctamente");
+    } else {
+        console.log("Firebase ya estaba inicializado.");
+    }
+    
+    const db = firebase.firestore();
 
 // Verificar conexión (mejorado)
 console.log("Verificando conexión a Firestore...");
-db.collection("patients").limit(1).get()
-    .then(snapshot => {
-        if (snapshot.size >= 0) { // Puede estar vacía
+    db.collection("patients").limit(1).get()
+        .then(snapshot => {
             console.log("Conexión a Firestore exitosa.");
-        }
-    })
-    .catch(error => {
-        console.error("Error al conectar con Firestore:", error);
-        showAlert("Error de conexión a la base de datos: " + error.message, "danger");
-    });
-
+            showAlert("Conexión a la base de datos establecida", "success");
+        })
+        .catch(error => {
+            console.error("Error al conectar con Firestore:", error);
+            showAlert("Error de conexión a la base de datos: " + error.message, "danger");
+        });
+} else {
+    console.error("Firebase no está definido. Asegúrate de incluir las bibliotecas de Firebase antes de tu script.");
+    alert("Error: Firebase no está disponible. Por favor, verifica la consola para más detalles.");
+}
 
 // Variables globales
 let currentPatientId = null; // ID del paciente seleccionado (para evoluciones)
