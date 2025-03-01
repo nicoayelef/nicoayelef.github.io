@@ -243,7 +243,7 @@ async function savePatient(e) {
         if (processedFiles.length > 0) {
             patient.complementaryExams = processedFiles;
         }
-        
+        console.log("Timestamp de creación:", firebase.firestore.Timestamp.now());
         // Guardar en Firestore
         console.log("Intentando guardar en Firestore...");
         db.collection("patients").add(patient)
