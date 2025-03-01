@@ -528,9 +528,9 @@ function saveEvolution(event) {
     const evolutionData = {
         patientId: currentPatientId,
         date: document.getElementById('evolutionDate').value,
-        subjective: document.getElementById('evolutionSubjective').value,
-        objective: document.getElementById('evolutionObjective').value,
-        assessment: document.getElementById('evolutionAssessment').value,
+        subjective: document.getElementById('evolutionProgress').value,
+objective: document.getElementById('evolutionTreatment').value,
+assessment: document.getElementById('evolutionPlan').value,
         plan: document.getElementById('evolutionPlan').value,
         psfsValues: { //Valores de los sliders de la evolución
             psfs1: document.getElementById('evolutionPsfs1Rating')?.value,
