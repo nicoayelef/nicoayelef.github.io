@@ -3,7 +3,7 @@ const firebaseConfig = {
    apiKey: "AIzaSyBYaNbZWHUS-Pvm49kmMtHw9LqqxUDySYA",
     authDomain: "base-de-datos-poli.firebaseapp.com",
     projectId: "base-de-datos-poli",
-    storageBucket: "base-de-datos-poli.firebasestorage.app",
+    storageBucket: "base-de-datos-poli.appspot.com",
     messagingSenderId: "954754202697",
     appId: "1:954754202697:web:e06171f6b0ade314259398"
   };
@@ -20,8 +20,8 @@ if (typeof firebase !== 'undefined') {
     
     const db = firebase.firestore();
 
-// Verificar conexión (mejorado)
-console.log("Verificando conexión a Firestore...");
+    // Verificar conexión (mejorado)
+    console.log("Verificando conexión a Firestore...");
     db.collection("patients").limit(1).get()
         .then(snapshot => {
             console.log("Conexión a Firestore exitosa.");
@@ -39,6 +39,7 @@ console.log("Verificando conexión a Firestore...");
 // Variables globales
 let currentPatientId = null; // ID del paciente seleccionado (para evoluciones)
 let currentEvolutionId = null; //ID de la evolución (para editar, que aun no esta implementado)
+let db = firebase.firestore(); // Asegurar que db esté disponible globalmente
 
 // --- Funciones de utilidad ---
 
@@ -103,6 +104,7 @@ function clearForm(formId) {
       form.reset();
     }
 }
+
 // --- Función para guardar un nuevo paciente ---
 async function savePatient(event) {
     event.preventDefault(); // Evitar el envío normal del formulario
@@ -223,47 +225,6 @@ async function savePatient(event) {
     }
 }
 
-// 2. Procesar archivos (si hay)
-const fileInput = document.getElementById('medicalExams');
-if (fileInput && fileInput.files && fileInput.files.length > 0) {
-    try {
-        const processedFiles = await processFiles(fileInput.files);
-        patientData.complementaryExams = processedFiles;
-        console.log("Archivos procesados correctamente:", processedFiles);
-    } catch (error) {
-        console.error("Error al procesar archivos:", error);
-        showAlert("Error al procesar los archivos adjuntos. La ficha se guardará sin archivos.", "warning");
-        patientData.complementaryExams = [];
-    }
-} else {
-    patientData.complementaryExams = [];
-}
-
-
-        // 3. Guardar en Firestore
-        const docRef = await db.collection("patients").add(patientData);
-        console.log("Paciente guardado con ID:", docRef.id);
-        showAlert("Paciente guardado exitosamente!", "success");
-
-        // 4. Limpiar el formulario
-        document.getElementById("patientForm").reset();
-        //Recargar los sliders.
-        updateRatingValue('psfs1Rating', 'psfs1Value');
-        updateRatingValue('psfs2Rating', 'psfs2Value');
-        updateRatingValue('psfs3Rating', 'psfs3Value');
-
-    } catch (error) {
-        console.error("Error al guardar el paciente:", error);
-        showAlert("Error al guardar el paciente: " + error.message, "danger");
-
-    } finally {
-        // Restaurar botón (independientemente de si hubo éxito o error)
-        if (saveBtn) {
-            saveBtn.disabled = false;
-            saveBtn.innerHTML = 'Guardar Ficha';
-        }
-    }
-}
 // Función para cargar y mostrar la lista de pacientes
 function loadPatients() {
   console.log("Cargando pacientes...");
@@ -516,10 +477,10 @@ function loadPatientPSFS() {
                 currentPatientId = patientId;  // Establecer el paciente actual
 
                const psfsContainer = document.getElementById('psfsUpdateContainer');
-if (!psfsContainer) {
-  console.error('psfsUpdateContainer no encontrado.');
-  return;
-}
+                if (!psfsContainer) {
+                  console.error('psfsUpdateContainer no encontrado.');
+                  return;
+                }
                 let psfsHTML = '';
 
                 if (patient.psfs1 && patient.psfs1.activity) {
@@ -946,6 +907,30 @@ function updateRatingValue(sliderId, valueId) {
   });
 }
 
-// Event listener para el formulario de evolución
-document.getElementById('evolutionForm')?.addEventListener('submit', saveEvolution);
-
+// Event listeners para la carga inicial y eventos de pestaña
+document.addEventListener('DOMContentLoaded', function() {
+    // Cargar pacientes al iniciar la página
+    loadPatients();
+    
+    // Cargar pacientes en el selector para evoluciones
+    loadPatientsIntoSelect();
+    
+    // Cargar evoluciones
+    loadEvolutions();
+    
+    // Event listener para el formulario de pacientes
+    document.getElementById('patientForm')?.addEventListener('submit', savePatient);
+    
+    // Event listener para el formulario de evolución
+    document.getElementById('evolutionForm')?.addEventListener('submit', saveEvolution);
+    
+    // Event listener para cargar PSFS al seleccionar un paciente
+    document.getElementById('patientSelect')?.addEventListener('change', loadPatientPSFS);
+    
+    // Configurar tabs para que carguen datos al hacer clic
+    document.querySelector('button[data-bs-target="#records-tab-pane"]')?.addEventListener('click', loadPatients);
+    document.querySelector('button[data-bs-target="#evolutions-tab-pane"]')?.addEventListener('click', function() {
+        loadPatientsIntoSelect();
+        loadEvolutions();
+    });
+});
