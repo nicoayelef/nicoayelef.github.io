@@ -853,7 +853,13 @@ function updateRatingValue(sliderId, valueId) {
 // --- Event Listeners (al final del script) ---
 
 // Event listener para el formulario de pacientes
-document.getElementById('patientForm')?.addEventListener('submit', savePatient);
+const patientForm = document.getElementById('patientForm');
+if (patientForm) {
+    console.log("Formulario de paciente encontrado, añadiendo event listener");
+    patientForm.addEventListener('submit', savePatient);
+} else {
+    console.error("Formulario de paciente no encontrado");
+}
 
 // Event listener para el selector de pacientes (en la pestaña de evoluciones)
 document.getElementById('patientSelect')?.addEventListener('change', () => {
