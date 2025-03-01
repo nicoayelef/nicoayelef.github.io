@@ -40,6 +40,7 @@ if (typeof firebase !== 'undefined') {
 let currentPatientId = null; // ID del paciente seleccionado (para evoluciones)
 let currentEvolutionId = null; //ID de la evolución (para editar, que aun no esta implementado)
 let db = firebase.firestore(); // Asegurar que db esté disponible globalmente
+let darkMode = localStorage.getItem('darkMode') === 'true' || false; // Para el modo oscuro
 
 // --- Funciones de utilidad ---
 
@@ -294,10 +295,12 @@ function showPatientDetails(patientId) {
 
   db.collection("patients").doc(patientId).get()
     .then((doc) => {
+      // Ocultar el modal de carga ANTES de hacer cualquier otra cosa
+      loadingModal.hide();
+      
       if (!doc.exists) {
         console.log("Paciente no encontrado:", patientId);
         showAlert("Paciente no encontrado", "warning");
-        loadingModal.hide(); // Asegurarse de ocultar el modal de carga
         return;
       }
 
@@ -309,7 +312,6 @@ function showPatientDetails(patientId) {
       const modalBody = document.getElementById('patientDetailsContent');
       if (!modalBody) {
         console.error("Elemento patientDetailsContent no encontrado.");
-        loadingModal.hide(); // Asegurarse de ocultar el modal de carga
         return;
       }
 
@@ -388,9 +390,16 @@ function showPatientDetails(patientId) {
 
       // --- Mostrar el modal de detalles ---
       const detailsModal = new bootstrap.Modal(document.getElementById('patientDetailsModal'));
-      // Primero ocultar el modal de carga y luego mostrar el de detalles
-      loadingModal.hide();
       detailsModal.show();
+      
+      // Asegurarnos que el botón de cerrar funcione correctamente
+      document.querySelector('#patientDetailsModal .btn-close').addEventListener('click', function() {
+        detailsModal.hide();
+      });
+      
+      document.querySelector('#patientDetailsModal .btn-secondary').addEventListener('click', function() {
+        detailsModal.hide();
+      });
     })
     .catch((error) => {
       console.error("Error al obtener detalles del paciente:", error);
@@ -470,6 +479,9 @@ function loadPatientPSFS() {
 
     db.collection("patients").doc(patientId).get()
         .then(doc => {
+            // IMPORTANTE: Ocultar el modal de carga al inicio del procesamiento de datos
+            loadingModal.hide();
+            
             if (doc.exists) {
                 const patient = doc.data();
                 currentPatientId = patientId;  // Establecer el paciente actual
@@ -477,47 +489,50 @@ function loadPatientPSFS() {
                 const psfsContainer = document.getElementById('psfsUpdateContainer');
                 if (!psfsContainer) {
                     console.error('psfsUpdateContainer no encontrado.');
-                    loadingModal.hide(); // Ocultar modal de carga
                     return;
                 }
+                
                 let psfsHTML = '';
 
                 if (patient.psfs1 && patient.psfs1.activity) {
                     psfsHTML += `
                     <div class="mb-3">
-                        <label class="form-label">${patient.psfs1.activity}</label>
+                        <label class="form-label fw-bold">${patient.psfs1.activity}</label>
                         <input type="range" class="form-range" min="0" max="10" step="1" id="evolutionPsfs1Rating" value="${patient.psfs1.rating || 0}">
                         <div class="d-flex justify-content-between">
                             <span>0</span>
                             <span id="evolutionPsfs1Value">${patient.psfs1.rating || 0}</span>
                             <span>10</span>
                         </div>
+                        <input type="hidden" id="evolutionPsfs1Activity" value="${patient.psfs1.activity}">
                     </div>`;
                 }
 
                 if (patient.psfs2 && patient.psfs2.activity) {
                     psfsHTML += `
                     <div class="mb-3">
-                        <label class="form-label">${patient.psfs2.activity}</label>
+                        <label class="form-label fw-bold">${patient.psfs2.activity}</label>
                         <input type="range" class="form-range" min="0" max="10" step="1" id="evolutionPsfs2Rating" value="${patient.psfs2.rating || 0}">
                          <div class="d-flex justify-content-between">
                             <span>0</span>
                             <span id="evolutionPsfs2Value">${patient.psfs2.rating || 0}</span>
                             <span>10</span>
                         </div>
+                        <input type="hidden" id="evolutionPsfs2Activity" value="${patient.psfs2.activity}">
                     </div>`;
                 }
 
                 if (patient.psfs3 && patient.psfs3.activity) {
                     psfsHTML += `
                     <div class="mb-3">
-                        <label class="form-label">${patient.psfs3.activity}</label>
+                        <label class="form-label fw-bold">${patient.psfs3.activity}</label>
                         <input type="range" class="form-range" min="0" max="10" step="1" id="evolutionPsfs3Rating" value="${patient.psfs3.rating || 0}">
                          <div class="d-flex justify-content-between">
                             <span>0</span>
                             <span id="evolutionPsfs3Value">${patient.psfs3.rating || 0}</span>
                             <span>10</span>
                         </div>
+                        <input type="hidden" id="evolutionPsfs3Activity" value="${patient.psfs3.activity}">
                     </div>`;
                 }
 
@@ -538,19 +553,8 @@ function loadPatientPSFS() {
                     updateRatingValue('evolutionPsfs3Rating', 'evolutionPsfs3Value');
                 }
 
-                // Mostrar el formulario de evolución DESPUÉS de cargar los datos PSFS
-                const evolutionFormContainer = document.getElementById('evolutionForm');
-                if(!evolutionFormContainer){
-                    console.error('evolutionForm no encontrado');
-                    loadingModal.hide();
-                    return;
-                }
-                evolutionFormContainer.style.display = 'block';
-                loadingModal.hide(); // Ocultar modal de carga
-
             } else {
                 showAlert("Paciente no encontrado", "warning");
-                loadingModal.hide(); // Ocultar modal de carga
             }
         })
         .catch(error => {
@@ -577,53 +581,64 @@ function saveEvolution(event) {
         saveBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Guardando...';
     }
 
+    // Obtener los nombres de las actividades de los campos ocultos
+    const psfs1Activity = document.getElementById('evolutionPsfs1Activity')?.value;
+    const psfs2Activity = document.getElementById('evolutionPsfs2Activity')?.value;
+    const psfs3Activity = document.getElementById('evolutionPsfs3Activity')?.value;
+
     // Recopilar datos del formulario de evolución
     const evolutionData = {
-    patientId: currentPatientId,
-    date: document.getElementById('evolutionDate').value,
-    subjective: document.getElementById('evolutionProgress').value,
-    objective: document.getElementById('evolutionTreatment').value,
-    assessment: document.getElementById('evolutionPlan').value, // Cambia esto o añade un campo adicional
-    evaluator: document.getElementById('evolutionEvaluator').value, // Añade el evaluador
-    psfsValues: {
-        psfs1: document.getElementById('evolutionPsfs1Rating')?.value,
-        psfs2: document.getElementById('evolutionPsfs2Rating')?.value,
-        psfs3: document.getElementById('evolutionPsfs3Rating')?.value,
-    },
-    createdAt: firebase.firestore.Timestamp.now()
-};
+        patientId: currentPatientId,
+        date: document.getElementById('evolutionDate').value,
+        subjective: document.getElementById('evolutionProgress').value,
+        objective: document.getElementById('evolutionTreatment').value,
+        assessment: document.getElementById('evolutionPlan').value,
+        evaluator: document.getElementById('evolutionEvaluator').value,
+        psfsValues: {
+            psfs1: {
+                activity: psfs1Activity,
+                rating: document.getElementById('evolutionPsfs1Rating')?.value
+            },
+            psfs2: {
+                activity: psfs2Activity,
+                rating: document.getElementById('evolutionPsfs2Rating')?.value
+            },
+            psfs3: {
+                activity: psfs3Activity,
+                rating: document.getElementById('evolutionPsfs3Rating')?.value
+            }
+        },
+        createdAt: firebase.firestore.Timestamp.now()
+    };
+    
     //Validaciones
-     if (!evolutionData.date) {
+    if (!evolutionData.date) {
         showAlert("Ingresa una fecha para la evolución", "warning");
-         if (saveBtn) {
+        if (saveBtn) {
             saveBtn.disabled = false;
             saveBtn.innerHTML = 'Guardar Evolución';
         }
         return;
     }
 
-
     // Guardar en Firestore
     db.collection("evolutions").add(evolutionData)
         .then((docRef) => {
             console.log("Evolución guardada con ID:", docRef.id);
             showAlert("Evolución guardada exitosamente", "success");
-            clearForm('evolutionForm'); //Limpia el formulario.
-             // Actualizar la lista de evoluciones
+            document.getElementById('evolutionForm').reset();
+            
+            // Limpiar el contenedor PSFS
+            document.getElementById('psfsUpdateContainer').innerHTML = '';
+            
+            // Actualizar la lista de evoluciones
             loadEvolutions();
-
-            //Recargar los sliders.
-            updateRatingValue('evolutionPsfs1Rating', 'evolutionPsfs1Value');
-            updateRatingValue('evolutionPsfs2Rating', 'evolutionPsfs2Value');
-            updateRatingValue('evolutionPsfs3Rating', 'evolutionPsfs3Value');
-
-
         })
         .catch((error) => {
             console.error("Error al guardar la evolución:", error);
             showAlert("Error al guardar la evolución: " + error.message, "danger");
         })
-        .finally( () => {
+        .finally(() => {
             // Restaurar botón
             if (saveBtn) {
                 saveBtn.disabled = false;
@@ -631,7 +646,6 @@ function saveEvolution(event) {
             }
         });
 }
-
 
 
 // Cargar Evoluciones (todas, inicialmente)
@@ -727,10 +741,12 @@ function showEvolutionDetails(evolutionId) {
     loadingModal.show();
 
     db.collection("evolutions").doc(evolutionId).get()
-        .then(async (doc) => { // Usamos async para poder usar await dentro
+        .then(async (doc) => {
+            // Ocultar el modal de carga INMEDIATAMENTE
+            loadingModal.hide();
+            
             if (!doc.exists) {
                 showAlert("Evolución no encontrada", "warning");
-                loadingModal.hide(); // Ocultamos el loading
                 return;
             }
 
@@ -752,8 +768,7 @@ function showEvolutionDetails(evolutionId) {
             // --- Rellenar el modal de detalles de evolución ---
             const modalBody = document.getElementById('evolutionDetailsContent');
             if (!modalBody) {
-                console.error("Elemento evolutionDetailsModalBody no encontrado.");
-                 loadingModal.hide(); // Ocultar modal de carga
+                console.error("Elemento evolutionDetailsContent no encontrado.");
                 return;
             }
 
@@ -766,23 +781,54 @@ function showEvolutionDetails(evolutionId) {
             modalBody.innerHTML = `
                 <h5>Evolución - ${patientName}</h5>
                 <p><strong>Fecha:</strong> ${evolutionDate}</p>
+                <p><strong>Evaluador:</strong> ${evolution.evaluator || 'No especificado'}</p>
                 <p><strong>Subjetivo:</strong> ${evolution.subjective || 'No especificado'}</p>
                 <p><strong>Objetivo:</strong> ${evolution.objective || 'No especificado'}</p>
                 <p><strong>Evaluación:</strong> ${evolution.assessment || 'No especificado'}</p>
                 <p><strong>Plan:</strong> ${evolution.plan || 'No especificado'}</p>
                 <hr>
                 <h5>Valores PSFS</h5>
-                ${evolution.psfsValues ? `
-                    <p><strong>PSFS 1:</strong> ${evolution.psfsValues.psfs1 || 'N/A'}</p>
-                    <p><strong>PSFS 2:</strong> ${evolution.psfsValues.psfs2 || 'N/A'}</p>
-                    <p><strong>PSFS 3:</strong> ${evolution.psfsValues.psfs3 || 'N/A'}</p>
-                ` : '<p>No hay valores PSFS registrados para esta evolución.</p>'}
             `;
+
+            // Mostrar valores PSFS de forma mejorada
+            if (evolution.psfsValues) {
+                if (evolution.psfsValues.psfs1 && evolution.psfsValues.psfs1.activity) {
+                    modalBody.innerHTML += `
+                    <p><strong>${evolution.psfsValues.psfs1.activity}:</strong> ${evolution.psfsValues.psfs1.rating || 'N/A'}</p>
+                    `;
+                }
+                
+                if (evolution.psfsValues.psfs2 && evolution.psfsValues.psfs2.activity) {
+                    modalBody.innerHTML += `
+                    <p><strong>${evolution.psfsValues.psfs2.activity}:</strong> ${evolution.psfsValues.psfs2.rating || 'N/A'}</p>
+                    `;
+                }
+                
+                if (evolution.psfsValues.psfs3 && evolution.psfsValues.psfs3.activity) {
+                    modalBody.innerHTML += `
+                    <p><strong>${evolution.psfsValues.psfs3.activity}:</strong> ${evolution.psfsValues.psfs3.rating || 'N/A'}</p>
+                    `;
+                }
+                
+                if (!evolution.psfsValues.psfs1?.activity && !evolution.psfsValues.psfs2?.activity && !evolution.psfsValues.psfs3?.activity) {
+                    modalBody.innerHTML += '<p>No hay valores PSFS registrados para esta evolución.</p>';
+                }
+            } else {
+                modalBody.innerHTML += '<p>No hay valores PSFS registrados para esta evolución.</p>';
+            }
 
             // --- Mostrar el modal de detalles ---
             const detailsModal = new bootstrap.Modal(document.getElementById('evolutionDetailsModal'));
-            loadingModal.hide(); // Ocultar modal de carga
             detailsModal.show();
+            
+            // Asegurarnos que el botón de cerrar funcione correctamente
+            document.querySelector('#evolutionDetailsModal .btn-close').addEventListener('click', function() {
+                detailsModal.hide();
+            });
+            
+            document.querySelector('#evolutionDetailsModal .btn-secondary').addEventListener('click', function() {
+                detailsModal.hide();
+            });
         })
         .catch((error) => {
             console.error("Error al obtener detalles de la evolución:", error);
@@ -1103,8 +1149,54 @@ function setupEvolutionSearch() {
     });
 }
 
+// Función para cambiar entre modo claro y oscuro
+function toggleDarkMode() {
+    darkMode = !darkMode;
+    localStorage.setItem('darkMode', darkMode);
+    applyTheme();
+}
+
+// Función para aplicar el tema actual
+function applyTheme() {
+    document.body.classList.toggle('dark-mode', darkMode);
+    
+    // Actualizar el texto del botón
+    const themeSwitcher = document.getElementById('theme-switcher');
+    if (themeSwitcher) {
+        themeSwitcher.innerHTML = darkMode ? 
+            '<i class="fas fa-sun"></i> Modo Claro' : 
+            '<i class="fas fa-moon"></i> Modo Oscuro';
+    }
+}
+
 // Event listeners para la carga inicial y eventos de pestaña
 document.addEventListener('DOMContentLoaded', function() {
+    // Aplicar tema basado en la preferencia guardada
+    applyTheme();
+    
+    // Agregar botón de cambio de tema si no existe
+    if (!document.getElementById('theme-switcher')) {
+        const themeBtn = document.createElement('button');
+        themeBtn.id = 'theme-switcher';
+        themeBtn.className = 'btn theme-toggle';
+        themeBtn.innerHTML = darkMode ? 
+            '<i class="fas fa-sun"></i> Modo Claro' : 
+            '<i class="fas fa-moon"></i> Modo Oscuro';
+        themeBtn.addEventListener('click', toggleDarkMode);
+        
+        // Insertar en la barra de navegación
+        const navbarBrand = document.querySelector('h1');
+        if (navbarBrand && navbarBrand.parentNode) {
+            const container = document.createElement('div');
+            container.className = 'd-flex justify-content-between align-items-center mb-4';
+            container.appendChild(navbarBrand.cloneNode(true));
+            container.appendChild(themeBtn);
+            navbarBrand.parentNode.replaceChild(container, navbarBrand);
+        } else {
+            document.body.insertBefore(themeBtn, document.body.firstChild);
+        }
+    }
+    
     // Cargar pacientes al iniciar la página
     loadPatients();
     
