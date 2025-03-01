@@ -216,7 +216,7 @@ async function savePatient(e) {
         console.log("Datos del paciente a guardar:", patient);
         
         // Mostrar mensaje de carga
-        const saveBtn = document.querySelector('button[type="submit"]');
+        const saveBtn = document.getElementById('savePatientBtn');
         if (saveBtn) {
             saveBtn.disabled = true;
             saveBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Guardando...';
@@ -243,7 +243,9 @@ async function savePatient(e) {
         if (processedFiles.length > 0) {
             patient.complementaryExams = processedFiles;
         }
-        console.log("Timestamp de creación:", firebase.firestore.Timestamp.now());
+        
+        console.log("Timestamp de creación:", patient.createdAt);
+        
         // Guardar en Firestore
         console.log("Intentando guardar en Firestore...");
         db.collection("patients").add(patient)
@@ -281,22 +283,12 @@ async function savePatient(e) {
                 
                 // Mostrar mensaje de error
                 showAlert("Error al guardar paciente: " + error.message, "danger");
-                
-                // Verificar conexión a Firestore
-                db.collection("patients").limit(1).get()
-                    .then(snapshot => {
-                        console.log("Conexión a Firestore funciona correctamente");
-                    })
-                    .catch(connError => {
-                        console.error("Error de conexión a Firestore:", connError);
-                        showAlert("Error de conexión a la base de datos. Por favor, verifica tu conexión a internet.", "danger");
-                    });
             });
     } catch (error) {
         console.error("Error en la función savePatient:", error);
         
         // Restaurar botón
-        const saveBtn = document.querySelector('button[type="submit"]');
+        const saveBtn = document.getElementById('savePatientBtn');
         if (saveBtn) {
             saveBtn.disabled = false;
             saveBtn.innerHTML = 'Guardar Ficha';
