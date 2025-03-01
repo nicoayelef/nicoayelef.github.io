@@ -1,12 +1,14 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistema de Fichas Clínicas Kinesiológicas</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome para iconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
     body {
         font-family: 'Arial', sans-serif;
@@ -23,7 +25,6 @@
         color: #0d6efd;
         font-weight: 600;
     }
-    /* Resto de tus estilos (sin cambios importantes aquí) */
     .nav-tabs {
         margin-bottom: 20px;
         border-bottom: 2px solid #0d6efd;
@@ -81,14 +82,8 @@
         color: #0d6efd;
     }
     .modal-xl {
-        max-width: 90%; /* O usa un valor específico en px si prefieres */
+        max-width: 90%;
     }
-     @media (max-width: 1200px) { /* Ajusta este valor según necesites */
-        .modal-xl {
-          max-width: 95%; /* Aumenta el ancho en pantallas más pequeñas */
-        }
-      }
-
     .form-section {
         margin-bottom: 20px;
         padding-bottom: 15px;
@@ -131,1123 +126,539 @@
         border-radius: 5px;
         display: block;
     }
-
-    /* Mejoras para la responsividad */
-    .row [class^="col-"] {
-        margin-bottom: 1rem; /* Espacio entre columnas en todas las filas */
-    }
-
-    /* Estilos para pantallas pequeñas */
-    @media (max-width: 768px) {
-        .form-section {
-            padding: 15px; /* Reduce el padding en pantallas pequeñas */
-        }
-        .rating-container {
-            flex-direction: column; /* Apila elementos en pantallas pequeñas */
-            align-items: flex-start; /* Alinea a la izquierda */
-        }
-    }
     </style>
 </head>
 <body>
+    <div class="container">
+        <h1>Sistema de Fichas Clínicas Kinesiológicas</h1>
 
-<div class="container">
-    <h1>Sistema de Fichas Clínicas Kinesiológicas</h1>
+        <!-- Navegación por pestañas -->
+        <ul class="nav nav-tabs" id="myTab" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="form-tab" data-bs-toggle="tab" data-bs-target="#form-tab-pane" type="button" role="tab" aria-controls="form-tab-pane" aria-selected="true">Formulario de Ingreso</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="records-tab" data-bs-toggle="tab" data-bs-target="#records-tab-pane" type="button" role="tab" aria-controls="records-tab-pane" aria-selected="false">Registros</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="evolutions-tab" data-bs-toggle="tab" data-bs-target="#evolutions-tab-pane" type="button" role="tab" aria-controls="evolutions-tab-pane" aria-selected="false">Evoluciones</button>
+            </li>
+        </ul>
 
-    <ul class="nav nav-tabs" id="myTab" role="tablist">
-        <li class="nav-item" role="presentation">
-            <button class="nav-link active" id="form-tab" data-bs-toggle="tab" data-bs-target="#form-tab-pane" type="button" role="tab" aria-controls="form-tab-pane" aria-selected="true">Formulario de Ingreso</button>
-        </li>
-        <li class="nav-item" role="presentation">
-            <button class="nav-link" id="records-tab" data-bs-toggle="tab" data-bs-target="#records-tab-pane" type="button" role="tab" aria-controls="records-tab-pane" aria-selected="false">Registros</button>
-        </li>
-        <li class="nav-item" role="presentation">
-            <button class="nav-link" id="evolutions-tab" data-bs-toggle="tab" data-bs-target="#evolutions-tab-pane" type="button" role="tab" aria-controls="evolutions-tab-pane" aria-selected="false">Evoluciones</button>
-        </li>
-    </ul>
-
-    <div class="tab-content" id="myTabContent">
-        <div class="tab-pane fade show active" id="form-tab-pane" role="tabpanel" aria-labelledby="form-tab" tabindex="0">
-            <div class="form-container">
-                <div id="alertContainer"></div>
-
-                <form id="patientForm">
-                    <div class="form-section">
-                        <h4 class="section-title">Información personal y de contacto</h4>
-                        <div class="row">
-                            <div class="col-md-6">
-                                <label for="evaluator" class="form-label">Kinesiólogo / Interno / Estudiante evaluador *</label>
-                                <input type="text" class="form-control" id="evaluator" required>
+        <div class="tab-content" id="myTabContent">
+            <!-- Pestaña de Formulario -->
+            <div class="tab-pane fade show active" id="form-tab-pane" role="tabpanel" aria-labelledby="form-tab" tabindex="0">
+                <div class="form-container">
+                    <!-- Contenedor para alertas -->
+                    <div id="alertContainer"></div>
+                    
+                    <form id="patientForm">
+                        <!-- Información personal y de contacto -->
+                        <div class="form-section">
+                            <h4 class="section-title">Información personal y de contacto</h4>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="evaluator" class="form-label">Kinesiólogo / Interno / Estudiante evaluador *</label>
+                                    <input type="text" class="form-control" id="evaluator" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="email" class="form-label">Correo del evaluador *</label>
+                                    <input type="email" class="form-control" id="email" required>
+                                </div>
                             </div>
-                            <div class="col-md-6">
-                                <label for="email" class="form-label">Correo del evaluador *</label>
-                                <input type="email" class="form-control" id="email" required>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="name" class="form-label">Nombre completo del paciente</label>
+                                    <input type="text" class="form-control" id="name">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="rut" class="form-label">RUT (sin puntos, con guión)</label>
+                                    <input type="text" class="form-control" id="rut">
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <label for="contactNumber" class="form-label">Número de contacto</label>
+                                    <input type="tel" class="form-control" id="contactNumber">
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label for="patientEmail" class="form-label">Email del paciente</label>
+                                    <input type="email" class="form-control" id="patientEmail">
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label for="nationality" class="form-label">Nacionalidad</label>
+                                    <input type="text" class="form-control" id="nationality">
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-3 mb-3">
+                                    <label for="age" class="form-label">Edad</label>
+                                    <input type="number" class="form-control" id="age">
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <label for="birthdate" class="form-label">Fecha de nacimiento</label>
+                                    <input type="date" class="form-control" id="birthdate">
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <label for="civilStatus" class="form-label">Estado civil</label>
+                                    <select class="form-select" id="civilStatus">
+                                        <option value="">Seleccionar</option>
+                                        <option value="Soltero/a">Soltero/a</option>
+                                        <option value="Casado/a">Casado/a</option>
+                                        <option value="Divorciado/a">Divorciado/a</option>
+                                        <option value="Viudo/a">Viudo/a</option>
+                                        <option value="Conviviente">Conviviente</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <label for="education" class="form-label">Nivel educacional</label>
+                                    <select class="form-select" id="education">
+                                        <option value="">Seleccionar</option>
+                                        <option value="Básica incompleta">Básica incompleta</option>
+                                        <option value="Básica completa">Básica completa</option>
+                                        <option value="Media incompleta">Media incompleta</option>
+                                        <option value="Media completa">Media completa</option>
+                                        <option value="Técnica incompleta">Técnica incompleta</option>
+                                        <option value="Técnica completa">Técnica completa</option>
+                                        <option value="Universitaria incompleta">Universitaria incompleta</option>
+                                        <option value="Universitaria completa">Universitaria completa</option>
+                                        <option value="Postgrado">Postgrado</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="address" class="form-label">Dirección</label>
+                                    <input type="text" class="form-control" id="address">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="emergencyContact" class="form-label">Número de contacto de emergencia y parentesco</label>
+                                    <input type="text" class="form-control" id="emergencyContact">
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="occupation" class="form-label">Ocupación (movimientos involucrados; tiempo activo y tiempos sedentarios)</label>
+                                    <textarea class="form-control" id="occupation" rows="3"></textarea>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="laterality" class="form-label">Lateralidad o dominancia</label>
+                                    <select class="form-select" id="laterality">
+                                        <option value="">Seleccionar</option>
+                                        <option value="Diestro">Diestro</option>
+                                        <option value="Zurdo">Zurdo</option>
+                                        <option value="Ambidiestro">Ambidiestro</option>
+                                    </select>
+                                </div>
                             </div>
                         </div>
 
-                        <div class="row">
-                            <div class="col-md-6">
-                                <label for="name" class="form-label">Nombre completo del paciente</label>
-                                <input type="text" class="form-control" id="name">
+                        <!-- Motivo de consulta y diagnóstico -->
+                        <div class="form-section">
+                            <h4 class="section-title">Motivo de consulta y diagnóstico</h4>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="consultReason" class="form-label">Motivo de consulta</label>
+                                    <textarea class="form-control" id="consultReason" rows="3"></textarea>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="diagnosis" class="form-label">Diagnóstico principal (en caso de que exista)</label>
+                                    <textarea class="form-control" id="diagnosis" rows="3"></textarea>
+                                </div>
                             </div>
-                            <div class="col-md-6">
-                                <label for="rut" class="form-label">RUT (sin puntos, con guión)</label>
-                                <input type="text" class="form-control" id="rut" placeholder="Ej: 12345678-9">
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-4">
-                                <label for="contactNumber" class="form-label">Número de contacto</label>
-                                <input type="tel" class="form-control" id="contactNumber" placeholder="Ej: +56912345678">
-                            </div>
-                            <div class="col-md-4">
-                                <label for="patientEmail" class="form-label">Email del paciente</label>
-                                <input type="email" class="form-control" id="patientEmail">
-                            </div>
-                            <div class="col-md-4">
-                                <label for="nationality" class="form-label">Nacionalidad</label>
-                                <input type="text" class="form-control" id="nationality">
+                            <div class="row">
+                                <div class="col-12 mb-3">
+                                    <label for="expectations" class="form-label">Expectativas y metas del usuario a corto, mediano o largo plazo</label>
+                                    <textarea class="form-control" id="expectations" rows="3"></textarea>
+                                </div>
                             </div>
                         </div>
 
-                        <div class="row">
-                            <div class="col-md-3">
-                                <label for="age" class="form-label">Edad</label>
-                                <input type="number" class="form-control" id="age">
-                            </div>
-                            <div class="col-md-3">
-                                <label for="birthdate" class="form-label">Fecha de nacimiento</label>
-                                <input type="date" class="form-control" id="birthdate">
-                            </div>
-                            <div class="col-md-3">
-                                <label for="civilStatus" class="form-label">Estado civil</label>
-                                <select class="form-select" id="civilStatus">
-                                    <option value="">Seleccionar</option>
-                                    <option value="Soltero/a">Soltero/a</option>
-                                    <option value="Casado/a">Casado/a</option>
-                                    <option value="Divorciado/a">Divorciado/a</option>
-                                    <option value="Viudo/a">Viudo/a</option>
-                                    <option value="Conviviente">Conviviente</option>
-                                </select>
-                            </div>
-                            <div class="col-md-3">
-                                <label for="education" class="form-label">Nivel educacional</label>
-                                <select class="form-select" id="education">
-                                    <option value="">Seleccionar</option>
-                                    <option value="Básica incompleta">Básica incompleta</option>
-                                    <option value="Básica completa">Básica completa</option>
-                                    <option value="Media incompleta">Media incompleta</option>
-                                    <option value="Media completa">Media completa</option>
-                                    <option value="Técnica incompleta">Técnica incompleta</option>
-                                    <option value="Técnica completa">Técnica completa</option>
-                                    <option value="Universitaria incompleta">Universitaria incompleta</option>
-                                    <option value="Universitaria completa">Universitaria completa</option>
-                                    <option value="Postgrado">Postgrado</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-6">
-                                <label for="address" class="form-label">Dirección</label>
-                                <input type="text" class="form-control" id="address">
-                            </div>
-                            <div class="col-md-6">
-                                <label for="emergencyContact" class="form-label">Número de contacto de emergencia y parentesco</label>
-                                <input type="text" class="form-control" id="emergencyContact">
+                        <!-- Anamnesis -->
+                        <div class="form-section">
+                            <h4 class="section-title">Anamnesis</h4>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="proximateAnamnesis" class="form-label">Anamnesis próxima</label>
+                                    <small class="form-text text-muted d-block mb-2">
+                                        1. Historia de como sucedió (qué? Cuándo?, Dónde?, Cómo?, etc)<br>
+                                        2. A (Antigüedad) - L (localización) - I (intensidad) - C (Carácter) - I (Irradiación) - A (atenuantes y agravantes)<br>
+                                        3. Cambios diurnos y vespertinos de la sintomatología.
+                                    </small>
+                                    <textarea class="form-control" id="proximateAnamnesis" rows="5"></textarea>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="remoteAnamnesis" class="form-label">Anamnesis remota</label>
+                                    <small class="form-text text-muted d-block mb-2">
+                                        1. Antecedentes médicos<br>
+                                        2. Antecedentes ortopédicos (lesiones, fracturas, lesiones ligamentosas)<br>
+                                        3. Antecedentes de enfermedades crónicas (HTA/DBM/DLP/OBESIDAD/EPOC/OTROS)<br>
+                                        4. Antecedentes de enfermedades familiares (madre, padre, hermanos, hijos)<br>
+                                        5. Medicamentos<br>
+                                        6. Intervenciones Qx<br>
+                                        7. Hospitalizaciones ultimo año<br>
+                                        8. Alergias<br>
+                                        9. Inmunizaciones<br>
+                                        10. Historial de caídas
+                                    </small>
+                                    <textarea class="form-control" id="remoteAnamnesis" rows="5"></textarea>
+                                </div>
                             </div>
                         </div>
 
-                        <div class="row">
-                            <div class="col-md-6">
-                                <label for="occupation" class="form-label">Ocupación (movimientos involucrados; tiempo activo y tiempos sedentarios)</label>
-                                <textarea class="form-control" id="occupation" rows="3"></textarea>
-                            </div>
-                            <div class="col-md-6">
-                                <label for="laterality" class="form-label">Lateralidad o dominancia</label>
-                                <select class="form-select" id="laterality">
-                                    <option value="">Seleccionar</option>
-                                    <option value="Diestro">Diestro</option>
-                                    <option value="Zurdo">Zurdo</option>
-                                    <option value="Ambidiestro">Ambidiestro</option>
-                                </select>
+                        <!-- Hábitos y entorno -->
+                        <div class="form-section">
+                            <h4 class="section-title">Hábitos y entorno</h4>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="habitsHobbies" class="form-label">Hábitos y hobbies</label>
+                                    <small class="form-text text-muted d-block mb-2">
+                                        1. Tabaco (cantidad, años de fumador, etc)<br>
+                                        2. Alcohol (bebedor frecuentemente o social)<br>
+                                        3. Drogas<br>
+                                        4. Hobbies o deportes (que realiza, ha realizado o quiere realizar)<br>
+                                        5. Hábitos nutricionales<br>
+                                        6. Sueño y calidad del sueño<br>
+                                        7. Estado mental<br>
+                                        8. Dificultad para la realización de una o más tareas de la vida diaria
+                                    </small>
+                                    <textarea class="form-control" id="habitsHobbies" rows="5"></textarea>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="homeSupport" class="form-label">Hogar y red de apoyo</label>
+                                    <small class="form-text text-muted d-block mb-2">
+                                        1. Descripción del hogar<br>
+                                        2. Red de apoyo<br>
+                                        3. Factores sociales relevantes<br>
+                                        4. Participación social / restricción de participación
+                                    </small>
+                                    <textarea class="form-control" id="homeSupport" rows="5"></textarea>
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    <div class="form-section">
-                        <h4 class="section-title">Motivo de consulta y diagnóstico</h4>
-                        <div class="row">
-                            <div class="col-md-6">
-                                <label for="consultReason" class="form-label">Motivo de consulta</label>
-                                <textarea class="form-control" id="consultReason" rows="3"></textarea>
-                            </div>
-                            <div class="col-md-6">
-                                <label for="diagnosis" class="form-label">Diagnóstico principal (en caso de que exista)</label>
-                                <textarea class="form-control" id="diagnosis" rows="3"></textarea>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-12">
-                                <label for="expectations" class="form-label">Expectativas y metas del usuario a corto, mediano o largo plazo</label>
-                                <textarea class="form-control" id="expectations" rows="3"></textarea>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="form-section">
-                        <h4 class="section-title">Anamnesis</h4>
-                        <div class="row">
-                            <div class="col-md-6">
-                                <label for="proximateAnamnesis" class="form-label">Anamnesis próxima</label>
-                                <small class="form-text text-muted d-block mb-2">
-                                    1. Historia de como sucedió (qué? Cuándo?, Dónde?, Cómo?, etc)<br>
-                                    2. A (Antigüedad) - L (localización) - I (intensidad) - C (Carácter) - I (Irradiación) - A (atenuantes y agravantes)<br>
-                                    3. Cambios diurnos y vespertinos de la sintomatología.
-                                </small>
-                                <textarea class="form-control" id="proximateAnamnesis" rows="5"></textarea>
-                            </div>
-                            <div class="col-md-6">
-                                <label for="remoteAnamnesis" class="form-label">Anamnesis remota</label>
-                                <small class="form-text text-muted d-block mb-2">
-                                    1. Antecedentes médicos<br>
-                                    2. Antecedentes ortopédicos (lesiones, fracturas, lesiones ligamentosas)<br>
-                                    3. Antecedentes de enfermedades crónicas (HTA/DBM/DLP/OBESIDAD/EPOC/OTROS)<br>
-                                    4. Antecedentes de enfermedades familiares (madre, padre, hermanos, hijos)<br>
-                                    5. Medicamentos<br>
-                                    6. Alergias<br>
-                                    7. Hospitalizaciones y cirugías previas.
-                                </small>
-                                <textarea class="form-control" id="remoteAnamnesis" rows="5"></textarea>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="form-section">
-                        <h4 class="section-title">Hábitos</h4>
-                        <div class="row">
-                           <div class="col-md-3">
-                                <label class="form-label">Tabaquismo</label>
-                                <div class="d-flex">
-                                    <div class="form-check me-3">
-                                        <input class="form-check-input" type="radio" name="smoking" id="smokingYes" value="Si">
-                                        <label class="form-check-label" for="smokingYes">Sí</label>
-                                    </div>
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="radio" name="smoking" id="smokingNo" value="No" checked>
-                                        <label class="form-check-label" for="smokingNo">No</label>
+                        <!-- Cuestionarios -->
+                        <div class="form-section">
+                            <h4 class="section-title">Cuestionarios</h4>
+                            <p class="text-muted">Contestar PSFS para enfocar una actividad significativa para la persona.</p>
+                          
+                            <div class="row mb-4">
+                                <div class="col-md-6 mb-3">
+                                    <label for="psfs1Activity" class="form-label">PSFS 1 (nombrar 1 actividad que se dificulte o sea relevante para el usuario)</label>
+                                    <input type="text" class="form-control" id="psfs1Activity">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Valoración (0-10)</label>
+                                    <div class="rating-container">
+                                        <span class="rating-label">No lo puede realizar</span>
+                                        <input type="range" class="form-range" min="0" max="10" step="1" id="psfs1Rating" value="5">
+                                        <span class="rating-value" id="psfs1Value">5</span>
                                     </div>
                                 </div>
-                                <input type="text" class="form-control mt-2" id="smokingDetails" placeholder="Cantidad y frecuencia" style="display: none;">
                             </div>
-
-                            <div class="col-md-3">
-                                <label class="form-label">Alcohol</label>
-                                 <div class="d-flex">
-                                    <div class="form-check me-3">
-                                        <input class="form-check-input" type="radio" name="alcohol" id="alcoholYes" value="Si">
-                                        <label class="form-check-label" for="alcoholYes">Sí</label>
-                                    </div>
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="radio" name="alcohol" id="alcoholNo" value="No" checked>
-                                        <label class="form-check-label" for="alcoholNo">No</label>
+                          
+                            <div class="row mb-4">
+                                <div class="col-md-6 mb-3">
+                                    <label for="psfs2Activity" class="form-label">PSFS 2 (nombrar 1 actividad que se dificulte o sea relevante para el usuario)</label>
+                                    <input type="text" class="form-control" id="psfs2Activity">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Valoración (0-10)</label>
+                                    <div class="rating-container">
+                                        <span class="rating-label">No lo puede realizar</span>
+                                        <input type="range" class="form-range" min="0" max="10" step="1" id="psfs2Rating" value="5">
+                                        <span class="rating-value" id="psfs2Value">5</span>
                                     </div>
                                 </div>
-                                <input type="text" class="form-control mt-2" id="alcoholDetails" placeholder="Cantidad y frecuencia" style="display: none;">
                             </div>
-
-
-                            <div class="col-md-3">
-                                <label class="form-label">Drogas</label>
-                                <div class="d-flex">
-                                    <div class="form-check me-3">
-                                        <input class="form-check-input" type="radio" name="drugs" id="drugsYes" value="Si">
-                                        <label class="form-check-label" for="drugsYes">Sí</label>
-                                    </div>
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="radio" name="drugs" id="drugsNo" value="No" checked>
-                                        <label class="form-check-label" for="drugsNo">No</label>
-                                    </div>
-                                 </div>
-                                    <input type="text" class="form-control mt-2" id="drugsDetails" placeholder="Tipo, cantidad y frecuencia" style="display: none;">
-                            </div>
-
-
-                            <div class="col-md-3">
-                                <label class="form-label">Actividad física</label>
-                                <div class="d-flex">
-                                    <div class="form-check me-3">
-                                            <input class="form-check-input" type="radio" name="physicalActivity" id="physicalActivityYes" value="Si">
-                                            <label class="form-check-label" for="physicalActivityYes">Sí</label>
-                                    </div>
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="radio" name="physicalActivity" id="physicalActivityNo" value="No" checked>
-                                        <label class="form-check-label" for="physicalActivityNo">No</label>
+                          
+                            <div class="row mb-4">
+                                <div class="col-md-6 mb-3">
+                                    <label for="psfs3Activity" class="form-label">PSFS 3 (nombrar 1 actividad que se dificulte o sea relevante para el usuario)</label>
+                                    <input type="text" class="form-control" id="psfs3Activity">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Valoración (0-10)</label>
+                                    <div class="rating-container">
+                                        <span class="rating-label">No lo puede realizar</span>
+                                        <input type="range" class="form-range" min="0" max="10" step="1" id="psfs3Rating" value="5">
+                                        <span class="rating-value" id="psfs3Value">5</span>
                                     </div>
                                 </div>
-                                <input type="text" class="form-control mt-2" id="physicalActivityDetails" placeholder="Tipo, duración y frecuencia" style="display: none;">
+                            </div>
+                          
+                            <div class="row">
+                                <div class="col-12 mb-3">
+                                    <label for="extraQuestionnaire" class="form-label">Cuestionario u outcome measures extra</label>
+                                    <textarea class="form-control" id="extraQuestionnaire" rows="3"></textarea>
+                                </div>
                             </div>
                         </div>
-                         <div class="row mt-3">
-                            <div class="col-md-6">
-                                <label for="sleepQuality" class="form-label">Calidad del sueño (horas diarias y si es sueño reparador)</label>
-                                <textarea class="form-control" id="sleepQuality" rows="2"></textarea>
-                            </div>
-                            <div class="col-md-6">
-                                 <label for="otherHabits" class="form-label">Otros hábitos relevantes (alimentación, hobbies, etc.)</label>
-                                 <textarea class="form-control" id="otherHabits" rows="2"></textarea>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="form-section">
-                        <h4 class="section-title">Examen Físico</h4>
-                        <div class="row">
-                            <div class="col-md-6">
-                                <label for="inspection" class="form-label">Inspección</label>
-                                <textarea class="form-control" id="inspection" rows="3"></textarea>
-                            </div>
-                            <div class="col-md-6">
-                                <label for="palpation" class="form-label">Palpación</label>
-                                <textarea class="form-control" id="palpation" rows="3"></textarea>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-4">
-                                <label for="bloodPressure" class="form-label">Presión arterial (mmHg)</label>
-                                <input type="text" class="form-control" id="bloodPressure">
-                            </div>
-                            <div class="col-md-4">
-                                <label for="heartRate" class="form-label">Frecuencia cardíaca (lpm)</label>
-                                <input type="number" class="form-control" id="heartRate">
-                            </div>
-                            <div class="col-md-4">
-                                <label for="respiratoryRate" class="form-label">Frecuencia respiratoria (rpm)</label>
-                                <input type="number" class="form-control" id="respiratoryRate">
+                        <!-- Evaluación física -->
+                        <div class="form-section">
+                            <h4 class="section-title">Evaluación física</h4>
+                          
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <label for="vitalSigns" class="form-label">Signos vitales</label>
+                                    <small class="form-text text-muted d-block mb-2">
+                                        1. Saturación<br>
+                                        2. Pulso<br>
+                                        3. Presión arterial<br>
+                                        4. Frecuencia respiratoria
+                                    </small>
+                                    <textarea class="form-control" id="vitalSigns" rows="4"></textarea>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label for="anthropometry" class="form-label">Antropometría</label>
+                                    <small class="form-text text-muted d-block mb-2">
+                                        Peso, Talla, Circunferencias (cuello, brazos, cintura, cadera, muslo, pantorrilla)
+                                    </small>
+                                    <textarea class="form-control" id="anthropometry" rows="4"></textarea>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label for="physicalExam" class="form-label">Examen físico</label>
+                                    <small class="form-text text-muted d-block mb-2">
+                                        Observación, Inspección, Palpación, Rangos de movimiento, Fuerza, Evaluación neurológica, Flexibilidad, Tests ortopédicos, Equilibrio, Tests de rendimiento
+                                    </small>
+                                    <textarea class="form-control" id="physicalExam" rows="4"></textarea>
+                                </div>
                             </div>
                         </div>
-                         <div class="row">
-                            <div class="col-md-4">
-                                <label for="temperature" class="form-label">Temperatura (°C)</label>
-                                <input type="number" step="0.1" class="form-control" id="temperature">
-                            </div>
-                            <div class="col-md-4">
-                                <label for="saturation" class="form-label">Saturación de oxígeno (%)</label>
-                                <input type="number" class="form-control" id="saturation">
-                            </div>
-                            <div class="col-md-4">
-                                <label for="weight" class="form-label">Peso (kg)</label>
-                                <input type="number" step="0.1" class="form-control" id="weight">
-                            </div>
-
-                        </div>
-                        <div class="row">
-                          <div class="col-md-4">
-                                <label for="height" class="form-label">Talla (metros)</label>
-                                <input type="number" step="0.01" class="form-control" id="height">
-                            </div>
-                            <div class="col-md-4">
-                                 <label for="imc" class="form-label">IMC (Calculado)</label>
-                                 <input type="text" class="form-control" id="imc" readonly>
-                             </div>
-                             <div class="col-md-4">
-                                    <label for="painScale" class="form-label">Escala de dolor (EVA)</label>
-                                        <div class="rating-container">
-                                            <input type="range" class="form-range" min="0" max="10" step="1" id="painScale" value="0">
-                                            <span class="rating-label">0</span>
-                                            <span class="rating-label">10</span>
-                                            <span class="rating-value" id="painScaleValue">0</span>
-                                    </div>
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-12">
-                                <label for="physicalExamNotes" class="form-label">Observaciones del examen físico</label>
-                                <textarea class="form-control" id="physicalExamNotes" rows="3"></textarea>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="form-section">
-                        <h4 class="section-title">Evaluación Kinésica Específica</h4>
-                        <div class="row">
-                            <div class="col-md-6">
-                                <label for="muscleBalance" class="form-label">Balance muscular</label>
-                                <textarea class="form-control" id="muscleBalance" rows="3"></textarea>
-                            </div>
-                            <div class="col-md-6">
-                                <label for="jointAssessment" class="form-label">Evaluación articular</label>
-                                 <textarea class="form-control" id="jointAssessment" rows="3"></textarea>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-6">
-                                <label for="posture" class="form-label">Postura</label>
-                                <textarea class="form-control" id="posture" rows="3"></textarea>
-                            </div>
-                            <div class="col-md-6">
-                                <label for="gait" class="form-label">Marcha</label>
-                                <textarea class="form-control" id="gait" rows="3"></textarea>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-6">
-                                <label for="functionalTests" class="form-label">Pruebas funcionales</label>
-                                <textarea class="form-control" id="functionalTests" rows="3"></textarea>
-                            </div>
-                            <div class="col-md-6">
-                               <label for="specialTests" class="form-label">Pruebas especiales / otros</label>
-                                <textarea class="form-control" id="specialTests" rows="3"></textarea>
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-12">
-                                <label for="kinesiologicDiagnosis" class="form-label">Diagnóstico kinésico</label>
-                                <textarea class="form-control" id="kinesiologicDiagnosis" rows="3"></textarea>
-                            </div>
-                        </div>
-
-                         <div class="row">
-                            <div class="col-12">
-                                <label for="treatmentPlan" class="form-label">Plan de tratamiento kinésico</label>
-                                <textarea class="form-control" id="treatmentPlan" rows="4"></textarea>
-                            </div>
-                        </div>
-                         <div class="row">
-                             <div class="col-12">
-                                 <label for="shortTermGoals" class="form-label">Objetivos a corto plazo</label>
-                                 <textarea class="form-control" id="shortTermGoals" rows="3"></textarea>
-                             </div>
-                         </div>
-                         <div class="row">
-                             <div class="col-12">
-                                 <label for="longTermGoals" class="form-label">Objetivos a largo plazo</label>
-                                 <textarea class="form-control" id="longTermGoals" rows="3"></textarea>
-                             </div>
-                         </div>
-
-                          <div class="row">
-                            <div class="col-12">
-                                <label for="extraNotes" class="form-label">Comentarios extra (derivar a otro especialista, examenes complementarios, etc)</label>
-                                <textarea class="form-control" id="extraNotes" rows="3"></textarea>
-                            </div>
-                        </div>
-
-                    </div>
-
-                    <button type="submit" class="btn btn-primary">Guardar</button>
-                </form>
-            </div>
+<!-- Sección de Archivos y Exámenes Complementarios -->
+<div class="form-section">
+    <h4 class="section-title">Archivos / Exámenes Complementarios / Imágenes de otros test</h4>
+    <div class="row">
+        <div class="col-md-12 mb-3">
+            <label for="medicalExams" class="form-label">Adjuntar archivos</label>
+            <input type="file" class="form-control" id="medicalExams" multiple accept=".pdf,.jpg,.jpeg,.png">
+            <div class="form-text">Formatos aceptados: PDF, JPG, PNG. Tamaño máximo: 5MB por archivo.</div>
         </div>
-        <div class="tab-pane fade" id="records-tab-pane" role="tabpanel" aria-labelledby="records-tab" tabindex="0">
-            <div class="search-container">
-               <div class="row">
-                 <div class="col-md-6">
-                    <input type="text" class="form-control" id="searchInput" placeholder="Buscar por nombre, RUT o ID...">
-                 </div>
-                  <div class="col-md-6">
-                    <button id="exportPdfBtn" class="btn btn-secondary btn-export">Exportar a PDF <i class="fas fa-file-pdf"></i></button>
-                    <button id="exportExcelBtn" class="btn btn-success btn-export">Exportar a Excel <i class="fas fa-file-excel"></i></button>
-                  </div>
-                </div>
-            </div>
-
-            <div id="patientRecords" class="row">
-                </div>
-
-            <div class="modal fade" id="patientModal" tabindex="-1" aria-labelledby="patientModalLabel" aria-hidden="true">
-                <div class="modal-dialog modal-xl">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="patientModalLabel">Detalles del Paciente</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <div class="modal-body" id="patientModalBody">
-                            </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="tab-pane fade" id="evolutions-tab-pane" role="tabpanel" aria-labelledby="evolutions-tab" tabindex="0">
-    <div class="form-container">
-      <div class="search-container">
-        <div class="row align-items-end">
-          <div class="col-md-6">
-            <label for="patientSearchInput" class="form-label">Buscar Paciente:</label>
-            <input type="text" class="form-control" id="patientSearchInput" placeholder="Buscar por nombre, RUT o ID...">
-          </div>
-          <div class="col-md-6">
-              <button type="button" class="btn btn-primary" id="searchPatientBtn"><i class="fas fa-search"></i> Buscar</button>
-          </div>
-        </div>
-      </div>
-        <div id="patientInfoContainer" class="mb-4">
-          </div>
-
-        <h4 class="section-title">Agregar Evolución</h4>
-        <div class="alert alert-info" role="alert">
-            Seleccione un paciente para agregar una evolución.
-        </div>
-
-        <div id="evolutionFormContainer" style="display: none;">
-          <form id="evolutionForm">
-              <input type="hidden" id="evolutionPatientId">
-              <div class="mb-3">
-                  <label for="evolutionDate" class="form-label">Fecha de Evolución *</label>
-                  <input type="date" class="form-control" id="evolutionDate" required>
-              </div>
-              <div class="mb-3">
-                  <label for="evolutionSummary" class="form-label">Resumen de la Evolución *</label>
-                  <textarea class="form-control" id="evolutionSummary" rows="4" required></textarea>
-              </div>
-               <div class="mb-3">
-                  <label for="evolutionPlan" class="form-label">Plan a Seguir *</label>
-                  <textarea class="form-control" id="evolutionPlan" rows="4" required></textarea>
-              </div>
-              <button type="submit" class="btn btn-primary">Guardar Evolución</button>
-          </form>
-      </div>
-       <div id="evolutionsListContainer" class="mt-4">
-            </div>
     </div>
+</div>                        
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <button type="submit" class="btn btn-primary" id="savePatientBtn">Guardar Ficha</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Pestaña de Registros -->
+            <div class="tab-pane fade" id="records-tab-pane" role="tabpanel" aria-labelledby="records-tab" tabindex="0">
+                <div class="container mt-4">
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                                    <h5 class="mb-0">Pacientes Registrados</h5>
+                                    <div>
+                                        <button class="btn btn-light btn-sm" id="exportAllPatientsBtn">
+                                            <i class="fas fa-file-export"></i> Exportar Todos
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    <div class="mb-3">
+                                       <div class="mb-3 input-group">
+    <input type="text" class="form-control" id="searchPatient" placeholder="Buscar por nombre o RUT">
+    <button class="btn btn-primary" id="searchButton" type="button">
+        <i class="fas fa-search"></i> Buscar
+    </button>
 </div>
+                                    </div>
+                                    <div class="table-responsive">
+                                        <table class="table table-striped">
+                                            <thead>
+                                                <tr>
+                                                    <th>Nombre</th>
+                                                    <th>RUT</th>
+                                                    <th>Edad</th>
+                                                    <th>Fecha de Registro</th>
+                                                    <th>Acciones</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="patientsTableBody">
+                                                <!-- Se cargará dinámicamente desde JavaScript -->
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.1/jspdf.plugin.autotable.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<script>
-// Funciones de utilidad
-function showAlert(message, type = 'success') {
-    const alertContainer = document.getElementById('alertContainer');
-    const alertDiv = document.createElement('div');
-    alertDiv.classList.add('alert', `alert-${type}`, 'alert-dismissible', 'fade', 'show');
-    alertDiv.innerHTML = `${message} <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>`;
-    alertContainer.appendChild(alertDiv);
-    // Opcional: Cerrar la alerta automáticamente después de algunos segundos
-    setTimeout(() => {
-        alertDiv.remove();
-    }, 5000);
-}
-
-function clearForm(formId) {
-    const form = document.getElementById(formId);
-    if (form) {
-        form.reset();
-    }
-    // Restablecer campos de selección múltiple, radio buttons, etc. (si es necesario)
-    // ...
-
-    // Limpiar detalles de hábitos
-    const habitDetailInputs = document.querySelectorAll('#smokingDetails, #alcoholDetails, #drugsDetails, #physicalActivityDetails');
-     habitDetailInputs.forEach(input => {
-        input.style.display = 'none';
-        input.value = '';
-    });
-    document.getElementById('imc').value = '';
-    document.getElementById('painScaleValue').innerText = '0';
-
-}
-
-// ---  Configuración Inicial (DOMContentLoaded) ---
-document.addEventListener('DOMContentLoaded', () => {
-
-    const patientForm = document.getElementById('patientForm');
-    const patientRecordsDiv = document.getElementById('patientRecords');
-    const searchInput = document.getElementById('searchInput');
-    const exportPdfBtn = document.getElementById('exportPdfBtn');
-    const exportExcelBtn = document.getElementById('exportExcelBtn');
-    const patientModal = new bootstrap.Modal(document.getElementById('patientModal'));
-
-
-    // Cargar pacientes al inicio
-    loadPatients();
-
-    patientForm.addEventListener('submit', function(event) {
-        event.preventDefault();
-        savePatient();
-        clearForm('patientForm');
-        loadPatients(); // Recargar después de guardar
-        // Cambiar a la pestaña de registros.
-        const recordsTab = new bootstrap.Tab(document.getElementById('records-tab'));
-        recordsTab.show();
-    });
-
-
-    // Busqueda de Pacientes
-    searchInput.addEventListener('input', () => {
-        const searchTerm = searchInput.value.toLowerCase();
-        filterPatients(searchTerm);
-    });
-
-    //Calculo de IMC.
-    document.getElementById('weight').addEventListener('input', calculateIMC);
-    document.getElementById('height').addEventListener('input', calculateIMC);
-
-    // Mostrar/ocultar detalles de hábitos
-    setupHabitDetailsToggle('smoking', 'smokingDetails');
-    setupHabitDetailsToggle('alcohol', 'alcoholDetails');
-    setupHabitDetailsToggle('drugs', 'drugsDetails');
-    setupHabitDetailsToggle('physicalActivity', 'physicalActivityDetails');
-
-    //Actualizacion de la escala EVA
-    document.getElementById('painScale').addEventListener('input', function() {
-        document.getElementById('painScaleValue').textContent = this.value;
-    });
-
-    //Exportar a PDF y Excel.
-    exportPdfBtn.addEventListener('click', exportToPdf);
-    exportExcelBtn.addEventListener('click', exportToExcel);
-
-
-    // ---  (El resto de las funciones se agregarán en las siguientes partes) ---
-}); // Fin del DOMContentLoaded
-
-
-// --- Funciones para el manejo de la información (se irán completando) ---
-
-// ... (Aquí irán las funciones como savePatient, getPatientData, etc.) ...
-
-    // --- (Dentro del script, continuación de la Parte 7.1) ---
-
-//Guardar Paciente.
-function savePatient() {
-    const patientData = getPatientData();
-    if (!patientData) return; // No guardar si la validación falla
-
-    let patients = JSON.parse(localStorage.getItem('patients')) || [];
-        //Asignar ID
-    patientData.id = patientData.rut || Date.now().toString();  //Usar RUT como ID, o timestamp si no hay RUT
-    patients.push(patientData);
-    localStorage.setItem('patients', JSON.stringify(patients));
-    showAlert('Paciente guardado exitosamente!');
-}
-
-
-//Obtener datos del formulario de paciente
-function getPatientData() {
-    // Obtener valores de los campos
-    const patientData = {
-        evaluator: document.getElementById('evaluator').value,
-        email: document.getElementById('email').value,
-        name: document.getElementById('name').value,
-        rut: document.getElementById('rut').value,
-        contactNumber: document.getElementById('contactNumber').value,
-        patientEmail: document.getElementById('patientEmail').value,
-        nationality: document.getElementById('nationality').value,
-        age: document.getElementById('age').value,
-        birthdate: document.getElementById('birthdate').value,
-        civilStatus: document.getElementById('civilStatus').value,
-        education: document.getElementById('education').value,
-        address: document.getElementById('address').value,
-        emergencyContact: document.getElementById('emergencyContact').value,
-        occupation: document.getElementById('occupation').value,
-        laterality: document.getElementById('laterality').value,
-        consultReason: document.getElementById('consultReason').value,
-        diagnosis: document.getElementById('diagnosis').value,
-        expectations: document.getElementById('expectations').value,
-        proximateAnamnesis: document.getElementById('proximateAnamnesis').value,
-        remoteAnamnesis: document.getElementById('remoteAnamnesis').value,
-        smoking: document.querySelector('input[name="smoking"]:checked').value,
-        smokingDetails: document.getElementById('smokingDetails').value,
-        alcohol: document.querySelector('input[name="alcohol"]:checked').value,
-        alcoholDetails: document.getElementById('alcoholDetails').value,
-        drugs: document.querySelector('input[name="drugs"]:checked').value,
-        drugsDetails: document.getElementById('drugsDetails').value,
-        physicalActivity: document.querySelector('input[name="physicalActivity"]:checked').value,
-        physicalActivityDetails: document.getElementById('physicalActivityDetails').value,
-        sleepQuality: document.getElementById('sleepQuality').value,
-        otherHabits: document.getElementById('otherHabits').value,
-        inspection: document.getElementById('inspection').value,
-        palpation: document.getElementById('palpation').value,
-        bloodPressure: document.getElementById('bloodPressure').value,
-        heartRate: document.getElementById('heartRate').value,
-        respiratoryRate: document.getElementById('respiratoryRate').value,
-        temperature: document.getElementById('temperature').value,
-        saturation: document.getElementById('saturation').value,
-        weight: document.getElementById('weight').value,
-        height: document.getElementById('height').value,
-        imc: document.getElementById('imc').value,
-        painScale: document.getElementById('painScale').value,
-        physicalExamNotes: document.getElementById('physicalExamNotes').value,
-        muscleBalance: document.getElementById('muscleBalance').value,
-        jointAssessment: document.getElementById('jointAssessment').value,
-        posture: document.getElementById('posture').value,
-        gait: document.getElementById('gait').value,
-        functionalTests: document.getElementById('functionalTests').value,
-        specialTests: document.getElementById('specialTests').value,
-        kinesiologicDiagnosis: document.getElementById('kinesiologicDiagnosis').value,
-        treatmentPlan: document.getElementById('treatmentPlan').value,
-        shortTermGoals: document.getElementById('shortTermGoals').value,
-        longTermGoals: document.getElementById('longTermGoals').value,
-        extraNotes: document.getElementById('extraNotes').value
-    };
-
-    // Validación básica (puedes agregar más validaciones según sea necesario)
-    if (!patientData.evaluator || !patientData.email) {
-        showAlert('Por favor, completa los campos obligatorios (Kinesiólogo y Correo del evaluador).', 'danger');
-        return null; // Indica que la validación falló
-    }
-
-    return patientData;
-}
-
-
-// Cargar pacientes desde localStorage
-function loadPatients() {
-    patientRecordsDiv.innerHTML = ''; // Limpiar registros anteriores
-    let patients = JSON.parse(localStorage.getItem('patients')) || [];
-    patients.forEach(patient => {
-        displayPatientRecord(patient);
-    });
-}
-
-//Mostrar un registro de paciente en la lista.
-function displayPatientRecord(patient) {
-    const card = document.createElement('div');
-    card.classList.add('col-md-4', 'patient-card'); // Usar columnas de Bootstrap
-    card.innerHTML = `
-        <div class="card">
-            <div class="card-body">
-                <h5 class="card-title">${patient.name}</h5>
-                <p class="card-text">RUT: ${patient.rut || 'No especificado'}</p>
-                <p class="card-text">ID: ${patient.id}</p>
-                <button class="btn btn-primary btn-sm view-details" data-patient-id="${patient.id}">Ver Detalles</button>
+            <!-- Pestaña de Evoluciones -->
+            <div class="tab-pane fade" id="evolutions-tab-pane" role="tabpanel" aria-labelledby="evolutions-tab" tabindex="0">
+                <div class="container mt-4">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header bg-primary text-white">
+                                    <h5>Registrar Nueva Evolución</h5>
+                                </div>
+                                <div class="card-body">
+                                    <form id="evolutionForm">
+                                        <div class="mb-3">
+                                            <label for="patientSelect" class="form-label">Seleccionar Paciente</label>
+                                            <select class="form-select" id="patientSelect" required>
+                                                <option value="">Seleccione un paciente</option>
+                                                <!-- Las opciones se cargarán dinámicamente desde JavaScript -->
+                                            </select>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="evolutionDate" class="form-label">Fecha de Evolución</label>
+                                            <input type="date" class="form-control" id="evolutionDate" required>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="evolutionProgress" class="form-label">Progreso del Paciente</label>
+                                            <textarea class="form-control" id="evolutionProgress" rows="3" placeholder="Describa el progreso del paciente" required></textarea>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="evolutionTreatment" class="form-label">Tratamiento Realizado</label>
+                                            <textarea class="form-control" id="evolutionTreatment" rows="3" placeholder="Describa el tratamiento realizado" required></textarea>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="evolutionPlan" class="form-label">Plan y Recomendaciones</label>
+                                            <textarea class="form-control" id="evolutionPlan" rows="3" placeholder="Describa el plan y recomendaciones" required></textarea>
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <label class="form-label">Actualización de PSFS</label>
+                                            <div id="psfsUpdateContainer">
+                                                <!-- Se cargará dinámicamente desde JavaScript -->
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <label for="evolutionEvaluator" class="form-label">Kinesiólogo Evaluador</label>
+                                            <input type="text" class="form-control" id="evolutionEvaluator" required>
+                                        </div>
+                                        
+                                        <button type="submit" class="btn btn-primary">Guardar Evolución</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header bg-primary text-white">
+                                    <h5>Historial de Evoluciones</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="mb-3">
+                                        <input type="text" class="form-control" id="searchEvolution" placeholder="Buscar por nombre o RUT del paciente">
+                                    </div>
+                                    <div class="table-responsive">
+                                        <table class="table table-striped">
+                                            <thead>
+                                                <tr>
+                                                    <th>Paciente</th>
+                                                    <th>Fecha</th>
+                                                    <th>Evaluador</th>
+                                                    <th>Acciones</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="evolutionsTableBody">
+                                                <!-- Se cargará dinámicamente desde JavaScript -->
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
-    `;
-    patientRecordsDiv.appendChild(card);
 
-    // Agregar evento al botón "Ver Detalles"
-    card.querySelector('.view-details').addEventListener('click', () => {
-        showPatientDetails(patient);
-    });
-}
+        <!-- Modal para ver detalles completos del paciente -->
+        <div class="modal fade" id="patientDetailsModal" tabindex="-1" aria-labelledby="patientDetailsModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-xl">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="patientDetailsModalLabel">Detalles del Paciente</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body" id="patientDetailsContent">
+                        <!-- El contenido se cargará dinámicamente -->
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                        <button type="button" class="btn btn-primary" id="exportPatientButton">
+                            <i class="fas fa-file-pdf"></i> Exportar a PDF
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Bootstrap JS y Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"></script>
+    <!-- jsPDF para exportar a PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
-  // Mostrar detalles del paciente en el modal
-function showPatientDetails(patient) {
-    const modalBody = document.getElementById('patientModalBody');
-    modalBody.innerHTML = formatPatientDataForModal(patient);
-    patientModal.show();
-}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    
+    <!-- Firebase App (la base) -->
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<!-- Firestore -->
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+<!-- Firebase Storage (opcional, solo si realmente lo necesitas) -->
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
 
-//Formatear datos del paciente para mostrar en el modal
-function formatPatientDataForModal(patient) {
-    // Plantilla para mostrar los datos.  Usa un formato de tabla para mejor presentación.
-    let html = `<table class="table table-striped">`;
+    <!-- Tu archivo JavaScript principal -->
+<script src="app.js"></script>
+    
+    <!-- Modal para ver detalles de evolución -->
+    <div class="modal fade" id="evolutionDetailsModal" tabindex="-1" aria-labelledby="evolutionDetailsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="evolutionDetailsModalLabel">Detalles de Evolución</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="evolutionDetailsContent">
+                    <!-- Se cargará dinámicamente desde JavaScript -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    <button type="button" class="btn btn-danger" id="deleteEvolutionBtn">Eliminar</button>
+                    <button type="button" class="btn btn-primary" id="exportEvolutionBtn">Exportar a PDF</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
-    for (const key in patient) {
-        if (patient.hasOwnProperty(key)) {
-            let label = key.replace(/([A-Z])/g, ' $1').trim(); // Convierte camelCase a palabras separadas
-            label = label.charAt(0).toUpperCase() + label.slice(1); // Primera letra en mayúscula
-            let value = patient[key] || 'No especificado'; //Maneja los valores vacios.
-            html += `<tr><td><strong>${label}:</strong></td><td>${value}</td></tr>`;
-        }
-    }
-    html += `</table>`;
-    return html;
-}
-
-//Filtrar Pacientes
-function filterPatients(searchTerm) {
-    let patients = JSON.parse(localStorage.getItem('patients')) || [];
-    const filteredPatients = patients.filter(patient => {
-        return (patient.name && patient.name.toLowerCase().includes(searchTerm)) ||
-                (patient.rut && patient.rut.toLowerCase().includes(searchTerm)) ||
-                (patient.id && patient.id.toLowerCase().includes(searchTerm));
-    });
-
-    patientRecordsDiv.innerHTML = ''; // Limpiar resultados anteriores
-    filteredPatients.forEach(patient => {
-        displayPatientRecord(patient);
-    });
-}
-
-// Funcion para calcular IMC
-function calculateIMC() {
-    const weight = parseFloat(document.getElementById('weight').value);
-    const height = parseFloat(document.getElementById('height').value);
-
-    if (!isNaN(weight) && !isNaN(height) && height > 0) {
-        const imc = (weight / (height * height)).toFixed(2);
-        document.getElementById('imc').value = imc;
-    } else {
-        document.getElementById('imc').value = ''; // Limpiar si no hay datos
-    }
-}
-
-
-// Función para mostrar/ocultar detalles de hábitos
-function setupHabitDetailsToggle(radioName, detailsId) {
-    const yesRadio = document.querySelector(`input[name="${radioName}"][value="Si"]`);
-    const noRadio = document.querySelector(`input[name="${radioName}"][value="No"]`);
-    const detailsInput = document.getElementById(detailsId);
-
-    yesRadio.addEventListener('change', () => {
-        detailsInput.style.display = 'block';
-    });
-
-    noRadio.addEventListener('change', () => {
-        detailsInput.style.display = 'none';
-        detailsInput.value = ''; // Limpiar el campo cuando se selecciona "No"
-    });
-}
-
-// --- (Dentro del script, continuación de la Parte 7.2) ---
-
-//Exportar a PDF
-function exportToPdf() {
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF({
-        orientation: 'landscape', // Cambiado a landscape
-    });
-
-    let patients = JSON.parse(localStorage.getItem('patients')) || [];
-    if (patients.length === 0) {
-        showAlert('No hay datos de pacientes para exportar.', 'warning');
-        return;
-    }
-    // Define las columnas, *usando los mismos nombres de propiedad* que en el objeto patient
-    const columns = [
-        { header: 'ID', dataKey: 'id' },
-        { header: 'Nombre', dataKey: 'name' },
-        { header: 'RUT', dataKey: 'rut' },
-        { header: 'Evaluador', dataKey: 'evaluator' },
-        { header: 'Contacto', dataKey: 'contactNumber' },
-        { header: "Edad", dataKey: 'age' },
-        { header: "Diagnóstico", dataKey: 'diagnosis' },
-        { header: "Fecha Nacimiento", dataKey: 'birthdate'}
-
-        // ... agrega más columnas según sea necesario
-    ];
-
-
-    // Preparar los datos para la tabla (array de objetos)
-    const data = patients.map(patient => {
-       //Crea un nuevo objeto con las propiedades que necesitas
-        return {
-            id: patient.id,
-            name: patient.name,
-            rut: patient.rut,
-            evaluator: patient.evaluator,
-            contactNumber: patient.contactNumber,
-            age: patient.age,
-            diagnosis: patient.diagnosis,
-            birthdate: patient.birthdate
-
-        };
-    });
-
-
-    doc.autoTable({
-        head: [columns.map(col => col.header)], // Extrae los encabezados
-        body: data.map(patient => columns.map(col => patient[col.dataKey] || '')),  // Extrae los datos
-        startY: 20, // Posición inicial
-        margin: { horizontal: 10 }, // Márgenes
-        styles: {
-            fontSize: 8,       // Tamaño de fuente
-            cellPadding: 2,   // Espaciado interno de celda
-            overflow: 'linebreak',  // Manejo de desbordamiento de texto
-            halign: 'left'    // Alineación horizontal del texto
-        },
-        columnStyles: {
-            0: { cellWidth: 20 }, // Ancho de la primera columna (ID)
-            // Ajusta los anchos de las otras columnas según necesites.
-        }
-    });
-
-    doc.save('fichas_clinicas.pdf');
-    showAlert('Datos exportados a PDF exitosamente!', 'success');
-}
-
-//Exportar a Excel
-function exportToExcel() {
-    let patients = JSON.parse(localStorage.getItem('patients')) || [];
-    if (patients.length === 0) {
-        showAlert('No hay datos de pacientes para exportar.', 'warning');
-        return;
-    }
-
-     // Crear un nuevo libro de trabajo
-    const wb = XLSX.utils.book_new();
-
-    // Preparar los datos, *incluyendo todas las propiedades que quieras*.
-    const data = patients.map(patient => ({
-        'ID': patient.id,
-        'Nombre': patient.name,
-        'RUT': patient.rut,
-        'Evaluador': patient.evaluator,
-        'Correo Evaluador': patient.email,
-        'Contacto': patient.contactNumber,
-        'Correo Paciente': patient.patientEmail,
-        'Nacionalidad': patient.nationality,
-        'Edad': patient.age,
-        'Fecha Nacimiento': patient.birthdate,
-        'Estado Civil': patient.civilStatus,
-        'Educación': patient.education,
-        'Dirección': patient.address,
-        'Contacto Emergencia': patient.emergencyContact,
-        'Ocupación': patient.occupation,
-        'Lateralidad': patient.laterality,
-        'Motivo Consulta': patient.consultReason,
-        'Diagnóstico': patient.diagnosis,
-        'Expectativas': patient.expectations,
-        'Anamnesis Próxima': patient.proximateAnamnesis,
-        'Anamnesis Remota': patient.remoteAnamnesis,
-        'Tabaquismo': patient.smoking === 'Si' ? `Sí (${patient.smokingDetails})` : 'No',
-        'Alcohol': patient.alcohol === 'Si' ? `Sí (${patient.alcoholDetails})` : 'No',
-        'Drogas': patient.drugs === 'Si' ? `Sí (${patient.drugsDetails})` : 'No',
-        'Actividad Física': patient.physicalActivity === 'Si' ? `Sí (${patient.physicalActivityDetails})` : 'No',
-        'Calidad Sueño': patient.sleepQuality,
-        'Otros Hábitos': patient.otherHabits,
-        'Inspección': patient.inspection,
-        'Palpación': patient.palpation,
-        'Presión Arterial': patient.bloodPressure,
-        'Frecuencia Cardíaca': patient.heartRate,
-        'Frecuencia Respiratoria': patient.respiratoryRate,
-        'Temperatura': patient.temperature,
-        'Saturación': patient.saturation,
-        'Peso': patient.weight,
-        'Talla': patient.height,
-        'IMC': patient.imc,
-        'EVA': patient.painScale,
-        'Notas Examen Físico': patient.physicalExamNotes,
-        'Balance Muscular': patient.muscleBalance,
-        'Evaluación Articular': patient.jointAssessment,
-        'Postura': patient.posture,
-        'Marcha': patient.gait,
-        'Pruebas Funcionales': patient.functionalTests,
-        'Pruebas Especiales': patient.specialTests,
-        'Diagnóstico Kinésico': patient.kinesiologicDiagnosis,
-        'Plan Tratamiento': patient.treatmentPlan,
-        'Objetivos Corto Plazo': patient.shortTermGoals,
-        'Objetivos Largo Plazo': patient.longTermGoals,
-         'Comentarios Extra': patient.extraNotes,
-    }));
-
-    // Convertir los datos a una hoja de cálculo
-    const ws = XLSX.utils.json_to_sheet(data);
-
-     // Agregar validaciones de datos (opcional, pero muy útil)
-    const range = XLSX.utils.decode_range(ws['!ref']); // Obtiene el rango de celdas
-
-     //Ejemplo: Lista desplegable para Estado Civil en la columna K
-     const civilStatusOptions = '"Soltero/a,Casado/a,Divorciado/a,Viudo/a,Conviviente"'; // Opciones, separadas por comas
-      for(let row = range.s.r + 1; row <= range.e.r; row++) {
-        const cellAddress = XLSX.utils.encode_cell({r: row, c: 10}); // Columna K (índice 10)
-        if(!ws[cellAddress]) ws[cellAddress] = {t:'s', v:''};  // Si la celda esta vacia, crea una celda de tipo string
-        ws[cellAddress].z = '@'; //Formato de texto
-
-        ws['!dataValidations'] = ws['!dataValidations'] || [];
-        ws['!dataValidations'].push({
-            sqref: cellAddress, // Aplica a esta celda
-            formula1: civilStatusOptions, // Las opciones de la lista
-            showDropDown: true  //Muestra el dropdown
-
+    <!-- Script para manejar los sliders PSFS -->
+    <script>
+        // Función para actualizar los valores de los sliders PSFS
+        document.addEventListener('DOMContentLoaded', function() {
+            // Manejar los sliders PSFS
+            const psfsSliders = ['psfs1Rating', 'psfs2Rating', 'psfs3Rating'];
+            
+            psfsSliders.forEach(sliderId => {
+                const slider = document.getElementById(sliderId);
+                const valueDisplay = document.getElementById(sliderId.replace('Rating', 'Value'));
+                
+                if (slider && valueDisplay) {
+                    // Establecer valor inicial
+                    valueDisplay.textContent = slider.value;
+                    
+                    // Actualizar valor cuando cambie el slider
+                    slider.addEventListener('input', function() {
+                        valueDisplay.textContent = this.value;
+                    });
+                }
+            });
         });
-    }
-
-
-    // Agregar la hoja de cálculo al libro de trabajo
-    XLSX.utils.book_append_sheet(wb, ws, "Pacientes");
-    // Generar el archivo Excel y descargarlo
-    XLSX.writeFile(wb, 'fichas_clinicas.xlsx');
-     showAlert('Datos exportados a Excel exitosamente!', 'success');
-}    
-// --- (Dentro del script, continuación de la Parte 7.3) ---
-
-    const searchPatientBtn = document.getElementById('searchPatientBtn');
-    const patientSearchInput = document.getElementById('patientSearchInput');
-    const patientInfoContainer = document.getElementById('patientInfoContainer');
-    const evolutionFormContainer = document.getElementById('evolutionFormContainer');
-    const evolutionForm = document.getElementById('evolutionForm');
-    const evolutionsListContainer = document.getElementById('evolutionsListContainer');
-
-
-    searchPatientBtn.addEventListener('click', searchPatientsForEvolution);
-    evolutionForm.addEventListener('submit', saveEvolution);
-
-
-
-//Buscar pacientes para agregar evoluciones.
-function searchPatientsForEvolution() {
-    const searchTerm = patientSearchInput.value.toLowerCase();
-    let patients = JSON.parse(localStorage.getItem('patients')) || [];
-    const filteredPatients = patients.filter(patient =>
-        (patient.name && patient.name.toLowerCase().includes(searchTerm)) ||
-        (patient.rut && patient.rut.toLowerCase().includes(searchTerm)) ||
-        (patient.id && patient.id.toLowerCase().includes(searchTerm))
-    );
-
-    displayPatientSearchResults(filteredPatients);
-}
-
-//Mostrar resultados de la búsqueda de pacientes
-function displayPatientSearchResults(patients) {
-    patientInfoContainer.innerHTML = ''; // Limpiar resultados anteriores
-     if (patients.length === 0) {
-        patientInfoContainer.innerHTML = '<p>No se encontraron pacientes.</p>';
-        return;
-    }
-    // Crea la lista, esta vez con botones "Seleccionar"
-    const ul = document.createElement('ul');
-    ul.classList.add('list-group');
-    patients.forEach(patient => {
-        const li = document.createElement('li');
-        li.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-center');
-        li.innerHTML = `
-            <span>${patient.name} (RUT: ${patient.rut || 'N/A'})</span>
-            <button class="btn btn-primary btn-sm select-patient" data-patient-id="${patient.id}">Seleccionar</button>
-        `;
-        ul.appendChild(li);
-
-        // Evento click para el botón "Seleccionar"
-        li.querySelector('.select-patient').addEventListener('click', () => {
-            selectPatientForEvolution(patient);
-        });
-    });
-    patientInfoContainer.appendChild(ul);
-}
-
-//Seleccionar un paciente para agregar/ver evoluciones
-function selectPatientForEvolution(patient) {
-    // Mostrar información del paciente
-    patientInfoContainer.innerHTML = `
-        <h4>${patient.name}</h4>
-        <p>RUT: ${patient.rut || 'No especificado'}</p>
-        <p>ID: ${patient.id}</p>
-    `;
-
-    // Establecer el ID del paciente en el campo oculto del formulario de evolución
-    document.getElementById('evolutionPatientId').value = patient.id;
-
-    // Mostrar el formulario de evolución
-    evolutionFormContainer.style.display = 'block';
-
-     // Cargar y mostrar las evoluciones existentes del paciente
-    loadEvolutions(patient.id);
-
-}
-
-// Guardar una nueva evolución
-function saveEvolution(event) {
-    event.preventDefault();
-
-    const patientId = document.getElementById('evolutionPatientId').value;
-    const evolutionDate = document.getElementById('evolutionDate').value;
-    const evolutionSummary = document.getElementById('evolutionSummary').value;
-    const evolutionPlan = document.getElementById('evolutionPlan').value;
-
-
-    // Validación básica
-    if (!patientId || !evolutionDate || !evolutionSummary || !evolutionPlan) {
-        showAlert('Por favor, completa todos los campos de la evolución.', 'danger');
-        return;
-    }
-
-    const newEvolution = {
-        date: evolutionDate,
-        summary: evolutionSummary,
-        plan: evolutionPlan,
-    };
-
-    // Obtener evoluciones existentes (o inicializar si no hay)
-    let evolutions = JSON.parse(localStorage.getItem('evolutions')) || {};
-    if (!evolutions[patientId]) {
-        evolutions[patientId] = [];
-    }
-
-    // Agregar la nueva evolución al array de evoluciones del paciente
-    evolutions[patientId].push(newEvolution);
-
-    // Guardar en localStorage
-    localStorage.setItem('evolutions', JSON.stringify(evolutions));
-
-    showAlert('Evolución guardada exitosamente!', 'success');
-    clearForm('evolutionForm'); // Limpia solo el formulario de evolución.
-    loadEvolutions(patientId); // Recargar las evoluciones del paciente actual
-
-}
-
-// Cargar evoluciones de un paciente
-function loadEvolutions(patientId) {
-    evolutionsListContainer.innerHTML = ''; // Limpiar evoluciones anteriores
-    let evolutions = JSON.parse(localStorage.getItem('evolutions')) || {};
-    const patientEvolutions = evolutions[patientId] || [];
-
-    if (patientEvolutions.length === 0) {
-        evolutionsListContainer.innerHTML = '<p>No hay evoluciones registradas para este paciente.</p>';
-        return;
-    }
-
-    // Mostrar cada evolución.  Se crea una tabla para una mejor presentación.
-    const table = document.createElement('table');
-    table.classList.add('table', 'table-striped');
-    table.innerHTML = `
-        <thead>
-            <tr>
-                <th>Fecha</th>
-                <th>Resumen</th>
-                <th>Plan</th>
-            </tr>
-        </thead>
-        <tbody>
-        </tbody>
-    `;
-    const tbody = table.querySelector('tbody');
-
-
-    patientEvolutions.forEach(evolution => {
-       const row = document.createElement('tr');
-        row.innerHTML = `
-            <td>${evolution.date}</td>
-            <td>${evolution.summary}</td>
-            <td>${evolution.plan}</td>
-        `;
-        tbody.appendChild(row);
-    });
-
-    evolutionsListContainer.appendChild(table);
-}
-    //Mostrar resultados de la búsqueda de pacientes (versión CORREGIDA)
-function displayPatientSearchResults(patients) {
-    patientInfoContainer.innerHTML = ''; // Limpiar resultados anteriores
-     if (patients.length === 0) {
-        patientInfoContainer.innerHTML = '<p>No se encontraron pacientes.</p>';
-        return;
-    }
-    // Crea la lista
-    const ul = document.createElement('ul');
-    ul.classList.add('list-group');
-
-    patients.forEach(patient => {
-        const li = document.createElement('li');
-        li.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-center');
-
-        // Usamos un template string para el contenido del <li>
-        li.innerHTML = `
-            <span>${patient.name} (RUT: ${patient.rut || 'N/A'})</span>
-            <button class="btn btn-primary btn-sm select-patient">Seleccionar</button>
-        `;
-
-        // Agregamos el <li> a la lista <ul>
-        ul.appendChild(li);
-
-        // Accedemos al botón DENTRO del <li> actual.  MUY IMPORTANTE.
-        const selectButton = li.querySelector('.select-patient');
-
-        // Asociamos el evento click *al botón*, no al <li>
-        selectButton.addEventListener('click', () => {
-            selectPatientForEvolution(patient); // 'patient' está correctamente en el scope aquí
-        });
-    });
-
-    patientInfoContainer.appendChild(ul);
-}
-</script>
-
-        
+    </script>
+</body>
+</html>
