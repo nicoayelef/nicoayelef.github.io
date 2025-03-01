@@ -1,86 +1,63 @@
-// theme.js - Solución robusta para cambio de tema y modal
-document.addEventListener('DOMContentLoaded', function() {
-  // Controlador para el modal de carga
-  window.loadingCount = 0;
+/* theme.css - Estilos para modo claro/oscuro */
+:root {
+  --background-color: #ffffff;
+  --text-color: #333333;
+  --card-bg: #f5f5f5;
+  --header-bg: #f0f0f0;
+  --border-color: #ddd;
+  --button-bg: #4a89dc;
+  --button-text: white;
+  --modal-bg: rgba(0, 0, 0, 0.5);
+  --modal-content-bg: white;
+}
 
-  // Función para mostrar el modal de carga
-  window.showLoadingModal = function() {
-    window.loadingCount++;
-    const loadingModal = document.getElementById('loadingModal');
-    if (loadingModal) {
-      const bsModal = new bootstrap.Modal(loadingModal);
-      bsModal.show();
-    }
-  };
+[data-theme="dark"] {
+  --background-color: #121212;
+  --text-color: #e0e0e0;
+  --card-bg: #1e1e1e;
+  --header-bg: #2d2d2d;
+  --border-color: #444;
+  --button-bg: #6c5ce7;
+  --button-text: white;
+  --modal-bg: rgba(0, 0, 0, 0.7);
+  --modal-content-bg: #2d2d2d;
+}
 
-  // Función para ocultar el modal de carga
-  window.hideLoadingModal = function() {
-    window.loadingCount--;
-    if (window.loadingCount <= 0) {
-      window.loadingCount = 0;
-      const loadingModal = document.getElementById('loadingModal');
-      if (loadingModal) {
-        const modalInstance = bootstrap.Modal.getInstance(loadingModal);
-        if (modalInstance) modalInstance.hide();
-      }
-    }
-  };
+/* Asegúrate de aplicar estas variables en tus elementos */
+body {
+  background-color: var(--background-color);
+  color: var(--text-color);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
 
-  // Configuración del tema claro/oscuro
-  const themeToggleBtn = document.getElementById('theme-switcher');
-  if (!themeToggleBtn) {
-    console.error('Botón de tema no encontrado');
-    return;
+.card, .form-container {
+  background-color: var(--card-bg);
+}
+
+.modal-content {
+  background-color: var(--modal-content-bg);
+}
+
+/* Utilizar !important solo si es necesario para sobrescribir estilos inline */
+.dark-mode .text-muted {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+/* Asegurarse de que los inputs sean legibles en modo oscuro */
+.dark-mode .form-control,
+.dark-mode .form-select {
+  background-color: #333;
+  color: #fff;
+  border-color: #555;
+}
+
+/* Estilos específicos para Safari */
+@supports (-webkit-touch-callout: none) {
+  .dark-mode {
+    background-color: #121212 !important;
   }
   
-  // Detectar preferencia del sistema
-  const prefiereDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
-  
-  // Obtener tema guardado o usar preferencia del sistema
-  const savedTheme = localStorage.getItem('theme') || (prefiereDarkMode ? 'dark' : 'light');
-  
-  // Aplicar tema inmediatamente
-  applyTheme(savedTheme);
-  
-  // Función para aplicar el tema
-  function applyTheme(theme) {
-    document.documentElement.setAttribute('data-theme', theme);
-    if (theme === 'dark') {
-      document.body.classList.add('dark-mode');
-      document.body.classList.remove('light-mode');
-      if (themeToggleBtn) themeToggleBtn.innerHTML = '<i class="fas fa-sun"></i> Modo Claro';
-    } else {
-      document.body.classList.add('light-mode');
-      document.body.classList.remove('dark-mode');
-      if (themeToggleBtn) themeToggleBtn.innerHTML = '<i class="fas fa-moon"></i> Modo Oscuro';
-    }
+  .light-mode {
+    background-color: #f8f9fa !important;
   }
-  
-  // Manejar clic en el botón
-  themeToggleBtn.addEventListener('click', function() {
-    const currentTheme = document.documentElement.getAttribute('data-theme');
-    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-    
-    // Guardar y aplicar el nuevo tema
-    localStorage.setItem('theme', newTheme);
-    applyTheme(newTheme);
-    
-    // Forzar repintado (para Safari)
-    document.body.style.display = 'none';
-    document.body.offsetHeight; // Forzar repintado
-    document.body.style.display = '';
-    
-    console.log('Tema cambiado a:', newTheme);
-  });
-  
-  // Protección de seguridad para el modal
-  setInterval(function() {
-    const loadingModal = document.getElementById('loadingModal');
-    if (loadingModal && loadingModal.classList.contains('show')) {
-      // Si el modal ha estado abierto por más de 10 segundos, cerrarlo
-      window.loadingCount = 0;
-      const modalInstance = bootstrap.Modal.getInstance(loadingModal);
-      if (modalInstance) modalInstance.hide();
-    }
-  }, 10000);
-});
+}
