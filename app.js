@@ -138,12 +138,20 @@ async function savePatient(event) {
             complementaryExams: [] // Inicializar el array para los archivos
         };
 
-
-        // 2. Procesar archivos (si hay)
+// 2. Procesar archivos (si hay)
 const fileInput = document.getElementById('medicalExams');
-if (fileInput.files.length > 0) {
-    const processedFiles = await processFiles(fileInput.files);  // Usar la función processFiles
-    patientData.complementaryExams = processedFiles;  // Añadir al objeto patientData
+if (fileInput && fileInput.files && fileInput.files.length > 0) {
+    try {
+        const processedFiles = await processFiles(fileInput.files);
+        patientData.complementaryExams = processedFiles;
+        console.log("Archivos procesados correctamente:", processedFiles);
+    } catch (error) {
+        console.error("Error al procesar archivos:", error);
+        showAlert("Error al procesar los archivos adjuntos. La ficha se guardará sin archivos.", "warning");
+        patientData.complementaryExams = [];
+    }
+} else {
+    patientData.complementaryExams = [];
 }
 
 
