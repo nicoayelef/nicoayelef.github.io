@@ -230,7 +230,9 @@ async function savePatient(e) {
         let processedFiles = [];
         if (hasFiles) {
             try {
+                console.log(`Procesando ${fileInput.files.length} archivos...`);
                 processedFiles = await processFiles(fileInput.files);
+                console.log(`${processedFiles.length} archivos procesados correctamente`);
             } catch (error) {
                 console.error("Error al procesar archivos:", error);
                 showAlert("Error al procesar archivos: " + error.message, "warning");
@@ -243,6 +245,7 @@ async function savePatient(e) {
         }
         
         // Guardar en Firestore
+        console.log("Intentando guardar en Firestore...");
         db.collection("patients").add(patient)
             .then((docRef) => {
                 console.log("Paciente guardado con ID:", docRef.id);
@@ -263,7 +266,12 @@ async function savePatient(e) {
                 loadPatients();
             })
             .catch((error) => {
-                console.error("Error al guardar paciente: ", error);
+                console.error("Error al guardar paciente en Firestore:", error);
+                
+                // Información adicional para depuración
+                if (error.code) {
+                    console.error("Código de error:", error.code);
+                }
                 
                 // Restaurar botón
                 if (saveBtn) {
@@ -273,6 +281,16 @@ async function savePatient(e) {
                 
                 // Mostrar mensaje de error
                 showAlert("Error al guardar paciente: " + error.message, "danger");
+                
+                // Verificar conexión a Firestore
+                db.collection("patients").limit(1).get()
+                    .then(snapshot => {
+                        console.log("Conexión a Firestore funciona correctamente");
+                    })
+                    .catch(connError => {
+                        console.error("Error de conexión a Firestore:", connError);
+                        showAlert("Error de conexión a la base de datos. Por favor, verifica tu conexión a internet.", "danger");
+                    });
             });
     } catch (error) {
         console.error("Error en la función savePatient:", error);
