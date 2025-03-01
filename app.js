@@ -253,7 +253,7 @@ function showPatientDetails(patientId) {
 
 
       // --- Rellenar el modal de detalles ---
-      const modalBody = document.getElementById('patientDetailsModalBody');
+      const modalBody = document.getElementById('patientDetailsContent');
       if (!modalBody) {
         console.error("Elemento patientDetailsModalBody no encontrado.");
         loadingModal.hide(); // Ocultar modal de carga
