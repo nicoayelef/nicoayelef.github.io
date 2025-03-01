@@ -422,7 +422,7 @@ function loadPatientPSFS() {
                 const patient = doc.data();
                 currentPatientId = patientId;  // Establecer el paciente actual
 
-                const psfsContainer = document.getElementById('psfsActivities');
+                const psfsContainer = document.getElementById('psfsUpdateContainer');
                  if (!psfsContainer) {
                     console.error('psfsActivities no encontrado.');
                     return;
