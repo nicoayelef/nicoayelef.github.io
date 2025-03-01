@@ -1,107 +1,86 @@
-// Funciones para controlar el tema oscuro/claro
-let darkMode = localStorage.getItem('darkMode') === 'true';
-
-// Función para cambiar entre modo claro y oscuro
-function toggleDarkMode() {
-    darkMode = !darkMode;
-    localStorage.setItem('darkMode', darkMode);
-    applyTheme();
-}
-
-// Función para aplicar el tema actual
-function applyTheme() {
-    document.body.classList.toggle('dark-mode', darkMode);
-    
-    // Actualizar el texto del botón
-    const themeSwitcher = document.getElementById('theme-switcher');
-    if (themeSwitcher) {
-        themeSwitcher.innerHTML = darkMode ? 
-            '<i class="fas fa-sun"></i> Modo Claro' : 
-            '<i class="fas fa-moon"></i> Modo Oscuro';
-    }
-    
-    console.log('Tema aplicado:', darkMode ? 'oscuro' : 'claro');
-}
-
-// Solución para el modal de carga que se queda atascado
-function setupLoadingModalSafety() {
-    // Esta función configura un "safety net" para el modal de carga
-    setInterval(() => {
-        // Verifica si el modal de carga está visible por más de 10 segundos
-        const loadingModal = document.getElementById('loadingModal');
-        if (loadingModal && loadingModal.classList.contains('show')) {
-            const modalInstance = bootstrap.Modal.getInstance(loadingModal);
-            if (modalInstance) {
-                modalInstance.hide();
-                console.log('Modal de carga cerrado automáticamente por tiempo de seguridad');
-            }
-        }
-    }, 10000); // Revisar cada 10 segundos
-}
-
-// Aplicar los arreglos cuando el documento esté listo
+// theme.js - Solución robusta para cambio de tema y modal
 document.addEventListener('DOMContentLoaded', function() {
-    // Aplicar tema basado en la preferencia guardada
-    applyTheme();
-    
-    // Configurar el botón de cambio de tema
-    const themeBtn = document.getElementById('theme-switcher');
-    if (themeBtn) {
-        themeBtn.addEventListener('click', toggleDarkMode);
-        console.log('Event listener para tema configurado');
+  // Controlador para el modal de carga
+  window.loadingCount = 0;
+
+  // Función para mostrar el modal de carga
+  window.showLoadingModal = function() {
+    window.loadingCount++;
+    const loadingModal = document.getElementById('loadingModal');
+    if (loadingModal) {
+      const bsModal = new bootstrap.Modal(loadingModal);
+      bsModal.show();
+    }
+  };
+
+  // Función para ocultar el modal de carga
+  window.hideLoadingModal = function() {
+    window.loadingCount--;
+    if (window.loadingCount <= 0) {
+      window.loadingCount = 0;
+      const loadingModal = document.getElementById('loadingModal');
+      if (loadingModal) {
+        const modalInstance = bootstrap.Modal.getInstance(loadingModal);
+        if (modalInstance) modalInstance.hide();
+      }
+    }
+  };
+
+  // Configuración del tema claro/oscuro
+  const themeToggleBtn = document.getElementById('theme-switcher');
+  if (!themeToggleBtn) {
+    console.error('Botón de tema no encontrado');
+    return;
+  }
+  
+  // Detectar preferencia del sistema
+  const prefiereDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  
+  // Obtener tema guardado o usar preferencia del sistema
+  const savedTheme = localStorage.getItem('theme') || (prefiereDarkMode ? 'dark' : 'light');
+  
+  // Aplicar tema inmediatamente
+  applyTheme(savedTheme);
+  
+  // Función para aplicar el tema
+  function applyTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    if (theme === 'dark') {
+      document.body.classList.add('dark-mode');
+      document.body.classList.remove('light-mode');
+      if (themeToggleBtn) themeToggleBtn.innerHTML = '<i class="fas fa-sun"></i> Modo Claro';
     } else {
-        console.error('Botón de tema no encontrado');
+      document.body.classList.add('light-mode');
+      document.body.classList.remove('dark-mode');
+      if (themeToggleBtn) themeToggleBtn.innerHTML = '<i class="fas fa-moon"></i> Modo Oscuro';
     }
-
-    // Establecer mecanismo de seguridad para el modal de carga
-    setupLoadingModalSafety();
+  }
+  
+  // Manejar clic en el botón
+  themeToggleBtn.addEventListener('click', function() {
+    const currentTheme = document.documentElement.getAttribute('data-theme');
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
     
-    // Reescribir el comportamiento de cerrar modal para los modales existentes
-    // Para el modal de detalles del paciente
-    document.querySelectorAll('.modal .btn-close, .modal .btn-secondary').forEach(button => {
-        button.addEventListener('click', function() {
-            const modalId = this.closest('.modal').id;
-            const modalElement = document.getElementById(modalId);
-            if (modalElement) {
-                const modalInstance = bootstrap.Modal.getInstance(modalElement);
-                if (modalInstance) {
-                    modalInstance.hide();
-                    console.log(`Modal ${modalId} cerrado correctamente`);
-                }
-            }
-        });
-    });
+    // Guardar y aplicar el nuevo tema
+    localStorage.setItem('theme', newTheme);
+    applyTheme(newTheme);
     
-    // Asegurarse de que el loadingModal se cierra correctamente
-    // Sobrescribir métodos problemáticos
-    const originalShowPatientDetails = window.showPatientDetails;
-    if (typeof originalShowPatientDetails === 'function') {
-        window.showPatientDetails = function(patientId) {
-            // Asegurarse de que no hay modal de carga abierto
-            const loadingModal = document.getElementById('loadingModal');
-            if (loadingModal && loadingModal.classList.contains('show')) {
-                const modalInstance = bootstrap.Modal.getInstance(loadingModal);
-                if (modalInstance) modalInstance.hide();
-            }
-            
-            // Llamar a la función original
-            return originalShowPatientDetails(patientId);
-        };
+    // Forzar repintado (para Safari)
+    document.body.style.display = 'none';
+    document.body.offsetHeight; // Forzar repintado
+    document.body.style.display = '';
+    
+    console.log('Tema cambiado a:', newTheme);
+  });
+  
+  // Protección de seguridad para el modal
+  setInterval(function() {
+    const loadingModal = document.getElementById('loadingModal');
+    if (loadingModal && loadingModal.classList.contains('show')) {
+      // Si el modal ha estado abierto por más de 10 segundos, cerrarlo
+      window.loadingCount = 0;
+      const modalInstance = bootstrap.Modal.getInstance(loadingModal);
+      if (modalInstance) modalInstance.hide();
     }
-
-    // También para loadPatientPSFS
-    const originalLoadPatientPSFS = window.loadPatientPSFS;
-    if (typeof originalLoadPatientPSFS === 'function') {
-        window.loadPatientPSFS = function() {
-            // Asegurarse de que no hay modal de carga abierto
-            const loadingModal = document.getElementById('loadingModal');
-            if (loadingModal && loadingModal.classList.contains('show')) {
-                const modalInstance = bootstrap.Modal.getInstance(loadingModal);
-                if (modalInstance) modalInstance.hide();
-            }
-            
-            // Llamar a la función original
-            return originalLoadPatientPSFS();
-        };
-    }
+  }, 10000);
 });
