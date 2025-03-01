@@ -1453,13 +1453,13 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log("Formulario encontrado:", patientForm);
     
     if (patientForm) {
-        patientForm.addEventListener('submit', function(e) {
-            console.log("Formulario enviado");
-            e.preventDefault(); // Evitar que el formulario se envíe de forma tradicional
-            savePatient(e);
-        });
+      patientForm.addEventListener('submit', function(e) {
+        console.log("Formulario enviado");
+        e.preventDefault(); // Evitar que el formulario se envíe de forma tradicional
+        savePatient(e);
+      });
     } else {
-        console.error("No se encontró el formulario con ID 'patientForm'");
+      console.error("No se encontró el formulario con ID 'patientForm'");
     }
     
     // Cargar la lista de pacientes
@@ -1468,7 +1468,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Configurar el botón de búsqueda
     const searchButton = document.getElementById('searchButton');
     if (searchButton) {
-        searchButton.addEventListener('click', searchPatients);
+      searchButton.addEventListener('click', searchPatients);
     }
     
     // Cargar pacientes en el selector
@@ -1480,22 +1480,12 @@ document.addEventListener('DOMContentLoaded', function() {
     // Event listener para el selector de pacientes
     const patientSelect = document.getElementById('patientSelect');
     if (patientSelect) {
-        patientSelect.addEventListener('change', loadPatientPSFS);
+      patientSelect.addEventListener('change', loadPatientPSFS);
     }
     
     // Event listener para el formulario de evolución
     const evolutionForm = document.getElementById('evolutionForm');
     if (evolutionForm) {
-        evolutionForm.addEventListener('submit', saveEvolution);
-    }
-    
-    // Event listener para la búsqueda de evoluciones
-    const searchEvolutionInput = document.getElementById('searchEvolution');
-    if (searchEvolutionInput) {
-        searchEvolutionInput.addEventListener('input', function() {
-            // Debounce para evitar muchas búsquedas
-            clearTimeout(this.searchTimeout);
-            this.searchTimeout = setTimeout(searchEvolutions, 500);
-        });
+      evolutionForm.addEventListener('submit', saveEvolution);
     }
 });
