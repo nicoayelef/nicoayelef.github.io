@@ -40,11 +40,32 @@ let currentEvolutionId = null; //ID de la evolución (para editar, que aun no es
 
 // Función para mostrar alertas.  Esta función la usarás en todo tu código.
 function showAlert(message, type) {
+    console.log(`Mostrando alerta: ${message} (${type})`);
+    
     const alertContainer = document.getElementById('alertContainer');
     if (!alertContainer) {
-        console.error("Elemento alertContainer no encontrado"); // Esencial para debuggear.
+        console.error("Elemento alertContainer no encontrado");
+        // Crear alerta flotante si no existe el contenedor
+        const floatingAlert = document.createElement('div');
+        floatingAlert.className = `alert alert-${type} alert-dismissible fade show position-fixed top-0 start-50 translate-middle-x mt-4`;
+        floatingAlert.style.zIndex = "9999";
+        floatingAlert.role = 'alert';
+        floatingAlert.innerHTML = `
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        `;
+        document.body.appendChild(floatingAlert);
+        
+        // Auto-cerrar después de 5 segundos
+        setTimeout(() => {
+            if(floatingAlert.parentNode) {
+                floatingAlert.remove();
+            }
+        }, 5000);
+        
         return;
     }
+    
     const alert = document.createElement('div');
     alert.className = `alert alert-${type} alert-dismissible fade show`;
     alert.role = 'alert';
@@ -54,14 +75,13 @@ function showAlert(message, type) {
     `;
     alertContainer.appendChild(alert);
 
-     // Auto-cerrar alertas después de 5 segundos
-     setTimeout(() => {
-      if(alert.parentNode) { //Verifica que aun exista antes de intentar eliminar
-        alert.remove();
-      }
+    // Auto-cerrar alertas después de 5 segundos
+    setTimeout(() => {
+        if(alert.parentNode) {
+            alert.remove();
+        }
     }, 5000);
 }
-
 // Función para convertir archivos a Base64 (Promisificada)
 function fileToBase64(file) {
     return new Promise((resolve, reject) => {
