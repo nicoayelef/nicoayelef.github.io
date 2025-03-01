@@ -526,19 +526,19 @@ function saveEvolution(event) {
 
     // Recopilar datos del formulario de evolución
     const evolutionData = {
-        patientId: currentPatientId,
-        date: document.getElementById('evolutionDate').value,
-        subjective: document.getElementById('evolutionProgress').value,
-objective: document.getElementById('evolutionTreatment').value,
-assessment: document.getElementById('evolutionPlan').value,
-        plan: document.getElementById('evolutionPlan').value,
-        psfsValues: { //Valores de los sliders de la evolución
-            psfs1: document.getElementById('evolutionPsfs1Rating')?.value,
-            psfs2: document.getElementById('evolutionPsfs2Rating')?.value,
-            psfs3: document.getElementById('evolutionPsfs3Rating')?.value,
-        },
-        createdAt: firebase.firestore.Timestamp.now()
-    };
+    patientId: currentPatientId,
+    date: document.getElementById('evolutionDate').value,
+    subjective: document.getElementById('evolutionProgress').value,
+    objective: document.getElementById('evolutionTreatment').value,
+    assessment: document.getElementById('evolutionPlan').value, // Cambia esto o añade un campo adicional
+    evaluator: document.getElementById('evolutionEvaluator').value, // Añade el evaluador
+    psfsValues: {
+        psfs1: document.getElementById('evolutionPsfs1Rating')?.value,
+        psfs2: document.getElementById('evolutionPsfs2Rating')?.value,
+        psfs3: document.getElementById('evolutionPsfs3Rating')?.value,
+    },
+    createdAt: firebase.firestore.Timestamp.now()
+};
     //Validaciones
      if (!evolutionData.date) {
         showAlert("Ingresa una fecha para la evolución", "warning");
