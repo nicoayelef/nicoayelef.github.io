@@ -1,63 +1,72 @@
-/* theme.css - Estilos para modo claro/oscuro */
-:root {
-  --background-color: #ffffff;
-  --text-color: #333333;
-  --card-bg: #f5f5f5;
-  --header-bg: #f0f0f0;
-  --border-color: #ddd;
-  --button-bg: #4a89dc;
-  --button-text: white;
-  --modal-bg: rgba(0, 0, 0, 0.5);
-  --modal-content-bg: white;
-}
+// theme.js - Manejo del tema claro/oscuro
 
-[data-theme="dark"] {
-  --background-color: #121212;
-  --text-color: #e0e0e0;
-  --card-bg: #1e1e1e;
-  --header-bg: #2d2d2d;
-  --border-color: #444;
-  --button-bg: #6c5ce7;
-  --button-text: white;
-  --modal-bg: rgba(0, 0, 0, 0.7);
-  --modal-content-bg: #2d2d2d;
-}
+document.addEventListener('DOMContentLoaded', function() {
+    // Detectar tema guardado en localStorage
+    const savedTheme = localStorage.getItem('darkMode');
+    const darkMode = savedTheme === 'true';
+    
+    // Aplicar tema al cargar la página
+    applyTheme(darkMode);
+    
+    // Configurar botón de cambio de tema
+    const themeToggle = document.getElementById('theme-switcher');
+    if (themeToggle) {
+        themeToggle.addEventListener('click', function() {
+            const newDarkMode = !document.body.classList.contains('dark-mode');
+            applyTheme(newDarkMode);
+            localStorage.setItem('darkMode', newDarkMode);
+        });
+    }
+    
+    // Función para aplicar el tema
+    function applyTheme(darkMode) {
+        document.body.classList.toggle('dark-mode', darkMode);
+        
+        // Actualizar texto del botón
+        const themeSwitcher = document.getElementById('theme-switcher');
+        if (themeSwitcher) {
+            themeSwitcher.innerHTML = darkMode ? 
+                '<i class="fas fa-sun"></i> Modo Claro' : 
+                '<i class="fas fa-moon"></i> Modo Oscuro';
+        }
+        
+        // Aplicar estilos específicos para modo oscuro a elementos del formulario
+        const formControls = document.querySelectorAll('.form-control, .form-select');
+        formControls.forEach(element => {
+            if (darkMode) {
+                element.style.backgroundColor = '#333';
+                element.style.color = '#fff';
+                element.style.borderColor = '#555';
+            } else {
+                element.style.backgroundColor = '';
+                element.style.color = '';
+                element.style.borderColor = '';
+            }
+        });
+    }
+    
+    // Configurar funciones globales para modals
+    window.showLoadingModal = function() {
+        const loadingModalEl = document.getElementById('loadingModal');
+        const loadingModal = new bootstrap.Modal(loadingModalEl);
+        loadingModal.show();
+    };
 
-/* Asegúrate de aplicar estas variables en tus elementos */
-body {
-  background-color: var(--background-color);
-  color: var(--text-color);
-  transition: background-color 0.3s ease, color 0.3s ease;
-}
-
-.card, .form-container {
-  background-color: var(--card-bg);
-}
-
-.modal-content {
-  background-color: var(--modal-content-bg);
-}
-
-/* Utilizar !important solo si es necesario para sobrescribir estilos inline */
-.dark-mode .text-muted {
-  background-color: rgba(255, 255, 255, 0.05) !important;
-}
-
-/* Asegurarse de que los inputs sean legibles en modo oscuro */
-.dark-mode .form-control,
-.dark-mode .form-select {
-  background-color: #333;
-  color: #fff;
-  border-color: #555;
-}
-
-/* Estilos específicos para Safari */
-@supports (-webkit-touch-callout: none) {
-  .dark-mode {
-    background-color: #121212 !important;
-  }
-  
-  .light-mode {
-    background-color: #f8f9fa !important;
-  }
-}
+    window.hideLoadingModal = function() {
+        const loadingModalEl = document.getElementById('loadingModal');
+        const loadingModal = bootstrap.Modal.getInstance(loadingModalEl);
+        if (loadingModal) {
+            loadingModal.hide();
+        } else {
+            // Forzar ocultamiento si no se puede obtener la instancia
+            loadingModalEl.classList.remove('show');
+            document.body.classList.remove('modal-open');
+            const backdrop = document.querySelector('.modal-backdrop');
+            if (backdrop) {
+                backdrop.remove();
+            }
+            document.body.style.overflow = '';
+            document.body.style.paddingRight = '';
+        }
+    };
+});
