@@ -12,9 +12,11 @@ document.addEventListener('DOMContentLoaded', function() {
     const themeToggle = document.getElementById('theme-switcher');
     if (themeToggle) {
         themeToggle.addEventListener('click', function() {
-            const newDarkMode = !document.body.classList.contains('dark-mode');
-            applyTheme(newDarkMode);
-            localStorage.setItem('darkMode', newDarkMode);
+            const currentTheme = document.body.classList.contains('dark-mode');
+            const newTheme = !currentTheme;
+            
+            applyTheme(newTheme);
+            localStorage.setItem('darkMode', newTheme);
         });
     }
     
@@ -29,44 +31,5 @@ document.addEventListener('DOMContentLoaded', function() {
                 '<i class="fas fa-sun"></i> Modo Claro' : 
                 '<i class="fas fa-moon"></i> Modo Oscuro';
         }
-        
-        // Aplicar estilos específicos para modo oscuro a elementos del formulario
-        const formControls = document.querySelectorAll('.form-control, .form-select');
-        formControls.forEach(element => {
-            if (darkMode) {
-                element.style.backgroundColor = '#333';
-                element.style.color = '#fff';
-                element.style.borderColor = '#555';
-            } else {
-                element.style.backgroundColor = '';
-                element.style.color = '';
-                element.style.borderColor = '';
-            }
-        });
     }
-    
-    // Configurar funciones globales para modals
-    window.showLoadingModal = function() {
-        const loadingModalEl = document.getElementById('loadingModal');
-        const loadingModal = new bootstrap.Modal(loadingModalEl);
-        loadingModal.show();
-    };
-
-    window.hideLoadingModal = function() {
-        const loadingModalEl = document.getElementById('loadingModal');
-        const loadingModal = bootstrap.Modal.getInstance(loadingModalEl);
-        if (loadingModal) {
-            loadingModal.hide();
-        } else {
-            // Forzar ocultamiento si no se puede obtener la instancia
-            loadingModalEl.classList.remove('show');
-            document.body.classList.remove('modal-open');
-            const backdrop = document.querySelector('.modal-backdrop');
-            if (backdrop) {
-                backdrop.remove();
-            }
-            document.body.style.overflow = '';
-            document.body.style.paddingRight = '';
-        }
-    };
 });
