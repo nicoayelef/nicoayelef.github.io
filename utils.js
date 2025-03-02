@@ -3,25 +3,30 @@
 // Funciones para manejar el modal de carga
 window.showLoadingModal = function() {
     const loadingModalEl = document.getElementById('loadingModal');
-    const loadingModal = new bootstrap.Modal(loadingModalEl);
-    loadingModal.show();
+    if (loadingModalEl) {
+        const loadingModal = new bootstrap.Modal(loadingModalEl, {
+            backdrop: 'static',
+            keyboard: false
+        });
+        loadingModal.show();
+    }
 };
 
 window.hideLoadingModal = function() {
     const loadingModalEl = document.getElementById('loadingModal');
-    const loadingModal = bootstrap.Modal.getInstance(loadingModalEl);
-    if (loadingModal) {
-        loadingModal.hide();
-    } else {
-        // Forzar ocultamiento si no se puede obtener la instancia
+    if (loadingModalEl) {
+        const loadingModal = bootstrap.Modal.getInstance(loadingModalEl);
+        if (loadingModal) {
+            loadingModal.hide();
+        }
+        
+        // Fallback method to ensure modal closes
         loadingModalEl.classList.remove('show');
         document.body.classList.remove('modal-open');
         const backdrop = document.querySelector('.modal-backdrop');
         if (backdrop) {
             backdrop.remove();
         }
-        document.body.style.overflow = '';
-        document.body.style.paddingRight = '';
     }
 };
 
@@ -31,7 +36,11 @@ window.formatDate = function(timestamp) {
     
     try {
         const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
-        return date.toLocaleDateString();
+        return date.toLocaleDateString('es-CL', {
+            day: '2-digit', 
+            month: '2-digit', 
+            year: 'numeric'
+        });
     } catch (e) {
         console.error("Error al formatear fecha:", e);
         return 'Fecha inválida';
@@ -44,7 +53,10 @@ window.formatTime = function(timestamp) {
     
     try {
         const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
-        return date.toLocaleTimeString();
+        return date.toLocaleTimeString('es-CL', {
+            hour: '2-digit', 
+            minute: '2-digit'
+        });
     } catch (e) {
         console.error("Error al formatear hora:", e);
         return '';
