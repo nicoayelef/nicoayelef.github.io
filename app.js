@@ -1,4 +1,4 @@
-// Configuración de Firebase (¡Tus credenciales!)
+// Configuración de Firebase
 const firebaseConfig = {
    apiKey: "AIzaSyBYaNbZWHUS-Pvm49kmMtHw9LqqxUDySYA",
     authDomain: "base-de-datos-poli.firebaseapp.com",
@@ -6,8 +6,7 @@ const firebaseConfig = {
     storageBucket: "base-de-datos-poli.appspot.com",
     messagingSenderId: "954754202697",
     appId: "1:954754202697:web:e06171f6b0ade314259398"
-  };
-
+};
 
 // Inicializar Firebase (con verificación)
 if (typeof firebase !== 'undefined') {
@@ -228,187 +227,188 @@ async function savePatient(event) {
 
 // Función para cargar y mostrar la lista de pacientes
 function loadPatients() {
-  console.log("Cargando pacientes...");
-  const patientsTableBody = document.getElementById('patientsTableBody');
+    console.log("Cargando pacientes...");
+    const patientsTableBody = document.getElementById('patientsTableBody');
     if (!patientsTableBody) {
         console.error("patientsTableBody no encontrado!");
         return;
     }
-  patientsTableBody.innerHTML = '<tr><td colspan="5" class="text-center">Cargando...</td></tr>'; // Mensaje de carga
+    patientsTableBody.innerHTML = '<tr><td colspan="5" class="text-center">Cargando...</td></tr>'; // Mensaje de carga
 
-  db.collection("patients")
-    .orderBy("createdAt", "desc") // Ordenar por fecha de creación (descendente)
-    .get()
-    .then((querySnapshot) => {
-      patientsTableBody.innerHTML = ""; // Limpiar la tabla
+    db.collection("patients")
+        .orderBy("createdAt", "desc") // Ordenar por fecha de creación (descendente)
+        .get()
+        .then((querySnapshot) => {
+            patientsTableBody.innerHTML = ""; // Limpiar la tabla
 
-      if (querySnapshot.empty) {
-        patientsTableBody.innerHTML = '<tr><td colspan="5" class="text-center">No hay pacientes registrados.</td></tr>';
-        return;
-      }
-
-      querySnapshot.forEach((doc) => {
-        const patient = doc.data();
-        patient.id = doc.id; // MUY IMPORTANTE: Asignar el ID del documento
-
-        const row = document.createElement('tr');
-        row.innerHTML = `
-          <td>${patient.name || 'Sin nombre'}</td>
-          <td>${patient.rut || 'N/A'}</td>
-          <td>${patient.age || 'N/A'}</td>
-          <td>${formatDate(patient.createdAt)} ${formatTime(patient.createdAt)}</td>
-          <td>
-            <button class="btn btn-primary btn-sm view-details" data-patient-id="${patient.id}">Ver</button>
-            <button class="btn btn-danger btn-sm delete-patient" data-patient-id="${patient.id}">Eliminar</button>
-          </td>
-        `;
-        patientsTableBody.appendChild(row);
-      });
-        // Delegación de eventos para los botones "Ver" y "Eliminar"
-        patientsTableBody.addEventListener('click', (event) => {
-            const target = event.target;
-            if (target.classList.contains('view-details') || target.closest('.view-details')) {
-                const patientId = (target.dataset.patientId || target.closest('.view-details').dataset.patientId);
-                showPatientDetails(patientId);
-
-            } else if (target.classList.contains('delete-patient') || target.closest('.delete-patient')) {
-                 const patientId = (target.dataset.patientId || target.closest('.delete-patient').dataset.patientId);
-                deletePatient(patientId);
+            if (querySnapshot.empty) {
+                patientsTableBody.innerHTML = '<tr><td colspan="5" class="text-center">No hay pacientes registrados.</td></tr>';
+                return;
             }
-        });
 
-    })
-    .catch((error) => {
-      console.error("Error al cargar pacientes:", error);
-      patientsTableBody.innerHTML = `<tr><td colspan="5" class="text-center text-danger">Error al cargar los pacientes: ${error.message}</td></tr>`;
-      showAlert("Error al cargar la lista de pacientes", "danger");
-    });
+            querySnapshot.forEach((doc) => {
+                const patient = doc.data();
+                patient.id = doc.id; // MUY IMPORTANTE: Asignar el ID del documento
+
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${patient.name || 'Sin nombre'}</td>
+                    <td>${patient.rut || 'N/A'}</td>
+                    <td>${patient.age || 'N/A'}</td>
+                    <td>${formatDate(patient.createdAt)} ${formatTime(patient.createdAt)}</td>
+                    <td>
+                        <button class="btn btn-primary btn-sm view-details" data-patient-id="${patient.id}">Ver</button>
+                        <button class="btn btn-danger btn-sm delete-patient" data-patient-id="${patient.id}">Eliminar</button>
+                    </td>
+                `;
+                patientsTableBody.appendChild(row);
+            });
+            
+            // Eliminar event listeners anteriores (para evitar duplicados)
+            const oldPatientsTableBody = patientsTableBody;
+            const newPatientsTableBody = oldPatientsTableBody.cloneNode(true);
+            oldPatientsTableBody.parentNode.replaceChild(newPatientsTableBody, oldPatientsTableBody);
+            
+            // Delegación de eventos para los botones "Ver" y "Eliminar"
+            newPatientsTableBody.addEventListener('click', (event) => {
+                const target = event.target;
+                if (target.classList.contains('view-details') || target.closest('.view-details')) {
+                    const patientId = (target.dataset.patientId || target.closest('.view-details').dataset.patientId);
+                    showPatientDetails(patientId);
+                } else if (target.classList.contains('delete-patient') || target.closest('.delete-patient')) {
+                    const patientId = (target.dataset.patientId || target.closest('.delete-patient').dataset.patientId);
+                    deletePatient(patientId);
+                }
+            });
+        })
+        .catch((error) => {
+            console.error("Error al cargar pacientes:", error);
+            patientsTableBody.innerHTML = `<tr><td colspan="5" class="text-center text-danger">Error al cargar los pacientes: ${error.message}</td></tr>`;
+            showAlert("Error al cargar la lista de pacientes", "danger");
+        });
 }
 
 // Función para mostrar los detalles de un paciente en un modal
 function showPatientDetails(patientId) {
-  console.log("Mostrando detalles del paciente:", patientId);
+    console.log("Mostrando detalles del paciente:", patientId);
 
-  // Usar la nueva función de carga
-window.showLoadingModal();
+    // Mostrar modal de carga
+    window.showLoadingModal();
 
-  db.collection("patients").doc(patientId).get()
-     })
-      .finally(() => {
-        // Siempre ocultar el modal de carga al final
-        window.hideLoadingModal();
-      });
-    .then((doc) => {
-     // No necesitamos ocultar el modal aquí - lo haremos en el finally
-      
-      if (!doc.exists) {
-        console.log("Paciente no encontrado:", patientId);
-        showAlert("Paciente no encontrado", "warning");
-        return;
-      }
-
-      const patient = doc.data();
-      patient.id = doc.id; // Asignar el ID del documento
-      console.log("Datos del paciente recuperados:", patient);
-
-      // --- Rellenar el modal de detalles ---
-      const modalBody = document.getElementById('patientDetailsContent');
-      if (!modalBody) {
-        console.error("Elemento patientDetailsContent no encontrado.");
-        return;
-      }
-
-      // Formatear fecha de nacimiento
-      let birthdateFormatted = 'No disponible';
-      if(patient.birthdate){
-          birthdateFormatted = new Date(patient.birthdate).toLocaleDateString();
-      }
-
-      // Formatear fecha de creacion.
-      let createdDate = formatDate(patient.createdAt);
-      let createdTime = formatTime(patient.createdAt);
-
-      // Construir el contenido del modal (mucho más organizado y legible)
-      modalBody.innerHTML = `
-      <p><strong>Nombre:</strong> ${patient.name || 'Sin nombre'}</p>
-      <p><strong>RUT:</strong> ${patient.rut || 'No especificado'}</p>
-      <p><strong>Edad:</strong> ${patient.age || 'No especificada'}</p>
-      <p><strong>Fecha de Nacimiento:</strong> ${birthdateFormatted}</p>
-      <p><strong>Email Evaluador:</strong> ${patient.email || 'No especificado'}</p>
-      <p><strong>Teléfono:</strong> ${patient.contactNumber || 'No especificado'}</p>
-       <p><strong>Email Paciente:</strong> ${patient.patientEmail || 'No especificado'}</p>
-      <p><strong>Nacionalidad:</strong> ${patient.nationality || 'No especificada'}</p>
-      <p><strong>Estado Civil:</strong> ${patient.civilStatus || 'No especificado'}</p>
-      <p><strong>Educación:</strong> ${patient.education || 'No especificada'}</p>
-      <p><strong>Dirección:</strong> ${patient.address || 'No especificada'}</p>
-      <p><strong>Contacto Emergencia:</strong> ${patient.emergencyContact || 'No especificado'}</p>
-      <p><strong>Ocupación:</strong> ${patient.occupation || 'No especificado'}</p>
-      <p><strong>Lateralidad:</strong> ${patient.laterality || 'No especificada'}</p>
-      <p><strong>Motivo Consulta:</strong> ${patient.consultReason || 'No especificado'}</p>
-      <p><strong>Diagnóstico:</strong> ${patient.diagnosis || 'No especificado'}</p>
-      <p><strong>Expectativas:</strong> ${patient.expectations || 'No especificado'}</p>
-      <p><strong>Anamnesis Próxima:</strong> ${patient.proximateAnamnesis || 'No especificado'}</p>
-      <p><strong>Anamnesis Remota:</strong> ${patient.remoteAnamnesis || 'No especificado'}</p>
-       <p><strong>Habitos/Hobbies:</strong> ${patient.habitsHobbies || 'No especificado'}</p>
-       <p><strong>Hogar y red de apoyo:</strong> ${patient.homeSupport || 'No especificado'}</p>
-       <p><strong>Cuestionario extra:</strong> ${patient.extraQuestionnaire || 'No especificado'}</p>
-       <p><strong>Signos vitales:</strong> ${patient.vitalSigns || 'No especificado'}</p>
-       <p><strong>Antropometria:</strong> ${patient.anthropometry || 'No especificado'}</p>
-      <p><strong>Examen físico:</strong> ${patient.physicalExam || 'No especificado'}</p>
-       <p><strong>Fecha Creación:</strong> ${createdDate} ${createdTime}</p>
-      
-
-      <hr>
-      <h5>PSFS (Patient-Specific Functional Scale)</h5>
-      <p><strong>Actividad 1:</strong> ${patient.psfs1?.activity || 'No especificada'} - <strong>Valoración:</strong> ${patient.psfs1?.rating || 'N/A'}</p>
-      <p><strong>Actividad 2:</strong> ${patient.psfs2?.activity || 'No especificada'} - <strong>Valoración:</strong> ${patient.psfs2?.rating || 'N/A'}</p>
-      <p><strong>Actividad 3:</strong> ${patient.psfs3?.activity || 'No especificada'} - <strong>Valoración:</strong> ${patient.psfs3?.rating || 'N/A'}</p>
-      `;
-
-      // Mostrar exámenes complementarios (si existen)
-      if (patient.complementaryExams && patient.complementaryExams.length > 0) {
-          const examsContainer = document.createElement('div');
-          examsContainer.innerHTML = '<h5>Exámenes Complementarios</h5>';
-
-          const examsList = document.createElement('ul');
-          examsList.className = 'list-group'; //Clase de Bootstrap
-
-          patient.complementaryExams.forEach(exam => {
-            const listItem = document.createElement('li');
-            listItem.className = 'list-group-item'; //Clase de Bootstrap
-            //Verifica que tipo de archivo es
-            if (exam.type.startsWith('image/')) {
-                listItem.innerHTML = `<a href="${exam.url}" target="_blank"><img src="${exam.url}" alt="${exam.name}" style="max-width: 100%; height: auto;"></a>`;
-            } else {
-                //Para archivos que no son imagenes, por ejemplo, PDFs
-                listItem.innerHTML = `<a href="${exam.url}" target="_blank">${exam.name}</a>`;
+    db.collection("patients").doc(patientId).get()
+        .then((doc) => {
+            if (!doc.exists) {
+                console.log("Paciente no encontrado:", patientId);
+                showAlert("Paciente no encontrado", "warning");
+                window.hideLoadingModal();
+                return;
             }
-            examsList.appendChild(listItem);
-          });
-          examsContainer.appendChild(examsList);
-          modalBody.appendChild(examsContainer);
-      } else {
-          modalBody.innerHTML += `<p><strong>Exámenes Complementarios:</strong> No hay exámenes adjuntos.</p>`;
-      }
 
-      // --- Mostrar el modal de detalles ---
-      const detailsModal = new bootstrap.Modal(document.getElementById('patientDetailsModal'));
-      detailsModal.show();
-      
-      // Asegurarnos que el botón de cerrar funcione correctamente
-      document.querySelector('#patientDetailsModal .btn-close').addEventListener('click', function() {
-        detailsModal.hide();
-      });
-      
-      document.querySelector('#patientDetailsModal .btn-secondary').addEventListener('click', function() {
-        detailsModal.hide();
-      });
-    })
-    .catch((error) => {
-      console.error("Error al obtener detalles del paciente:", error);
-      showAlert("Error al cargar los detalles del paciente: " + error.message, "danger");
-      window.hideLoadingModal(); // Asegurarse de ocultar el modal en caso de error
-    });
+            const patient = doc.data();
+            patient.id = doc.id; // Asignar el ID del documento
+            console.log("Datos del paciente recuperados:", patient);
+
+            // --- Rellenar el modal de detalles ---
+            const modalBody = document.getElementById('patientDetailsContent');
+            if (!modalBody) {
+                console.error("Elemento patientDetailsContent no encontrado.");
+                window.hideLoadingModal();
+                return;
+            }
+
+            // Formatear fecha de nacimiento
+            let birthdateFormatted = 'No disponible';
+            if(patient.birthdate){
+                birthdateFormatted = new Date(patient.birthdate).toLocaleDateString();
+            }
+
+            // Formatear fecha de creacion.
+            let createdDate = formatDate(patient.createdAt);
+            let createdTime = formatTime(patient.createdAt);
+
+            // Construir el contenido del modal (mucho más organizado y legible)
+            modalBody.innerHTML = `
+            <p><strong>Nombre:</strong> ${patient.name || 'Sin nombre'}</p>
+            <p><strong>RUT:</strong> ${patient.rut || 'No especificado'}</p>
+            <p><strong>Edad:</strong> ${patient.age || 'No especificada'}</p>
+            <p><strong>Fecha de Nacimiento:</strong> ${birthdateFormatted}</p>
+            <p><strong>Email Evaluador:</strong> ${patient.email || 'No especificado'}</p>
+            <p><strong>Teléfono:</strong> ${patient.contactNumber || 'No especificado'}</p>
+            <p><strong>Email Paciente:</strong> ${patient.patientEmail || 'No especificado'}</p>
+            <p><strong>Nacionalidad:</strong> ${patient.nationality || 'No especificada'}</p>
+            <p><strong>Estado Civil:</strong> ${patient.civilStatus || 'No especificado'}</p>
+            <p><strong>Educación:</strong> ${patient.education || 'No especificada'}</p>
+            <p><strong>Dirección:</strong> ${patient.address || 'No especificada'}</p>
+            <p><strong>Contacto Emergencia:</strong> ${patient.emergencyContact || 'No especificado'}</p>
+            <p><strong>Ocupación:</strong> ${patient.occupation || 'No especificado'}</p>
+            <p><strong>Lateralidad:</strong> ${patient.laterality || 'No especificada'}</p>
+            <p><strong>Motivo Consulta:</strong> ${patient.consultReason || 'No especificado'}</p>
+            <p><strong>Diagnóstico:</strong> ${patient.diagnosis || 'No especificado'}</p>
+            <p><strong>Expectativas:</strong> ${patient.expectations || 'No especificado'}</p>
+            <p><strong>Anamnesis Próxima:</strong> ${patient.proximateAnamnesis || 'No especificado'}</p>
+            <p><strong>Anamnesis Remota:</strong> ${patient.remoteAnamnesis || 'No especificado'}</p>
+            <p><strong>Habitos/Hobbies:</strong> ${patient.habitsHobbies || 'No especificado'}</p>
+            <p><strong>Hogar y red de apoyo:</strong> ${patient.homeSupport || 'No especificado'}</p>
+            <p><strong>Cuestionario extra:</strong> ${patient.extraQuestionnaire || 'No especificado'}</p>
+            <p><strong>Signos vitales:</strong> ${patient.vitalSigns || 'No especificado'}</p>
+            <p><strong>Antropometria:</strong> ${patient.anthropometry || 'No especificado'}</p>
+            <p><strong>Examen físico:</strong> ${patient.physicalExam || 'No especificado'}</p>
+            <p><strong>Fecha Creación:</strong> ${createdDate} ${createdTime}</p>
+
+            <hr>
+            <h5>PSFS (Patient-Specific Functional Scale)</h5>
+            <p><strong>Actividad 1:</strong> ${patient.psfs1?.activity || 'No especificada'} - <strong>Valoración:</strong> ${patient.psfs1?.rating || 'N/A'}</p>
+            <p><strong>Actividad 2:</strong> ${patient.psfs2?.activity || 'No especificada'} - <strong>Valoración:</strong> ${patient.psfs2?.rating || 'N/A'}</p>
+            <p><strong>Actividad 3:</strong> ${patient.psfs3?.activity || 'No especificada'} - <strong>Valoración:</strong> ${patient.psfs3?.rating || 'N/A'}</p>
+            `;
+
+            // Mostrar exámenes complementarios (si existen)
+            if (patient.complementaryExams && patient.complementaryExams.length > 0) {
+                const examsContainer = document.createElement('div');
+                examsContainer.innerHTML = '<h5>Exámenes Complementarios</h5>';
+
+                const examsList = document.createElement('ul');
+                examsList.className = 'list-group'; //Clase de Bootstrap
+
+                patient.complementaryExams.forEach(exam => {
+                    const listItem = document.createElement('li');
+                    listItem.className = 'list-group-item'; //Clase de Bootstrap
+                    //Verifica que tipo de archivo es
+                    if (exam.type.startsWith('image/')) {
+                        listItem.innerHTML = `<a href="${exam.url}" target="_blank"><img src="${exam.url}" alt="${exam.name}" style="max-width: 100%; height: auto;"></a>`;
+                    } else {
+                        //Para archivos que no son imagenes, por ejemplo, PDFs
+                        listItem.innerHTML = `<a href="${exam.url}" target="_blank">${exam.name}</a>`;
+                    }
+                    examsList.appendChild(listItem);
+                });
+                examsContainer.appendChild(examsList);
+                modalBody.appendChild(examsContainer);
+            } else {
+                modalBody.innerHTML += `<p><strong>Exámenes Complementarios:</strong> No hay exámenes adjuntos.</p>`;
+            }
+
+            // --- Mostrar el modal de detalles ---
+            const detailsModal = new bootstrap.Modal(document.getElementById('patientDetailsModal'));
+            detailsModal.show();
+            
+            // Ocultar el modal de carga
+            window.hideLoadingModal();
+            
+            // Asegurarnos que el botón de cerrar funcione correctamente
+            document.querySelector('#patientDetailsModal .btn-close').addEventListener('click', function() {
+                detailsModal.hide();
+            });
+            
+            document.querySelector('#patientDetailsModal .btn-secondary').addEventListener('click', function() {
+                detailsModal.hide();
+            });
+        })
+        .catch((error) => {
+            console.error("Error al obtener detalles del paciente:", error);
+            showAlert("Error al cargar los detalles del paciente: " + error.message, "danger");
+            window.hideLoadingModal(); // Asegurarse de ocultar el modal en caso de error
+        });
 }
 
 // Función para eliminar un paciente
@@ -421,9 +421,7 @@ function deletePatient(patientId) {
     }
 
     // Mostrar modal de carga
-    const loadingModal = new bootstrap.Modal(document.getElementById('loadingModal'));
-    loadingModal.show();
-
+    window.showLoadingModal();
 
     db.collection("patients").doc(patientId).delete()
         .then(() => {
@@ -436,9 +434,10 @@ function deletePatient(patientId) {
             showAlert("Error al eliminar el paciente: " + error.message, "danger");
         })
         .finally(() => {
-          loadingModal.hide(); // Ocultar modal *siempre*
+            window.hideLoadingModal(); // Ocultar modal *siempre*
         });
 }
+
 // --- Funciones para la pestaña "Evoluciones" ---
 
 // Cargar Pacientes en el Selector (para Evoluciones)
@@ -476,15 +475,11 @@ function loadPatientPSFS() {
         return;
     }
 
-   // Usar la nueva función de carga
-window.showLoadingModal();
+    // Mostrar modal de carga
+    window.showLoadingModal();
 
     db.collection("patients").doc(patientId).get()
         .then(doc => {
-            // No necesitamos ocultar el modal aquí - lo haremos en el finally
-
-
-            
             if (doc.exists) {
                 const patient = doc.data();
                 currentPatientId = patientId;  // Establecer el paciente actual
@@ -492,6 +487,7 @@ window.showLoadingModal();
                 const psfsContainer = document.getElementById('psfsUpdateContainer');
                 if (!psfsContainer) {
                     console.error('psfsUpdateContainer no encontrado.');
+                    window.hideLoadingModal();
                     return;
                 }
                 
@@ -556,17 +552,18 @@ window.showLoadingModal();
                     updateRatingValue('evolutionPsfs3Rating', 'evolutionPsfs3Value');
                 }
 
+                window.hideLoadingModal();
             } else {
                 showAlert("Paciente no encontrado", "warning");
+                window.hideLoadingModal();
             }
         })
         .catch(error => {
             console.error("Error al cargar datos PSFS:", error);
             showAlert("Error al cargar datos PSFS: " + error.message, "danger");
-            loadingModal.hide(); // Ocultar modal de carga
+            window.hideLoadingModal();
         });
 }
-
 
 // Función para guardar la evolución de un paciente
 function saveEvolution(event) {
@@ -650,36 +647,35 @@ function saveEvolution(event) {
         });
 }
 
-
 // Cargar Evoluciones (todas, inicialmente)
 function loadEvolutions() {
     const evolutionsTableBody = document.getElementById('evolutionsTableBody');
-     if (!evolutionsTableBody) {
+    if (!evolutionsTableBody) {
         console.error("evolutionsTableBody no encontrado");
-        return
+        return;
     }
     evolutionsTableBody.innerHTML = '<tr><td colspan="4">Cargando...</td></tr>';
 
     db.collection("evolutions").orderBy("createdAt", "desc").get()
     .then((querySnapshot) => {
-
         evolutionsTableBody.innerHTML = '';
 
         if (querySnapshot.empty) {
             evolutionsTableBody.innerHTML = '<tr><td colspan="4">No hay evoluciones registradas.</td></tr>';
             return;
         }
+        
         //Crear un mapa para los nombres de los pacientes.
         const patientIds = new Set(); //Evita duplicados.
         const patientNames = {};
 
         querySnapshot.forEach((doc) => {
-          const evolution = doc.data();
-          patientIds.add(evolution.patientId); //Agrego el ID al Set.
+            const evolution = doc.data();
+            patientIds.add(evolution.patientId); //Agrego el ID al Set.
         });
 
         //Obtener los nombres de los pacientes, una sola vez por paciente.
-         const getPatientNames = async () => {
+        const getPatientNames = async () => {
             for (const patientId of patientIds) {
                 try {
                     const patientDoc = await db.collection("patients").doc(patientId).get();
@@ -695,7 +691,7 @@ function loadEvolutions() {
             }
 
             // Una vez que tenemos todos los nombres, mostrar las evoluciones
-             querySnapshot.forEach((doc) => {
+            querySnapshot.forEach((doc) => {
                 const evolution = doc.data();
                 evolution.id = doc.id;
 
@@ -703,7 +699,7 @@ function loadEvolutions() {
                 row.innerHTML = `
                     <td>${patientNames[evolution.patientId] || 'Paciente Desconocido'}</td>
                     <td>${evolution.date || 'No especificada'}</td>
-                   <td>${evolution.subjective ? (evolution.subjective.length > 50 ? evolution.subjective.substring(0, 50) + '...' : evolution.subjective) : 'No especificado'}</td>
+                    <td>${evolution.subjective ? (evolution.subjective.length > 50 ? evolution.subjective.substring(0, 50) + '...' : evolution.subjective) : 'No especificado'}</td>
                     <td>
                         <button class="btn btn-primary btn-sm view-evolution" data-evolution-id="${evolution.id}">Ver</button>
                         <button class="btn btn-danger btn-sm delete-evolution" data-evolution-id="${evolution.id}">Eliminar</button>
@@ -711,44 +707,47 @@ function loadEvolutions() {
                 `;
                 evolutionsTableBody.appendChild(row);
             });
+            
+            //Eliminar event listeners anteriores para evitar duplicados
+            const oldEvolutionsTableBody = evolutionsTableBody;
+            const newEvolutionsTableBody = oldEvolutionsTableBody.cloneNode(true);
+            oldEvolutionsTableBody.parentNode.replaceChild(newEvolutionsTableBody, oldEvolutionsTableBody);
+            
             //Delegación de eventos para botones.
-             evolutionsTableBody.addEventListener('click', (event) => {
+            newEvolutionsTableBody.addEventListener('click', (event) => {
                 const target = event.target;
 
                 if (target.classList.contains('view-evolution') || target.closest('.view-evolution')) {
                     const evolutionId = (target.dataset.evolutionId || target.closest('.view-evolution').dataset.evolutionId);
                     showEvolutionDetails(evolutionId);
                 } else if (target.classList.contains('delete-evolution') || target.closest('.delete-evolution')) {
-                     const evolutionId = (target.dataset.evolutionId || target.closest('.delete-evolution').dataset.evolutionId);
+                    const evolutionId = (target.dataset.evolutionId || target.closest('.delete-evolution').dataset.evolutionId);
                     deleteEvolution(evolutionId);
                 }
             });
-
         };
+        
         //Inicia el proceso de obtener los nombres
         getPatientNames();
-
     })
     .catch((error) => {
         console.error("Error al cargar evoluciones:", error);
         evolutionsTableBody.innerHTML = '<tr><td colspan="4">Error al cargar evoluciones.</td></tr>';
     });
 }
+
 // --- Funciones para ver y eliminar evoluciones ---
 
 function showEvolutionDetails(evolutionId) {
     console.log("Mostrando detalles de evolución:", evolutionId);
 
     // Mostrar modal de carga
-    const loadingModal = new bootstrap.Modal(document.getElementById('loadingModal'));
-    loadingModal.show();
+    window.showLoadingModal();
 
     db.collection("evolutions").doc(evolutionId).get()
         .then(async (doc) => {
-            // Ocultar el modal de carga INMEDIATAMENTE
-            loadingModal.hide();
-            
             if (!doc.exists) {
+                window.hideLoadingModal();
                 showAlert("Evolución no encontrada", "warning");
                 return;
             }
@@ -772,13 +771,14 @@ function showEvolutionDetails(evolutionId) {
             const modalBody = document.getElementById('evolutionDetailsContent');
             if (!modalBody) {
                 console.error("Elemento evolutionDetailsContent no encontrado.");
+                window.hideLoadingModal();
                 return;
             }
 
             //Formatear Fecha
             let evolutionDate = 'No disponible';
             if(evolution.date){
-                evolutionDate = new Date(evolution.date).toLocaleDateString()
+                evolutionDate = new Date(evolution.date).toLocaleDateString();
             }
 
             modalBody.innerHTML = `
@@ -824,6 +824,9 @@ function showEvolutionDetails(evolutionId) {
             const detailsModal = new bootstrap.Modal(document.getElementById('evolutionDetailsModal'));
             detailsModal.show();
             
+            // Ocultar el modal de carga
+            window.hideLoadingModal();
+            
             // Asegurarnos que el botón de cerrar funcione correctamente
             document.querySelector('#evolutionDetailsModal .btn-close').addEventListener('click', function() {
                 detailsModal.hide();
@@ -836,10 +839,9 @@ function showEvolutionDetails(evolutionId) {
         .catch((error) => {
             console.error("Error al obtener detalles de la evolución:", error);
             showAlert("Error al cargar los detalles de la evolución", "danger");
-            loadingModal.hide(); // Ocultar modal *siempre*
+            window.hideLoadingModal(); // Ocultar modal *siempre*
         });
 }
-
 
 function deleteEvolution(evolutionId) {
     console.log("Eliminando evolución:", evolutionId);
@@ -848,9 +850,9 @@ function deleteEvolution(evolutionId) {
     if (!confirm("¿Estás seguro de que quieres eliminar esta evolución?\n\n¡Esta acción es irreversible!")) {
         return;
     }
-     // Mostrar modal de carga
-    const loadingModal = new bootstrap.Modal(document.getElementById('loadingModal'));
-    loadingModal.show();
+    
+    // Mostrar modal de carga
+    window.showLoadingModal();
 
     db.collection("evolutions").doc(evolutionId).delete()
         .then(() => {
@@ -862,7 +864,7 @@ function deleteEvolution(evolutionId) {
             console.error("Error al eliminar evolución:", error);
             showAlert("Error al eliminar la evolución: " + error.message, "danger");
         }).finally(() => {
-             loadingModal.hide();
+            window.hideLoadingModal();
         });
 }
 
@@ -909,53 +911,27 @@ async function processFiles(files) {
     return processedFiles;
 }
 
-// Función para formatear fecha
-function formatDate(timestamp) {
-  if (!timestamp) return 'Fecha no disponible';
-  
-  try {
-    const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
-    return date.toLocaleDateString();
-  } catch (e) {
-    console.error("Error al formatear fecha:", e);
-    return 'Fecha inválida';
-  }
-}
-
-// Función para formatear hora
-function formatTime(timestamp) {
-  if (!timestamp) return '';
-  
-  try {
-    const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
-    return date.toLocaleTimeString();
-  } catch (e) {
-    console.error("Error al formatear hora:", e);
-    return '';
-  }
-}
-
 // Función para actualizar el valor de los sliders (mejorada)
 function updateRatingValue(sliderId, valueId) {
-  const slider = document.getElementById(sliderId);
-  const valueDisplay = document.getElementById(valueId);
-  
-  if (!slider || !valueDisplay) {
-    console.error(`Elementos no encontrados: ${sliderId} o ${valueId}`);
-    return;
-  }
-  
-  // Establecer valor inicial
-  valueDisplay.textContent = slider.value;
-  
-  // Eliminar event listeners anteriores para evitar duplicados
-  const newSlider = slider.cloneNode(true);
-  slider.parentNode.replaceChild(newSlider, slider);
-  
-  // Actualizar valor cuando cambie el slider
-  newSlider.addEventListener('input', function() {
-    document.getElementById(valueId).textContent = this.value;
-  });
+    const slider = document.getElementById(sliderId);
+    const valueDisplay = document.getElementById(valueId);
+    
+    if (!slider || !valueDisplay) {
+        console.error(`Elementos no encontrados: ${sliderId} o ${valueId}`);
+        return;
+    }
+    
+    // Establecer valor inicial
+    valueDisplay.textContent = slider.value;
+    
+    // Eliminar event listeners anteriores para evitar duplicados
+    const newSlider = slider.cloneNode(true);
+    slider.parentNode.replaceChild(newSlider, slider);
+    
+    // Actualizar valor cuando cambie el slider
+    newSlider.addEventListener('input', function() {
+        document.getElementById(valueId).textContent = this.value;
+    });
 }
 
 // Función de búsqueda dinámica para pacientes
@@ -1026,6 +1002,23 @@ function setupPatientSearch() {
                     `;
                     patientsTableBody.appendChild(row);
                 });
+                
+                // Eliminar event listeners anteriores
+                const oldPatientsTableBody = patientsTableBody;
+                const newPatientsTableBody = oldPatientsTableBody.cloneNode(true);
+                oldPatientsTableBody.parentNode.replaceChild(newPatientsTableBody, oldPatientsTableBody);
+                
+                // Agregar nuevos event listeners
+                newPatientsTableBody.addEventListener('click', (event) => {
+                    const target = event.target;
+                    if (target.classList.contains('view-details') || target.closest('.view-details')) {
+                        const patientId = (target.dataset.patientId || target.closest('.view-details').dataset.patientId);
+                        showPatientDetails(patientId);
+                    } else if (target.classList.contains('delete-patient') || target.closest('.delete-patient')) {
+                        const patientId = (target.dataset.patientId || target.closest('.delete-patient').dataset.patientId);
+                        deletePatient(patientId);
+                    }
+                });
             })
             .catch((error) => {
                 console.error("Error al buscar pacientes:", error);
@@ -1043,7 +1036,6 @@ function setupPatientSearch() {
         searchTimeout = setTimeout(performSearch, 500);
     });
 }
-
 // Función de búsqueda dinámica para evoluciones
 function setupEvolutionSearch() {
     const searchInput = document.getElementById('searchEvolution');
@@ -1136,6 +1128,23 @@ function setupEvolutionSearch() {
                             `;
                             evolutionsTableBody.appendChild(row);
                         });
+                        
+                        // Eliminar event listeners anteriores
+                        const oldEvolutionsTableBody = evolutionsTableBody;
+                        const newEvolutionsTableBody = oldEvolutionsTableBody.cloneNode(true);
+                        oldEvolutionsTableBody.parentNode.replaceChild(newEvolutionsTableBody, oldEvolutionsTableBody);
+                        
+                        // Agregar nuevos event listeners
+                        newEvolutionsTableBody.addEventListener('click', (event) => {
+                            const target = event.target;
+                            if (target.classList.contains('view-evolution') || target.closest('.view-evolution')) {
+                                const evolutionId = (target.dataset.evolutionId || target.closest('.view-evolution').dataset.evolutionId);
+                                showEvolutionDetails(evolutionId);
+                            } else if (target.classList.contains('delete-evolution') || target.closest('.delete-evolution')) {
+                                const evolutionId = (target.dataset.evolutionId || target.closest('.delete-evolution').dataset.evolutionId);
+                                deleteEvolution(evolutionId);
+                            }
+                        });
                     });
             })
             .catch(error => {
@@ -1152,54 +1161,8 @@ function setupEvolutionSearch() {
     });
 }
 
-// Función para cambiar entre modo claro y oscuro
-function toggleDarkMode() {
-    darkMode = !darkMode;
-    localStorage.setItem('darkMode', darkMode);
-    applyTheme();
-}
-
-// Función para aplicar el tema actual
-function applyTheme() {
-    document.body.classList.toggle('dark-mode', darkMode);
-    
-    // Actualizar el texto del botón
-    const themeSwitcher = document.getElementById('theme-switcher');
-    if (themeSwitcher) {
-        themeSwitcher.innerHTML = darkMode ? 
-            '<i class="fas fa-sun"></i> Modo Claro' : 
-            '<i class="fas fa-moon"></i> Modo Oscuro';
-    }
-}
-
 // Event listeners para la carga inicial y eventos de pestaña
 document.addEventListener('DOMContentLoaded', function() {
-    // Aplicar tema basado en la preferencia guardada
-    applyTheme();
-    
-    // Agregar botón de cambio de tema si no existe
-    if (!document.getElementById('theme-switcher')) {
-        const themeBtn = document.createElement('button');
-        themeBtn.id = 'theme-switcher';
-        themeBtn.className = 'btn theme-toggle';
-        themeBtn.innerHTML = darkMode ? 
-            '<i class="fas fa-sun"></i> Modo Claro' : 
-            '<i class="fas fa-moon"></i> Modo Oscuro';
-        themeBtn.addEventListener('click', toggleDarkMode);
-        
-        // Insertar en la barra de navegación
-        const navbarBrand = document.querySelector('h1');
-        if (navbarBrand && navbarBrand.parentNode) {
-            const container = document.createElement('div');
-            container.className = 'd-flex justify-content-between align-items-center mb-4';
-            container.appendChild(navbarBrand.cloneNode(true));
-            container.appendChild(themeBtn);
-            navbarBrand.parentNode.replaceChild(container, navbarBrand);
-        } else {
-            document.body.insertBefore(themeBtn, document.body.firstChild);
-        }
-    }
-    
     // Cargar pacientes al iniciar la página
     loadPatients();
     
