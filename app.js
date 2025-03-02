@@ -8,66 +8,73 @@ const firebaseConfig = {
     appId: "1:954754202697:web:e06171f6b0ade314259398"
 };
 
-// Inicializar Firebase (con verificación)
-if (typeof firebase !== 'undefined') {
-    if (!firebase.apps.length) {
-        firebase.initializeApp(firebaseConfig);
-        console.log("Firebase inicializado correctamente");
-    } else {
-        console.log("Firebase ya estaba inicializado.");
-    }
-    
-    const db = firebase.firestore();
+// Variable global para rastrear el estado de inicialización de Firebase
+let firebaseInitialized = false;
 
-    // Verificar conexión (mejorado)
-    console.log("Verificando conexión a Firestore...");
-    db.collection("patients").limit(1).get()
-        .then(snapshot => {
-            console.log("Conexión a Firestore exitosa.");
-            showAlert("Conexión a la base de datos establecida", "success");
-        })
-        .catch(error => {
-            console.error("Error al conectar con Firestore:", error);
-            showAlert("Error de conexión a la base de datos: " + error.message, "danger");
-        });
-} else {
-    console.error("Firebase no está definido. Asegúrate de incluir las bibliotecas de Firebase antes de tu script.");
-    alert("Error: Firebase no está disponible. Por favor, verifica la consola para más detalles.");
+// Inicializar Firebase (con verificación mejorada)
+function initializeFirebase() {
+    return new Promise((resolve, reject) => {
+        if (firebaseInitialized) {
+            console.log("Firebase ya estaba inicializado.");
+            resolve();
+            return;
+        }
+
+        if (typeof firebase !== 'undefined') {
+            try {
+                if (!firebase.apps.length) {
+                    firebase.initializeApp(firebaseConfig);
+                }
+                
+                const db = firebase.firestore();
+                
+                // Verificar conexión con un timeout
+                const connectionTimeout = setTimeout(() => {
+                    reject(new Error("Tiempo de espera de conexión agotado"));
+                }, 10000);
+                
+                db.collection("patients").limit(1).get()
+                    .then(snapshot => {
+                        clearTimeout(connectionTimeout);
+                        firebaseInitialized = true;
+                        console.log("Conexión a Firestore exitosa.");
+                        showAlert("Conexión a la base de datos establecida", "success");
+                        resolve(db);
+                    })
+                    .catch(error => {
+                        clearTimeout(connectionTimeout);
+                        console.error("Error al conectar con Firestore:", error);
+                        showAlert("Error de conexión a la base de datos: " + error.message, "danger");
+                        reject(error);
+                    });
+            } catch (error) {
+                console.error("Error al inicializar Firebase:", error);
+                showAlert("Error al inicializar Firebase: " + error.message, "danger");
+                reject(error);
+            }
+        } else {
+            console.error("Firebase no está definido. Asegúrate de incluir las bibliotecas de Firebase antes de tu script.");
+            showAlert("Error: Firebase no está disponible. Por favor, verifica la consola para más detalles.", "danger");
+            reject(new Error("Firebase no definido"));
+        }
+    });
 }
 
 // Variables globales
 let currentPatientId = null; // ID del paciente seleccionado (para evoluciones)
 let currentEvolutionId = null; //ID de la evolución (para editar, que aun no esta implementado)
-let db = firebase.firestore(); // Asegurar que db esté disponible globalmente
+let db = null; // Se inicializará después de la conexión
 let darkMode = localStorage.getItem('darkMode') === 'true' || false; // Para el modo oscuro
 
 // --- Funciones de utilidad ---
 
-// Función para mostrar alertas.  Esta función la usarás en todo tu código.
+// Función para mostrar alertas con mejor manejo
 function showAlert(message, type) {
     console.log(`Mostrando alerta: ${message} (${type})`);
     
     const alertContainer = document.getElementById('alertContainer');
     if (!alertContainer) {
         console.error("Elemento alertContainer no encontrado");
-        // Crear alerta flotante si no existe el contenedor
-        const floatingAlert = document.createElement('div');
-        floatingAlert.className = `alert alert-${type} alert-dismissible fade show position-fixed top-0 start-50 translate-middle-x mt-4`;
-        floatingAlert.style.zIndex = "9999";
-        floatingAlert.role = 'alert';
-        floatingAlert.innerHTML = `
-            ${message}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        `;
-        document.body.appendChild(floatingAlert);
-        
-        // Auto-cerrar después de 5 segundos
-        setTimeout(() => {
-            if(floatingAlert.parentNode) {
-                floatingAlert.remove();
-            }
-        }, 5000);
-        
         return;
     }
     
@@ -78,6 +85,9 @@ function showAlert(message, type) {
         ${message}
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     `;
+    
+    // Limpiar alertas previas
+    alertContainer.innerHTML = '';
     alertContainer.appendChild(alert);
 
     // Auto-cerrar alertas después de 5 segundos
@@ -87,9 +97,59 @@ function showAlert(message, type) {
         }
     }, 5000);
 }
-// Función para convertir archivos a Base64 (Promisificada)
+
+// ... [resto de las funciones del archivo original permanecen igual]
+
+// Modificación en el event listener DOMContentLoaded
+document.addEventListener('DOMContentLoaded', async function() {
+    try {
+        // Inicializar Firebase primero
+        db = await initializeFirebase();
+        
+        // Resto de las inicializaciones
+        loadPatients();
+        loadPatientsIntoSelect();
+        loadEvolutions();
+        
+        // Event listeners
+        document.getElementById('patientForm')?.addEventListener('submit', savePatient);
+        document.getElementById('evolutionForm')?.addEventListener('submit', saveEvolution);
+        document.getElementById('patientSelect')?.addEventListener('change', loadPatientPSFS);
+        
+        // Configurar tabs
+        document.querySelector('button[data-bs-target="#records-tab-pane"]')?.addEventListener('click', loadPatients);
+        document.querySelector('button[data-bs-target="#evolutions-tab-pane"]')?.addEventListener('click', function() {
+            loadPatientsIntoSelect();
+            loadEvolutions();
+        });
+        
+        // Inicializar búsquedas
+        setupPatientSearch();
+        setupEvolutionSearch();
+        
+        // Inicializar sliders PSFS
+        updateRatingValue('psfs1Rating', 'psfs1Value');
+        updateRatingValue('psfs2Rating', 'psfs2Value');
+        updateRatingValue('psfs3Rating', 'psfs3Value');
+        
+        // Mensaje de conexión exitosa
+        setTimeout(() => {
+            showAlert("Conexión establecida con el servidor", "success");
+        }, 1000);
+    } catch (error) {
+        console.error("Error durante la inicialización:", error);
+        showAlert("Error al inicializar la aplicación", "danger");
+    }
+});
+
+// Mejora en la función fileToBase64 para manejar errores
 function fileToBase64(file) {
     return new Promise((resolve, reject) => {
+        if (!file) {
+            reject(new Error("No se proporcionó ningún archivo"));
+            return;
+        }
+        
         const reader = new FileReader();
         reader.readAsDataURL(file);
         reader.onload = () => resolve(reader.result);
@@ -97,133 +157,11 @@ function fileToBase64(file) {
     });
 }
 
-// Funcion para limpiar los formularios:
-function clearForm(formId) {
-    const form = document.getElementById(formId);
-    if (form) {
-      form.reset();
-    }
-}
-
-// --- Función para guardar un nuevo paciente ---
-async function savePatient(event) {
-    event.preventDefault(); // Evitar el envío normal del formulario
-    console.log("Función savePatient ejecutada");
-    
-    const saveBtn = document.getElementById('savePatientBtn');
-
-    // Deshabilitar el botón mientras se guarda
-    if (saveBtn) {
-        saveBtn.disabled = true;
-        saveBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Guardando...';
-    }
-
-    try {
-        // Verificar campos obligatorios
-        const evaluator = document.getElementById('evaluator').value;
-        const email = document.getElementById('email').value;
-        
-        if (!evaluator || !email) {
-            throw new Error("Los campos de Evaluador y Correo son obligatorios");
-        }
-        
-        // 1. Recopilar los datos del formulario
-        const patientData = {
-            evaluator: evaluator,
-            email: email,
-            name: document.getElementById('name').value,
-            rut: document.getElementById('rut').value,
-            contactNumber: document.getElementById('contactNumber').value,
-            patientEmail: document.getElementById('patientEmail').value,
-            nationality: document.getElementById('nationality').value,
-            age: document.getElementById('age').value,
-            birthdate: document.getElementById('birthdate').value,
-            civilStatus: document.getElementById('civilStatus').value,
-            education: document.getElementById('education').value,
-            address: document.getElementById('address').value,
-            emergencyContact: document.getElementById('emergencyContact').value,
-            occupation: document.getElementById('occupation').value,
-            laterality: document.getElementById('laterality').value,
-            consultReason: document.getElementById('consultReason').value,
-            diagnosis: document.getElementById('diagnosis').value,
-            expectations: document.getElementById('expectations').value,
-            proximateAnamnesis: document.getElementById('proximateAnamnesis').value,
-            remoteAnamnesis: document.getElementById('remoteAnamnesis').value,
-            habitsHobbies: document.getElementById('habitsHobbies').value,
-            homeSupport: document.getElementById('homeSupport').value,
-            // Datos de los sliders PSFS
-            psfs1: {
-                activity: document.getElementById('psfs1Activity').value,
-                rating: document.getElementById('psfs1Rating').value
-            },
-            psfs2: {
-                activity: document.getElementById('psfs2Activity').value,
-                rating: document.getElementById('psfs2Rating').value
-            },
-            psfs3: {
-                activity: document.getElementById('psfs3Activity').value,
-                rating: document.getElementById('psfs3Rating').value
-            },
-            extraQuestionnaire: document.getElementById('extraQuestionnaire').value,
-            vitalSigns: document.getElementById('vitalSigns').value,
-            anthropometry: document.getElementById('anthropometry').value,
-            physicalExam: document.getElementById('physicalExam').value,
-            createdAt: firebase.firestore.Timestamp.now(),
-            complementaryExams: [] // Inicializar el array para los archivos
-        };
-
-        console.log("Datos del paciente recopilados:", patientData);
-
-        // 2. Procesar archivos (si hay)
-        const fileInput = document.getElementById('medicalExams');
-        if (fileInput && fileInput.files && fileInput.files.length > 0) {
-            try {
-                console.log("Procesando archivos...");
-                const processedFiles = await processFiles(fileInput.files);
-                patientData.complementaryExams = processedFiles;
-                console.log("Archivos procesados correctamente:", processedFiles);
-            } catch (error) {
-                console.error("Error al procesar archivos:", error);
-                showAlert("Error al procesar los archivos adjuntos. La ficha se guardará sin archivos.", "warning");
-                patientData.complementaryExams = [];
-            }
-        } else {
-            console.log("No hay archivos para procesar");
-            patientData.complementaryExams = [];
-        }
-
-        // 3. Guardar en Firestore
-        console.log("Guardando en Firestore...");
-        if (!db) {
-            throw new Error("La base de datos no está inicializada correctamente");
-        }
-        
-        const docRef = await db.collection("patients").add(patientData);
-        console.log("Paciente guardado con ID:", docRef.id);
-        showAlert("Paciente guardado exitosamente!", "success");
-
-        // 4. Limpiar el formulario
-        document.getElementById("patientForm").reset();
-        
-        // Recargar los sliders
-        updateRatingValue('psfs1Rating', 'psfs1Value');
-        updateRatingValue('psfs2Rating', 'psfs2Value');
-        updateRatingValue('psfs3Rating', 'psfs3Value');
-        
-        // 5. Recargar la lista de pacientes
-        loadPatients();
-
-    } catch (error) {
-        console.error("Error al guardar el paciente:", error);
-        showAlert("Error al guardar el paciente: " + error.message, "danger");
-    } finally {
-        // Restaurar botón (independientemente de si hubo éxito o error)
-        if (saveBtn) {
-            saveBtn.disabled = false;
-            saveBtn.innerHTML = 'Guardar Ficha';
-        }
-    }
-}
+// Funciones adicionales para manejar errores
+window.onerror = function(message, source, lineno, colno, error) {
+    console.error("Error global:", { message, source, lineno, colno, error });
+    showAlert(`Error inesperado: ${message}`, "danger");
+};
 
 // Función para cargar y mostrar la lista de pacientes
 function loadPatients() {
